@@ -9,3 +9,6 @@ pub mod tui;
 
 /// Event handler.
 pub mod handler;
+
+/// CircularBuffer.
+pub mod cb;
