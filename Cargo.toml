@@ -1,0 +1,13 @@
+[package]
+name = "logss"
+version = "0.1.0"
+authors = ["Victor Rosales <todoesverso@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+crossterm = "0.25.0"
+
+[dependencies.tui]
+version = "0.19.0"
+default-features = false
+features = ["crossterm"]
