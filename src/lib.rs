@@ -12,3 +12,6 @@ pub mod handler;
 
 /// CircularBuffer.
 pub mod cb;
+
+/// Threaded Stdin.
+pub mod tstdin;
