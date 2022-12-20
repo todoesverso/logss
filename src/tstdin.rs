@@ -40,11 +40,11 @@ impl StdinHandler {
         }
     }
 
-    pub fn recv(&self) -> AppResult<String> {
+    pub fn recv(&self) -> Result<String, mpsc::RecvError> {
         Ok(self.receiver.recv()?)
     }
 
-    pub fn try_recv(&self) -> AppResult<String> {
+    pub fn try_recv(&self) -> Result<String, mpsc::TryRecvError> {
         Ok(self.receiver.try_recv()?)
     }
 }

@@ -1,13 +1,15 @@
 use std::error;
 use tui::backend::Backend;
-use tui::layout::Alignment;
 use tui::style::{Color, Style};
 use tui::terminal::Frame;
 use tui::text::Spans;
 use tui::widgets::{Block, Borders, Paragraph};
+use std::sync::mpsc::TryRecvError;
+use clap::Parser;
 
 use crate::cb::CircularBuffer;
 use crate::tstdin::StdinHandler;
+use crate::args::Args;
 
 /// Application result type.
 pub type AppResult<T> = std::result::Result<T, Box<dyn error::Error>>;
@@ -18,6 +20,7 @@ pub struct App<'a> {
     /// Is the application running?
     pub running: bool,
     stdin: StdinHandler,
+    args: Args,
     raw_buffer: CircularBuffer<Spans<'a>>,
 }
 
@@ -26,6 +29,7 @@ impl<'a> Default for App<'a> {
         Self {
             running: true,
             stdin: StdinHandler::new(),
+            args: Args::parse(),
             raw_buffer: CircularBuffer::new(128),
         }
     }
@@ -47,9 +51,10 @@ impl<'a> App<'a> {
             Ok(line) => {
                 self.raw_buffer.push(Spans::from(line));
             }
-            Err(_) => {
-                ();
+            Err(TryRecvError::Disconnected) => {
+                todo!();
             }
+            _ => {}
         }
     }
 

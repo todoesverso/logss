@@ -15,3 +15,6 @@ pub mod cb;
 
 /// Threaded Stdin.
 pub mod tstdin;
+
+/// Command line arguments
+pub mod args;
