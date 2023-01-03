@@ -4,8 +4,8 @@
 /// Usage example:
 /// ```
 /// extern crate logss;
-/// use logss::CircularBuffer;
-/// let mut cb:CircularBuffer<i32> = CircularBuffer::new(3):
+/// use logss::cb;
+/// let mut cb:cb::CircularBuffer<i32> = cb::CircularBuffer::new(3);
 /// cb.push(1);
 /// cb.push(2);
 /// cb.push(3);
