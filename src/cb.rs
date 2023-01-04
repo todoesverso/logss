@@ -13,7 +13,7 @@
 /// assert_eq!(cb.buffer, vec![4, 2, 3]);
 ///
 /// // Notice the order that clone returns
-/// let cb2 = cb.clone();
+/// let cb2 = cb.ordered_clone();
 /// assert_eq!(cb2.buffer, vec![2, 3, 4]);
 /// ```
 #[derive(Debug)]
@@ -114,7 +114,7 @@ mod tests {
         cb.push(3);
         cb.push(4);
 
-        let cb2 = cb.clone();
+        let cb2 = cb.ordered_clone();
         assert_eq!(cb2.buffer, vec![2, 3, 4]);
     }
 }
