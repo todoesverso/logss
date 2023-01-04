@@ -31,7 +31,7 @@ pub struct App<'a> {
     pub help: bool,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Eq, PartialEq)]
 pub enum Views {
     RawBuffer,
     Containers,
@@ -62,13 +62,11 @@ impl<'a> Container<'a> {
         // TODO: accept color
         let contains_index = line.find(&self.text).unwrap();
 
-        let sp = Spans(vec![
+        Spans(vec![
             Span::from(line[0..contains_index].to_string()),
             Span::styled(self.text.clone(), Style::default().fg(Color::Red)),
             Span::from(line[contains_index + self.text.len()..].to_string()),
-        ]);
-
-        sp
+        ])
     }
 
     fn push(&mut self, element: Spans<'a>) {
@@ -76,6 +74,7 @@ impl<'a> Container<'a> {
     }
 
     fn proc_and_push_line(&mut self, line: String) {
+        // TODO: select colors randomly
         let sp = self.process_line(line);
         let _ = &self.push(sp);
     }
@@ -85,7 +84,6 @@ impl<'a> Container<'a> {
 
         // TODO: Review this logic
         if bufflen < size {
-            return;
         } else {
             self.scroll = (bufflen - size) as u16;
         }
@@ -150,7 +148,7 @@ impl<'a> App<'a> {
 
     fn get_layout_blocks(&self, size: Rect) -> Vec<Rect> {
         let mut constr = vec![];
-        let contains_count = if self.contains.len() > 0 {
+        let contains_count = if !self.contains.is_empty() {
             self.contains.len()
         } else {
             1
@@ -174,11 +172,11 @@ impl<'a> App<'a> {
     fn render_contains<B: Backend>(&mut self, frame: &mut Frame<'_, B>) {
         let blocks = self.get_layout_blocks(frame.size());
         // TODO: Review this logic
-        let mut i = 0;
         let keys = self.contains.keys().cloned().collect::<Vec<String>>();
-        for key in keys {
+        for (i, key) in keys.into_iter().enumerate() {
+            //for (i, key) in self.contains.keys().cloned().enumerate() {
             let container = self.contains.get_mut(&key).unwrap();
-            let cb = container.cb.clone();
+            let cb = container.cb.ordered_clone();
             container.update_scroll(blocks[i].height as usize);
             let mut paragraph = Paragraph::new(cb.buffer.clone())
                 .block(create_block(&key))
@@ -188,13 +186,13 @@ impl<'a> App<'a> {
                 paragraph = paragraph.wrap(Wrap { trim: false });
             }
             frame.render_widget(paragraph, blocks[i]);
-            i += 1;
         }
     }
 
+    // TODO: avoid code duplication
     fn render_raw<B: Backend>(&self, frame: &mut Frame<'_, B>) {
         let container = &self.raw_buffer;
-        let cb = container.cb.clone();
+        let cb = container.cb.ordered_clone();
         let mut paragraph = Paragraph::new(cb.buffer.clone())
             .block(create_block("*"))
             .style(Style::default().fg(Color::White).bg(Color::Black));
@@ -248,7 +246,7 @@ impl<'a> App<'a> {
     }
 }
 
-fn create_block<'a>(title: &'a str) -> Block<'a> {
+fn create_block(title: &str) -> Block {
     Block::default().borders(Borders::ALL).title(Span::styled(
         title,
         Style::default().add_modifier(Modifier::BOLD),

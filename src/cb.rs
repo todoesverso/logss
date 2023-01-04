@@ -46,6 +46,11 @@ where
         self.buffer.len()
     }
 
+    /// Returns ttue if the buffer is empty
+    pub fn is_empty(&self) -> bool {
+        self.buffer.is_empty()
+    }
+
     /// Push an element into the buffer
     pub fn push(&mut self, element: T) {
         let capacity = self.capacity();
@@ -61,7 +66,7 @@ where
     }
 
     /// Clones and returns a new instance of [`CircularBuffer`] in the write order
-    pub fn clone(&self) -> CircularBuffer<T> {
+    pub fn ordered_clone(&self) -> CircularBuffer<T> {
         let capacity = self.capacity();
         let len = self.len();
         let mut cb = CircularBuffer::new(capacity);

@@ -1,50 +1,46 @@
-use crate::app::AppResult;
-
 use std::io::stdin;
 use std::sync::mpsc;
 use std::thread;
 
 #[derive(Debug)]
 pub struct StdinHandler {
-    sender: mpsc::Sender<String>,
     receiver: mpsc::Receiver<String>,
-    handler: thread::JoinHandle<()>,
+}
+
+impl Default for StdinHandler {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl StdinHandler {
     pub fn new() -> Self {
         let (sender, receiver) = mpsc::channel();
-        let handler = {
-            let sender = sender.clone();
-            thread::spawn(move || {
-                let stdin = stdin();
-                loop {
-                    let mut line = String::new();
-                    match stdin.read_line(&mut line) {
-                        Ok(len) => {
-                            if len == 0 {
-                                break;
-                            } else {
-                                sender.send(line).unwrap();
-                            }
+        let sender = sender;
+        thread::spawn(move || {
+            let stdin = stdin();
+            loop {
+                let mut line = String::new();
+                match stdin.read_line(&mut line) {
+                    Ok(len) => {
+                        if len == 0 {
+                            break;
+                        } else {
+                            sender.send(line).unwrap();
                         }
-                        Err(_) => todo!(),
                     }
+                    Err(_) => todo!(),
                 }
-            })
-        };
-        Self {
-            sender,
-            receiver,
-            handler,
-        }
+            }
+        });
+        Self { receiver }
     }
 
     pub fn recv(&self) -> Result<String, mpsc::RecvError> {
-        Ok(self.receiver.recv()?)
+        self.receiver.recv()
     }
 
     pub fn try_recv(&self) -> Result<String, mpsc::TryRecvError> {
-        Ok(self.receiver.try_recv()?)
+        self.receiver.try_recv()
     }
 }
