@@ -12,6 +12,7 @@ A simple CLI tool that helps you parse you live logs.
 ## Roadmap
 
 - [ ] Refactor!
+- [ ] Add documentation!
 - [ ] Dynamic search
 - [ ] Pause
 - [ ] Clever matching and highlights
