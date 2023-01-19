@@ -26,7 +26,7 @@ impl StdinHandler {
                         if len == 0 {
                             break;
                         } else {
-                            sender.send(line).unwrap();
+                            sender.send(line).ok();
                         }
                     }
                     Err(_) => todo!(),

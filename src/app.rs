@@ -140,7 +140,7 @@ impl<'a> App<'a> {
                 }
             }
             Err(TryRecvError::Disconnected) => {
-                todo!();
+                self.running = false;
             }
             _ => {}
         }
@@ -172,14 +172,11 @@ impl<'a> App<'a> {
     fn render_contains<B: Backend>(&mut self, frame: &mut Frame<'_, B>) {
         let blocks = self.get_layout_blocks(frame.size());
         // TODO: Review this logic
-        let keys = self.contains.keys().cloned().collect::<Vec<String>>();
-        for (i, key) in keys.into_iter().enumerate() {
-            //for (i, key) in self.contains.keys().cloned().enumerate() {
-            let container = self.contains.get_mut(&key).unwrap();
+        for (i, (key, container)) in self.contains.iter_mut().enumerate() {
             let cb = container.cb.ordered_clone();
             container.update_scroll(blocks[i].height as usize);
             let mut paragraph = Paragraph::new(cb.buffer.clone())
-                .block(create_block(&key))
+                .block(create_block(key))
                 .style(Style::default().fg(Color::White).bg(Color::Black))
                 .scroll((container.scroll, 0));
             if self.wrap {
