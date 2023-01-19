@@ -3,6 +3,12 @@ name = "logss"
 version = "0.1.0"
 authors = ["Victor Rosales <todoesverso@gmail.com>"]
 edition = "2018"
+publish = false
+repository = "https://github.com/todoesverso/logss"
+keywords = ["terminal", "logs", "cli", "split"]
+categories = ["visualization", "command-line-utilities", "parsing"]
+license = "MIT"
+license-file = "LICENSE"
 
 [dependencies]
 clap = { version = "4.0.29", features = ["derive"] }
