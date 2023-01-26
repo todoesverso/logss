@@ -67,13 +67,13 @@ impl<'a> Container<'a> {
             if self.scroll - *down > 0 {
                 self.scroll -= *down;
             } else if *down > 1 {
-                    *down -= 1;
+                *down -= 1;
             }
 
             if self.scroll + *up <= (bufflen - size) as u16 {
                 self.scroll += *up;
             } else if *up > 1 {
-                    *up -= 1;
+                *up -= 1;
             }
         }
     }

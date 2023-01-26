@@ -226,7 +226,6 @@ impl<'a> App<'a> {
                     "c       - continues autoscroll",
                     Style::default().bg(Color::Blue),
                 )),
- 
                 Spans::from(Span::styled(
                     "Esc     - exits the program",
                     Style::default().bg(Color::Red),
