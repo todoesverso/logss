@@ -188,7 +188,7 @@ impl<'a> App<'a> {
     fn render_id<B: Backend>(&mut self, frame: &mut Frame<'_, B>, id: u8) {
         for (key, container) in self.containers.iter() {
             if container.id == id {
-                let title = format!("({}) - {}", id, key);
+                let title = format!("({id}) - {key}");
                 container.render(frame, frame.size(), &title, self.pause);
             }
         }
