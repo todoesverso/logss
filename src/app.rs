@@ -4,13 +4,13 @@ use std::error;
 use std::sync::mpsc::TryRecvError;
 use tui::backend::Backend;
 use tui::layout::{Constraint, Direction, Layout, Rect};
-use tui::style::{Color, Modifier, Style};
+use tui::style::{Color, Style};
 use tui::terminal::Frame;
 use tui::text::{Span, Spans};
-use tui::widgets::{Block, Borders, Clear, Paragraph, Wrap};
+use tui::widgets::{Block, Borders, Clear, Paragraph};
 
 use crate::args::Args;
-use crate::cb::CircularBuffer;
+use crate::container::{Container, CONTAINER_BUFFER};
 use crate::tstdin::StdinHandler;
 
 /// Application result type.
@@ -24,70 +24,24 @@ pub struct App<'a> {
     stdin: StdinHandler,
     args: Args,
     raw_buffer: Container<'a>,
-    contains: HashMap<String, Container<'a>>,
+    pub containers: HashMap<String, Container<'a>>,
     pub show: Views,
     pub prev_show: Views,
     pub wrap: bool,
+    pub pause: bool,
     pub help: bool,
+    pub zoom_id: Option<u8>,
+    pub up: u16,
+    pub up_hot: u16,
+    pub down: u16,
+    pub down_hot: u16,
 }
 
 #[derive(Debug, Eq, PartialEq)]
 pub enum Views {
     RawBuffer,
     Containers,
-}
-
-// TODO: rename all this contains and move it to its own mod
-#[derive(Debug)]
-struct Container<'a> {
-    /// matching text
-    text: String,
-    /// circular buffer with matching lines
-    cb: CircularBuffer<Spans<'a>>,
-    /// scroll for the paragraph
-    scroll: u16,
-}
-
-impl<'a> Container<'a> {
-    pub fn new(text: String, buffersize: usize) -> Self {
-        Self {
-            text,
-            cb: CircularBuffer::new(buffersize),
-            scroll: 0,
-        }
-    }
-
-    fn process_line(&self, line: String) -> Spans<'a> {
-        // TODO: maybe add smart time coloration?
-        // TODO: accept color
-        let contains_index = line.find(&self.text).unwrap();
-
-        Spans(vec![
-            Span::from(line[0..contains_index].to_string()),
-            Span::styled(self.text.clone(), Style::default().fg(Color::Red)),
-            Span::from(line[contains_index + self.text.len()..].to_string()),
-        ])
-    }
-
-    fn push(&mut self, element: Spans<'a>) {
-        let _ = &self.cb.push(element);
-    }
-
-    fn proc_and_push_line(&mut self, line: String) {
-        // TODO: select colors randomly
-        let sp = self.process_line(line);
-        let _ = &self.push(sp);
-    }
-
-    fn update_scroll(&mut self, size: usize) {
-        let bufflen = self.cb.len();
-
-        // TODO: Review this logic
-        if bufflen < size {
-        } else {
-            self.scroll = (bufflen - size) as u16;
-        }
-    }
+    Zoom,
 }
 
 impl<'a> Default for App<'a> {
@@ -95,13 +49,19 @@ impl<'a> Default for App<'a> {
         Self {
             running: true,
             wrap: false,
+            pause: false,
             help: false,
             stdin: StdinHandler::new(),
             args: Args::parse(),
-            raw_buffer: Container::new("*".to_string(), 128),
-            contains: HashMap::new(),
+            raw_buffer: Container::new("*".to_string(), CONTAINER_BUFFER),
+            containers: HashMap::new(),
             show: Views::Containers,
             prev_show: Views::Containers,
+            zoom_id: None,
+            up: 0,
+            up_hot: 0,
+            down: 0,
+            down_hot: 0,
         }
     }
 }
@@ -110,11 +70,34 @@ impl<'a> App<'a> {
     /// Constructs a new instance of [`App`].
     pub fn new() -> Self {
         let mut ret = Self::default();
+        let colors = [
+            Color::Red,
+            Color::LightRed,
+            Color::Blue,
+            Color::LightBlue,
+            Color::Cyan,
+            Color::LightCyan,
+            Color::Green,
+            Color::LightGreen,
+            Color::Yellow,
+            Color::LightYellow,
+            Color::Magenta,
+            Color::LightMagenta,
+            Color::Gray,
+            Color::DarkGray,
+        ];
 
-        for c in &ret.args.contains {
-            // TODO: this should be a constant
-            let con = Container::new(c.clone(), 128);
-            ret.contains.insert(c.to_string(), con);
+        let mut i = 0;
+        for (id, c) in (0_u8..).zip(ret.args.containers.iter()) {
+            if i > ret.args.containers.len() {
+                i = 0;
+            }
+
+            let mut con = Container::new(c.clone(), CONTAINER_BUFFER);
+            con.match_color = colors[i];
+            con.id = id;
+            ret.containers.insert(c.to_string(), con);
+            i += 1;
         }
         ret
     }
@@ -128,11 +111,13 @@ impl<'a> App<'a> {
         match self.stdin.try_recv() {
             Ok(line) => {
                 // save all lines to a raw buffer
-                self.raw_buffer.cb.push(Spans::from(line.clone()));
-                let keys = self.contains.keys().cloned().collect::<Vec<String>>();
+                if !self.pause {
+                    self.raw_buffer.cb.push(Spans::from(line.clone()));
+                }
+                let keys = self.containers.keys().cloned().collect::<Vec<String>>();
                 for key in keys {
-                    if line.contains(&key.to_string()) {
-                        self.contains
+                    if line.contains(&key.to_string()) && !self.pause {
+                        self.containers
                             .get_mut(&key)
                             .unwrap()
                             .proc_and_push_line(line.clone());
@@ -148,17 +133,17 @@ impl<'a> App<'a> {
 
     fn get_layout_blocks(&self, size: Rect) -> Vec<Rect> {
         let mut constr = vec![];
-        let contains_count = if !self.contains.is_empty() {
-            self.contains.len()
+        let containers_count = if !self.containers.is_empty() {
+            self.containers.len()
         } else {
             1
         };
-        let mut per = 100 / contains_count;
+        let mut per = 100 / containers_count;
         // TODO: fix this, it depends on the size, so use it
-        if contains_count % 2 != 0 {
+        if containers_count % 2 != 0 {
             per -= 1
         };
-        for _ in 0..contains_count {
+        for _ in 0..containers_count {
             constr.push(Constraint::Percentage(per as u16));
         }
         let ret = Layout::default()
@@ -169,35 +154,44 @@ impl<'a> App<'a> {
         ret
     }
 
-    fn render_contains<B: Backend>(&mut self, frame: &mut Frame<'_, B>) {
+    fn render_containers<B: Backend>(&mut self, frame: &mut Frame<'_, B>) {
         let blocks = self.get_layout_blocks(frame.size());
         // TODO: Review this logic
-        for (i, (key, container)) in self.contains.iter_mut().enumerate() {
-            let cb = container.cb.ordered_clone();
-            container.update_scroll(blocks[i].height as usize);
-            let mut paragraph = Paragraph::new(cb.buffer.clone())
-                .block(create_block(key))
-                .style(Style::default().fg(Color::White).bg(Color::Black))
-                .scroll((container.scroll, 0));
-            if self.wrap {
-                paragraph = paragraph.wrap(Wrap { trim: false });
-            }
-            frame.render_widget(paragraph, blocks[i]);
+        for (i, (key, container)) in self.containers.iter().enumerate() {
+            let title = format!("({}) - {}", container.id, key);
+            container.render(frame, blocks[i], &title, self.pause);
         }
     }
 
-    // TODO: avoid code duplication
-    fn render_raw<B: Backend>(&self, frame: &mut Frame<'_, B>) {
-        let container = &self.raw_buffer;
-        let cb = container.cb.ordered_clone();
-        let mut paragraph = Paragraph::new(cb.buffer.clone())
-            .block(create_block("*"))
-            .style(Style::default().fg(Color::White).bg(Color::Black));
-        if self.wrap {
-            paragraph = paragraph.wrap(Wrap { trim: false });
+    fn update_containers<B: Backend>(&mut self, frame: &mut Frame<'_, B>) {
+        let blocks = self.get_layout_blocks(frame.size());
+        let mut area;
+        for (i, (_, container)) in self.containers.iter_mut().enumerate() {
+            container.wrapui = self.wrap;
+            if self.show == Views::Zoom {
+                area = frame.size().height;
+            } else {
+                area = blocks[i].height;
+            }
+            container.update_scroll(area as usize, &mut self.up, &mut self.down);
         }
+        let container = &mut self.raw_buffer;
 
-        frame.render_widget(paragraph, frame.size());
+        container.update_scroll(frame.size().height as usize, &mut self.up, &mut self.down);
+    }
+
+    fn render_raw<B: Backend>(&mut self, frame: &mut Frame<'_, B>) {
+        let container = &self.raw_buffer;
+        container.render(frame, frame.size(), "*", self.pause);
+    }
+
+    fn render_id<B: Backend>(&mut self, frame: &mut Frame<'_, B>, id: u8) {
+        for (key, container) in self.containers.iter() {
+            if container.id == id {
+                let title = format!("({}) - {}", id, key);
+                container.render(frame, frame.size(), &title, self.pause);
+            }
+        }
     }
 
     fn render_help<B: Backend>(&self, frame: &mut Frame<'_, B>) {
@@ -205,49 +199,65 @@ impl<'a> App<'a> {
         if self.help {
             let help_text = vec![
                 Spans::from(Span::styled(
-                    "h   - toggles help popup",
+                    "h       - toggles help popup",
                     Style::default().bg(Color::Blue),
                 )),
                 Spans::from(Span::styled(
-                    "w   - toggles text wrapping",
+                    "w       - toggles text wrapping",
                     Style::default().bg(Color::Blue),
                 )),
                 Spans::from(Span::styled(
-                    "*   - toggles between containers and raw input",
+                    "p       - toggles scrolling",
                     Style::default().bg(Color::Blue),
                 )),
                 Spans::from(Span::styled(
-                    "Esc - exits the program",
+                    "*       - toggles between containers and raw input",
+                    Style::default().bg(Color::Blue),
+                )),
+                Spans::from(Span::styled(
+                    "0-9     - toggles zoom to specific container",
+                    Style::default().bg(Color::Blue),
+                )),
+                Spans::from(Span::styled(
+                    "Up/Down - Scrolls lines",
+                    Style::default().bg(Color::Blue),
+                )),
+                Spans::from(Span::styled(
+                    "c       - continues autoscroll",
+                    Style::default().bg(Color::Blue),
+                )),
+ 
+                Spans::from(Span::styled(
+                    "Esc     - exits the program",
                     Style::default().bg(Color::Red),
                 )),
             ];
             let block = Block::default().title("Help").borders(Borders::ALL);
             let paragraph = Paragraph::new(help_text.clone()).block(block);
-            let area = centered_rect(60, 20, size);
-            frame.render_widget(Clear, area); //this clears out the background
+            let area = centered_rect(35, 25, size);
+            frame.render_widget(Clear, area); // this clears out the background
             frame.render_widget(paragraph, area);
         }
     }
     /// Renders the user interface widgets.
     pub fn render<B: Backend>(&mut self, frame: &mut Frame<'_, B>) {
+        self.update_containers(frame);
         match self.show {
             Views::Containers => {
-                self.render_contains(frame);
+                self.render_containers(frame);
             }
             Views::RawBuffer => {
                 self.render_raw(frame);
+            }
+            Views::Zoom => {
+                if let Some(id) = self.zoom_id {
+                    self.render_id(frame, id)
+                }
             }
         }
         // Popups need to go at the bottom
         self.render_help(frame);
     }
-}
-
-fn create_block(title: &str) -> Block {
-    Block::default().borders(Borders::ALL).title(Span::styled(
-        title,
-        Style::default().add_modifier(Modifier::BOLD),
-    ))
 }
 
 /// helper function to create a centered rect using up certain percentage of the available rect `r`
