@@ -8,7 +8,6 @@ repository = "https://github.com/todoesverso/logss"
 keywords = ["terminal", "logs", "cli", "split"]
 categories = ["visualization", "command-line-utilities", "parsing"]
 license = "MIT"
-license-file = "LICENSE"
 
 [dependencies]
 clap = { version = "4.0.29", features = ["derive"] }

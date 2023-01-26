@@ -18,3 +18,6 @@ pub mod tstdin;
 
 /// Command line arguments
 pub mod args;
+
+/// Container matcher
+pub mod container;

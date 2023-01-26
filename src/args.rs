@@ -6,5 +6,5 @@ use clap::Parser;
 pub struct Args {
     /// Matching line
     #[arg(short, long)]
-    pub contains: Vec<String>,
+    pub containers: Vec<String>,
 }
