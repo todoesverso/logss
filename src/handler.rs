@@ -25,34 +25,73 @@ pub fn handle_key_events(key_event: KeyEvent, app: &mut App) -> AppResult<()> {
         KeyCode::Char('w') => app.wrap = !app.wrap,
         KeyCode::Char('p') => app.pause = !app.pause,
         KeyCode::Char('0') => {
-            zoom_view_helper(app, 0);
+            if key_event.modifiers == KeyModifiers::ALT {
+                remove_view_helper(app, 0);
+            } else {
+                zoom_view_helper(app, 0);
+            }
         }
         KeyCode::Char('1') => {
-            zoom_view_helper(app, 1);
+            if key_event.modifiers == KeyModifiers::ALT {
+                remove_view_helper(app, 1);
+            } else {
+                zoom_view_helper(app, 1);
+            }
         }
         KeyCode::Char('2') => {
-            zoom_view_helper(app, 2);
+            if key_event.modifiers == KeyModifiers::ALT {
+                remove_view_helper(app, 2);
+            } else {
+                zoom_view_helper(app, 2);
+            }
         }
         KeyCode::Char('3') => {
-            zoom_view_helper(app, 3);
+            if key_event.modifiers == KeyModifiers::ALT {
+                remove_view_helper(app, 3);
+            } else {
+                zoom_view_helper(app, 3);
+            }
         }
         KeyCode::Char('4') => {
             zoom_view_helper(app, 4);
+            if key_event.modifiers == KeyModifiers::ALT {
+                remove_view_helper(app, 4);
+            }
         }
         KeyCode::Char('5') => {
-            zoom_view_helper(app, 5);
+            if key_event.modifiers == KeyModifiers::ALT {
+                remove_view_helper(app, 5);
+            } else {
+                zoom_view_helper(app, 5);
+            }
         }
         KeyCode::Char('6') => {
-            zoom_view_helper(app, 6);
+            if key_event.modifiers == KeyModifiers::ALT {
+                remove_view_helper(app, 6);
+            } else {
+                zoom_view_helper(app, 6);
+            }
         }
         KeyCode::Char('7') => {
-            zoom_view_helper(app, 7);
+            if key_event.modifiers == KeyModifiers::ALT {
+                remove_view_helper(app, 7);
+            } else {
+                zoom_view_helper(app, 7);
+            }
         }
         KeyCode::Char('8') => {
-            zoom_view_helper(app, 8);
+            if key_event.modifiers == KeyModifiers::ALT {
+                remove_view_helper(app, 8);
+            } else {
+                zoom_view_helper(app, 8);
+            }
         }
         KeyCode::Char('9') => {
-            zoom_view_helper(app, 9);
+            if key_event.modifiers == KeyModifiers::ALT {
+                remove_view_helper(app, 9);
+            } else {
+                zoom_view_helper(app, 9);
+            }
         }
         KeyCode::Up => {
             app.pause = true;
@@ -88,4 +127,13 @@ fn zoom_view_helper(app: &mut App, id: u8) {
         app.show = Views::Zoom;
         app.zoom_id = Some(id);
     }
+}
+
+fn remove_view_helper(app: &mut App, id: u8) {
+    if !app.containers.values().map(|c| c.id).any(|x| x == id) {
+        return;
+    }
+
+    app.show = Views::Remove;
+    app.zoom_id = Some(id);
 }

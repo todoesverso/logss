@@ -42,6 +42,7 @@ pub enum Views {
     RawBuffer,
     Containers,
     Zoom,
+    Remove,
 }
 
 impl<'a> Default for App<'a> {
@@ -194,6 +195,13 @@ impl<'a> App<'a> {
         }
     }
 
+    fn remove_id(&mut self, id: u8) {
+        if let Some(key) = self.containers.iter().find(|c| c.1.id == id).map(|c| c.0) {
+            let key = key.clone();
+            self.containers.remove(&key);
+        }
+    }
+
     fn render_help<B: Backend>(&self, frame: &mut Frame<'_, B>) {
         let size = frame.size();
         if self.help {
@@ -219,6 +227,10 @@ impl<'a> App<'a> {
                     Style::default().bg(Color::Blue),
                 )),
                 Spans::from(Span::styled(
+                    "Alt+0-9 - removes specific container",
+                    Style::default().bg(Color::Blue),
+                )),
+                Spans::from(Span::styled(
                     "Up/Down - Scrolls lines",
                     Style::default().bg(Color::Blue),
                 )),
@@ -233,7 +245,7 @@ impl<'a> App<'a> {
             ];
             let block = Block::default().title("Help").borders(Borders::ALL);
             let paragraph = Paragraph::new(help_text.clone()).block(block);
-            let area = centered_rect(35, 25, size);
+            let area = centered_rect(35, 26, size);
             frame.render_widget(Clear, area); // this clears out the background
             frame.render_widget(paragraph, area);
         }
@@ -250,7 +262,14 @@ impl<'a> App<'a> {
             }
             Views::Zoom => {
                 if let Some(id) = self.zoom_id {
-                    self.render_id(frame, id)
+                    self.render_id(frame, id);
+                }
+            }
+            Views::Remove => {
+                if let Some(id) = self.zoom_id {
+                    self.remove_id(id);
+                    self.show = Views::Containers;
+                    self.zoom_id = None;
                 }
             }
         }
