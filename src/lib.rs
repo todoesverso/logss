@@ -21,3 +21,6 @@ pub mod args;
 
 /// Container matcher
 pub mod container;
+
+/// Help menu
+pub mod help;
