@@ -6,6 +6,7 @@ use tui::text::{Span, Spans};
 use tui::widgets::{Block, Borders, Paragraph, Wrap};
 
 use crate::cb::CircularBuffer;
+use crate::states::ContainerState;
 
 #[derive(Debug)]
 pub struct Container<'a> {
@@ -14,26 +15,32 @@ pub struct Container<'a> {
     /// circular buffer with matching lines
     pub cb: CircularBuffer<Spans<'a>>,
     /// scroll for the paragraph
-    pub scroll: u16,
     pub id: u8,
-    /// style for the paragraph
-    styleui: Style,
-    pub wrapui: bool,
-    pub match_color: Color,
+    pub state: ContainerState,
 }
 
 pub const CONTAINER_BUFFER: usize = 64;
+pub const CONTAINERS_MAX: u8 = 10;
+pub const CONTAINER_COLORS: [tui::style::Color; 10] = [
+    Color::Red,
+    Color::Blue,
+    Color::Cyan,
+    Color::Green,
+    Color::Yellow,
+    Color::LightYellow,
+    Color::Magenta,
+    Color::LightMagenta,
+    Color::Gray,
+    Color::DarkGray,
+];
 
 impl<'a> Container<'a> {
     pub fn new(text: String, buffersize: usize) -> Self {
         Self {
             text,
             cb: CircularBuffer::new(buffersize),
-            scroll: 0,
-            styleui: Style::default().fg(Color::White).bg(Color::Black),
-            wrapui: false,
-            match_color: Color::Red,
             id: 0,
+            state: ContainerState::default(),
         }
     }
 
@@ -43,7 +50,7 @@ impl<'a> Container<'a> {
 
         Spans(vec![
             Span::from(line[0..contains_index].to_string()),
-            Span::styled(self.text.clone(), Style::default().fg(self.match_color)),
+            Span::styled(self.text.clone(), Style::default().fg(self.state.color)),
             Span::from(line[contains_index + self.text.len()..].to_string()),
         ])
     }
@@ -63,33 +70,28 @@ impl<'a> Container<'a> {
 
         if bufflen < size {
         } else {
-            self.scroll = (bufflen - size) as u16;
-            if self.scroll - *down > 0 {
-                self.scroll -= *down;
+            self.state.scroll = (bufflen - size) as u16;
+            if self.state.scroll - *down > 0 {
+                self.state.scroll -= *down;
             } else if *down > 1 {
                 *down -= 1;
             }
 
-            if self.scroll + *up <= (bufflen - size) as u16 {
-                self.scroll += *up;
+            if self.state.scroll + *up <= (bufflen - size) as u16 {
+                self.state.scroll += *up;
             } else if *up > 1 {
                 *up -= 1;
             }
         }
     }
 
-    pub fn render<B: Backend>(
-        &self,
-        frame: &mut Frame<'_, B>,
-        area: Rect,
-        title: &'a str,
-        paused: bool,
-    ) {
+    pub fn render<B: Backend>(&self, frame: &mut Frame<'_, B>, area: Rect) {
+        let title = format!("({}) - {}", self.id, self.text);
         let mut paragraph = Paragraph::new(self.cb.ordered_clone().buffer.clone())
-            .block(create_block(title, self.match_color, paused))
-            .style(self.styleui)
-            .scroll((self.scroll, 0));
-        if self.wrapui {
+            .block(create_block(&title, self.state.color, self.state.paused))
+            .style(self.state.style)
+            .scroll((self.state.scroll, 0));
+        if self.state.wrap {
             paragraph = paragraph.wrap(Wrap { trim: false });
         }
 

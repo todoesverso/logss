@@ -12,6 +12,9 @@ license = "MIT"
 [dependencies]
 clap = { version = "4.0.29", features = ["derive"] }
 crossterm = "0.25.0"
+is-terminal = "0.4.2"
+unicode-width = "0.1.10"
+use = "0.0.0"
 
 [dependencies.tui]
 version = "0.19.0"
