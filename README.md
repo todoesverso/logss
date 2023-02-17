@@ -89,7 +89,7 @@ Pre compiled binaries for several platforms can be downloaded from the [release]
 ## Roadmap
 
 This is just a personal project intended to learn Rust, so things move slowly. 
-Currently it is a Beta release because there are several things missing but it works and can be useful for someone.
+Currently it is a Alpha release because there are several things missing but it works and can be useful for someone.
 
 This is a list of things I plan to do:
 
