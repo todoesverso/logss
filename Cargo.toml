@@ -1,6 +1,6 @@
 [package]
 name = "logss"
-version = "1.0.0-beta"
+version = "1.0.0-alpha"
 authors = ["Victor Rosales <todoesverso@gmail.com>"]
 edition = "2018"
 publish = false
