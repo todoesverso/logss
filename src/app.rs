@@ -1,9 +1,10 @@
 use clap::Parser;
+use crossterm::event::KeyCode;
 use std::collections::HashMap;
 use std::error;
 use std::sync::mpsc::TryRecvError;
 use tui::backend::Backend;
-use tui::layout::{Constraint, Layout, Rect};
+use tui::layout::{Constraint, Direction, Layout, Rect};
 use tui::terminal::Frame;
 use tui::text::Spans;
 
@@ -22,8 +23,6 @@ pub type AppResult<T> = std::result::Result<T, Box<dyn error::Error>>;
 /// This is the main application.
 #[derive(Debug)]
 pub struct App<'a> {
-    /// Is the application running?
-    pub running: bool,
     pub containers: HashMap<String, Container<'a>>,
     pub state: AppState,
     pub input: Input,
@@ -35,7 +34,6 @@ pub struct App<'a> {
 impl<'a> Default for App<'a> {
     fn default() -> Self {
         Self {
-            running: true,
             stdin: StdinHandler::new(),
             args: Args::parse(),
             input: Input::default(),
@@ -67,23 +65,103 @@ impl<'a> App<'a> {
         ret
     }
 
-    fn get_free_ids(&self) -> Vec<u8> {
-        let used_ids: Vec<u8> = self.containers.iter().map(|c| c.1.id).collect();
-        let mut free_ids: Vec<u8> = Vec::new();
+    pub fn init(&mut self) {
+        self.state.running = true;
+        self.stdin.init();
+    }
 
-        for id in 1_u8..CONTAINERS_MAX {
-            if !used_ids.contains(&id) {
-                free_ids.push(id);
-            }
+    pub fn is_running(&self) -> bool {
+        self.state.running
+    }
+
+    pub fn show_input(&self) -> bool {
+        self.state.show_input
+    }
+
+    pub fn hide_show_input(&mut self) {
+        self.state.show_input = false;
+    }
+
+    pub fn stop(&mut self) {
+        self.state.running = false;
+    }
+
+    pub fn pause(&mut self) {
+        self.state.paused = true;
+    }
+
+    pub fn unpause(&mut self) {
+        self.state.paused = false;
+    }
+
+    pub fn flip_pause(&mut self) {
+        self.state.paused = !self.state.paused;
+    }
+
+    pub fn flip_wrap(&mut self) {
+        self.state.wrap = !self.state.wrap;
+    }
+
+    pub fn flip_help(&mut self) {
+        self.state.help = !self.state.help;
+    }
+
+    pub fn flip_show_input(&mut self) {
+        self.state.show_input = !self.state.show_input;
+    }
+
+    pub fn scroll_up(&mut self) {
+        self.state.scroll_up += 1;
+    }
+
+    pub fn scroll_down(&mut self) {
+        self.state.scroll_down += 1;
+    }
+
+    pub fn reset_scroll_up(&mut self) {
+        self.state.scroll_up = 0;
+    }
+
+    pub fn reset_scroll_down(&mut self) {
+        self.state.scroll_down = 0;
+    }
+
+    pub fn set_direction(&mut self, direction: Direction) {
+        self.state.direction = direction;
+    }
+
+    pub fn flip_direction(&mut self) {
+        if self.state.direction == Direction::Vertical {
+            self.state.direction = Direction::Horizontal;
+        } else {
+            self.state.direction = Direction::Vertical;
         }
+    }
 
-        free_ids
+    pub fn update_input(&mut self, key_code: KeyCode) {
+        match key_code {
+            KeyCode::Enter => {
+                self.add_input_as_container();
+                self.hide_show_input();
+            }
+            KeyCode::Char(c) => {
+                self.input.push(c);
+            }
+            KeyCode::Backspace => {
+                self.input.pop();
+            }
+            KeyCode::Esc => {
+                self.hide_show_input();
+            }
+            _ => {}
+        }
     }
 
     pub fn add_input_as_container(&mut self) {
         self.add_container(&self.input.input.clone());
         self.input.reset();
     }
+
     pub fn add_container(&mut self, text: &str) {
         let first_free_id = self.get_free_ids();
         let mut con = Container::new(text.to_string(), CONTAINER_BUFFER);
@@ -94,12 +172,44 @@ impl<'a> App<'a> {
         }
     }
 
+    pub fn zoom_into(&mut self, id: u8) {
+        if !self.containers.values().map(|c| c.id).any(|x| x == id) {
+            return;
+        }
+
+        if self.state.show == Views::Zoom {
+            self.state.show = Views::Containers;
+            self.state.zoom_id = None;
+        } else {
+            self.state.show = Views::Zoom;
+            self.state.zoom_id = Some(id);
+        }
+    }
+
+    pub fn remove_view(&mut self, id: u8) {
+        if !self.containers.values().map(|c| c.id).any(|x| x == id) {
+            return;
+        }
+        self.state.show = Views::Remove;
+        self.state.zoom_id = Some(id);
+    }
+
+    pub fn flip_raw_view(&mut self) {
+        if !self.containers.is_empty() {
+            if self.state.show == Views::RawBuffer {
+                self.state.show = Views::Containers;
+            } else {
+                self.state.show = Views::RawBuffer;
+            }
+        }
+    }
+
     /// Handles the tick event of the terminal.
     pub fn tick(&mut self) {
         self.get_stdin();
     }
 
-    pub fn get_stdin(&mut self) {
+    fn get_stdin(&mut self) {
         match self.stdin.try_recv() {
             Ok(line) => {
                 // save all lines to a raw buffer
@@ -117,10 +227,23 @@ impl<'a> App<'a> {
                 }
             }
             Err(TryRecvError::Disconnected) => {
-                self.state.running = false;
+                self.stop();
             }
             _ => {}
         }
+    }
+
+    fn get_free_ids(&self) -> Vec<u8> {
+        let used_ids: Vec<u8> = self.containers.iter().map(|c| c.1.id).collect();
+        let mut free_ids: Vec<u8> = Vec::new();
+
+        for id in 1_u8..CONTAINERS_MAX {
+            if !used_ids.contains(&id) {
+                free_ids.push(id);
+            }
+        }
+
+        free_ids
     }
 
     fn get_layout_blocks(&self, size: Rect) -> Vec<Rect> {
@@ -198,6 +321,7 @@ impl<'a> App<'a> {
             render_help(frame);
         }
     }
+
     fn render_input<B: Backend>(&self, frame: &mut Frame<'_, B>) {
         if self.state.show_input {
             self.input.render(frame, frame.size());

@@ -32,6 +32,7 @@ impl<B: Backend> Tui<B> {
         crossterm::execute!(io::stderr(), EnterAlternateScreen, EnableMouseCapture)?;
         self.terminal.hide_cursor()?;
         self.terminal.clear()?;
+        self.events.init();
         Ok(())
     }
 

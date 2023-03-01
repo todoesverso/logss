@@ -22,15 +22,25 @@ pub enum Event {
 pub struct EventHandler {
     /// Event receiver channel.
     receiver: mpsc::Receiver<Event>,
+    sender: mpsc::Sender<Event>,
+    tick_rate: u64,
 }
 
 impl EventHandler {
     /// Constructs a new instance of [`EventHandler`].
     pub fn new(tick_rate: u64) -> Self {
-        let tick_rate = Duration::from_millis(tick_rate);
         let (sender, receiver) = mpsc::channel();
 
-        let sender = sender;
+        Self {
+            receiver,
+            sender,
+            tick_rate,
+        }
+    }
+
+    pub fn init(&self) {
+        let tick_rate = Duration::from_millis(self.tick_rate);
+        let sender = self.sender.clone();
         thread::spawn(move || {
             let mut last_tick = Instant::now();
             loop {
@@ -54,8 +64,6 @@ impl EventHandler {
                 }
             }
         });
-
-        Self { receiver }
     }
 
     /// Receive the next event from the handler thread.

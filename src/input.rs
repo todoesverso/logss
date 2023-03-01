@@ -33,4 +33,11 @@ impl Input {
     pub fn reset(&mut self) {
         self.input = String::new();
     }
+
+    pub fn push(&mut self, ch: char) {
+        self.input.push(ch);
+    }
+    pub fn pop(&mut self) {
+        self.input.pop();
+    }
 }

@@ -12,7 +12,7 @@
 /// cb.push(4);
 /// assert_eq!(cb.buffer, vec![4, 2, 3]);
 ///
-/// // Notice the order that clone returns
+/// // Notice the order that `ordered_clone` returns
 /// let cb2 = cb.ordered_clone();
 /// assert_eq!(cb2.buffer, vec![2, 3, 4]);
 /// ```
@@ -91,10 +91,12 @@ mod tests {
         let mut cb: CircularBuffer<i32> = CircularBuffer::new(3);
         assert_eq!(cb.capacity(), 3);
         assert_eq!(cb.len(), 0);
+        assert_eq!(cb.is_empty(), true);
 
         cb.push(1);
         assert_eq!(cb.buffer, vec![1]);
         assert_eq!(cb.len(), 1);
+        assert_eq!(cb.is_empty(), false);
 
         cb.push(2);
         cb.push(3);

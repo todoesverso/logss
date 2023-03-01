@@ -25,9 +25,11 @@ fn main() -> AppResult<()> {
     let events = EventHandler::new(args.render);
     let mut tui = Tui::new(terminal, events);
     tui.init()?;
+    // TODO: make it fail and propagate
+    app.init();
 
     // Start the main loop.
-    while app.running {
+    while app.is_running() {
         // Render the user interface.
         tui.draw(&mut app)?;
         // Handle events.
