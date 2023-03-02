@@ -17,6 +17,10 @@ jobs:
         with:
           command: check
 
+  cache:
+    name: Rust Cache
+      uses: Swatinem/rust-cache@v2.2.1
+
   test:
     name: Test Suite
     runs-on: ubuntu-latest
