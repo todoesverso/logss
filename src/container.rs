@@ -109,3 +109,27 @@ fn create_block(title: &str, color: Color, paused: bool) -> Block {
         Style::default().add_modifier(modifier).fg(color),
     ))
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_create_block() {
+        let block = create_block("sarasa", Color::Red, false);
+        let expected = Block::default().borders(Borders::ALL).title(Span::styled(
+            "sarasa",
+            Style::default().add_modifier(Modifier::BOLD).fg(Color::Red),
+        ));
+        assert_eq!(block, expected);
+
+        let block = create_block("coso", Color::Blue, true);
+        let expected = Block::default().borders(Borders::ALL).title(Span::styled(
+            "coso",
+            Style::default()
+                .add_modifier(Modifier::BOLD | Modifier::SLOW_BLINK)
+                .fg(Color::Blue),
+        ));
+        assert_eq!(block, expected);
+    }
+}

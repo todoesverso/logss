@@ -64,3 +64,173 @@ fn view_helper(app: &mut App, id: u8, key_event: KeyEvent) {
         app.zoom_into(id);
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::states::Views;
+    use tui::layout::Direction;
+
+    #[test]
+    fn stop() {
+        let mut app = App::default();
+        app.add_container("1");
+        app.add_container("2");
+        assert_eq!(app.containers.len(), 2);
+
+        // Test stoping
+        app.state.running = true;
+        assert_eq!(app.is_running(), true);
+        let key = KeyEvent::new(KeyCode::Esc, KeyModifiers::NONE);
+        handle_key_events(key, &mut app).ok();
+        assert_eq!(app.is_running(), false);
+
+        app.state.running = true;
+        let key = KeyEvent::new(KeyCode::Char('d'), KeyModifiers::NONE);
+        handle_key_events(key, &mut app).ok();
+        assert_eq!(app.is_running(), true);
+
+        app.state.running = true;
+        let key = KeyEvent::new(KeyCode::Char('D'), KeyModifiers::NONE);
+        handle_key_events(key, &mut app).ok();
+        assert_eq!(app.is_running(), true);
+
+        app.state.running = true;
+        let key = KeyEvent::new(KeyCode::Char('d'), KeyModifiers::CONTROL);
+        handle_key_events(key, &mut app).ok();
+        assert_eq!(app.is_running(), false);
+
+        app.state.running = true;
+        let key = KeyEvent::new(KeyCode::Char('D'), KeyModifiers::CONTROL);
+        handle_key_events(key, &mut app).ok();
+        assert_eq!(app.is_running(), false);
+    }
+
+    #[test]
+    fn flip_raw() {
+        let mut app = App::default();
+        app.add_container("3");
+        assert_eq!(app.containers.len(), 1);
+        assert_eq!(app.state.show, Views::Containers);
+        let key = KeyEvent::new(KeyCode::Char('*'), KeyModifiers::NONE);
+        handle_key_events(key, &mut app).ok();
+        assert_eq!(app.state.show, Views::RawBuffer);
+        handle_key_events(key, &mut app).ok();
+        assert_eq!(app.state.show, Views::Containers);
+    }
+
+    #[test]
+    fn flip_show_input() {
+        let mut app = App::default();
+        assert_eq!(app.state.show_input, false);
+        let key = KeyEvent::new(KeyCode::Char('i'), KeyModifiers::NONE);
+        handle_key_events(key, &mut app).ok();
+        assert_eq!(app.state.show_input, true);
+        let key = KeyEvent::new(KeyCode::Esc, KeyModifiers::NONE);
+        handle_key_events(key, &mut app).ok();
+        assert_eq!(app.state.show_input, false);
+    }
+
+    #[test]
+    fn flip_help() {
+        let mut app = App::default();
+        assert_eq!(app.state.help, false);
+        let key = KeyEvent::new(KeyCode::Char('h'), KeyModifiers::NONE);
+        handle_key_events(key, &mut app).ok();
+        assert_eq!(app.state.help, true);
+        let key = KeyEvent::new(KeyCode::Char('h'), KeyModifiers::NONE);
+        handle_key_events(key, &mut app).ok();
+        assert_eq!(app.state.help, false);
+    }
+
+    #[test]
+    fn flip_wrap() {
+        let mut app = App::default();
+        assert_eq!(app.state.wrap, false);
+        let key = KeyEvent::new(KeyCode::Char('w'), KeyModifiers::NONE);
+        handle_key_events(key, &mut app).ok();
+        assert_eq!(app.state.wrap, true);
+        let key = KeyEvent::new(KeyCode::Char('w'), KeyModifiers::NONE);
+        handle_key_events(key, &mut app).ok();
+        assert_eq!(app.state.help, false);
+    }
+
+    #[test]
+    fn flip_pause() {
+        let mut app = App::default();
+        assert_eq!(app.state.paused, false);
+        let key = KeyEvent::new(KeyCode::Char('p'), KeyModifiers::NONE);
+        handle_key_events(key, &mut app).ok();
+        assert_eq!(app.state.paused, true);
+        let key = KeyEvent::new(KeyCode::Char('p'), KeyModifiers::NONE);
+        handle_key_events(key, &mut app).ok();
+        assert_eq!(app.state.help, false);
+    }
+
+    #[test]
+    fn flip_direction() {
+        let mut app = App::default();
+        assert_eq!(app.state.direction, Direction::Vertical);
+        let key = KeyEvent::new(KeyCode::Char('v'), KeyModifiers::NONE);
+        handle_key_events(key, &mut app).ok();
+        assert_eq!(app.state.direction, Direction::Horizontal);
+        let key = KeyEvent::new(KeyCode::Char('v'), KeyModifiers::NONE);
+        handle_key_events(key, &mut app).ok();
+        assert_eq!(app.state.direction, Direction::Vertical);
+    }
+
+    #[test]
+    fn scroll_up_down_continue() {
+        let mut app = App::default();
+        assert_eq!(app.state.scroll_up, 0);
+        assert_eq!(app.state.scroll_down, 0);
+        assert_eq!(app.state.paused, false);
+        let mut key = KeyEvent::new(KeyCode::Up, KeyModifiers::NONE);
+        key.kind = KeyEventKind::Press;
+        handle_key_events(key, &mut app).ok();
+        assert_eq!(app.state.scroll_up, 1);
+        assert_eq!(app.state.scroll_down, 0);
+        assert_eq!(app.state.paused, true);
+        let mut key = KeyEvent::new(KeyCode::Up, KeyModifiers::NONE);
+        key.kind = KeyEventKind::Press;
+        handle_key_events(key, &mut app).ok();
+        assert_eq!(app.state.scroll_up, 2);
+        assert_eq!(app.state.scroll_down, 0);
+        assert_eq!(app.state.paused, true);
+        let mut key = KeyEvent::new(KeyCode::Down, KeyModifiers::NONE);
+        key.kind = KeyEventKind::Press;
+        handle_key_events(key, &mut app).ok();
+        assert_eq!(app.state.scroll_up, 2);
+        assert_eq!(app.state.scroll_down, 1);
+        assert_eq!(app.state.paused, true);
+        let key = KeyEvent::new(KeyCode::Char('c'), KeyModifiers::NONE);
+        handle_key_events(key, &mut app).ok();
+        assert_eq!(app.state.scroll_up, 0);
+        assert_eq!(app.state.scroll_down, 0);
+        assert_eq!(app.state.paused, false);
+    }
+
+    #[test]
+    fn container_number() {
+        let mut app = App::default();
+        app.add_container("1");
+        app.add_container("2");
+        assert_eq!(app.containers.len(), 2);
+
+        assert_eq!(app.state.show, Views::Containers);
+        assert_eq!(app.state.zoom_id, None);
+        let key = KeyEvent::new(KeyCode::Char('1'), KeyModifiers::NONE);
+        handle_key_events(key, &mut app).ok();
+        assert_eq!(app.state.show, Views::Zoom);
+        assert_eq!(app.state.zoom_id, Some(1));
+        // Flip
+        handle_key_events(key, &mut app).ok();
+        assert_eq!(app.state.show, Views::Containers);
+        assert_eq!(app.state.zoom_id, None);
+
+        let key = KeyEvent::new(KeyCode::Char('1'), KeyModifiers::ALT);
+        handle_key_events(key, &mut app).ok();
+        assert_eq!(app.state.show, Views::Remove);
+        assert_eq!(app.state.zoom_id, Some(1));
+    }
+}

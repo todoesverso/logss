@@ -5,7 +5,7 @@ use tui::terminal::Frame;
 use tui::text::{Span, Spans};
 use unicode_width::UnicodeWidthStr;
 
-use crate::popup::{centered_rect, render_popup};
+use crate::popup::render_popup;
 
 #[derive(Debug, Default)]
 pub struct Input {
@@ -20,7 +20,6 @@ impl Input {
 
     pub fn render<B: Backend>(&self, frame: &mut Frame<'_, B>, area: Rect) {
         let pos = (40, 8);
-        let area = centered_rect(pos.0, pos.1, area);
         let text = vec![Spans::from(Span::styled(
             self.input.clone(),
             Style::default(),
@@ -39,5 +38,77 @@ impl Input {
     }
     pub fn pop(&mut self) {
         self.input.pop();
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use tui::{backend::TestBackend, buffer::Buffer, Terminal};
+
+    #[test]
+    fn simple_full_test() {
+        let mut input = Input::new();
+        assert_eq!(input.input, String::new());
+
+        input.push('a');
+        assert_eq!(input.input, "a");
+        input.push('b');
+        assert_eq!(input.input, "ab");
+        input.pop();
+        assert_eq!(input.input, "a");
+        input.reset();
+        assert_eq!(input.input, String::new());
+    }
+
+    #[test]
+    fn test_render_input() {
+        let mut input = Input::new();
+        input.push('a');
+        input.push('b');
+        let backend = TestBackend::new(20, 38);
+        let mut terminal = Terminal::new(backend).unwrap();
+        terminal.draw(|f| input.render(f, f.size())).unwrap();
+        let expected = Buffer::with_lines(vec![
+            "                    ",
+            "                    ",
+            "                    ",
+            "                    ",
+            "                    ",
+            "                    ",
+            "                    ",
+            "                    ",
+            "                    ",
+            "                    ",
+            "                    ",
+            "                    ",
+            "                    ",
+            "                    ",
+            "                    ",
+            "                    ",
+            "                    ",
+            "      ┌Input─┐      ",
+            "      │ab    │      ",
+            "      └──────┘      ",
+            "                    ",
+            "                    ",
+            "                    ",
+            "                    ",
+            "                    ",
+            "                    ",
+            "                    ",
+            "                    ",
+            "                    ",
+            "                    ",
+            "                    ",
+            "                    ",
+            "                    ",
+            "                    ",
+            "                    ",
+            "                    ",
+            "                    ",
+            "                    ",
+        ]);
+        terminal.backend().assert_buffer(&expected);
     }
 }
