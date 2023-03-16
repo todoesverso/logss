@@ -14,7 +14,6 @@ pub struct Container<'a> {
     text: String,
     /// circular buffer with matching lines
     pub cb: CircularBuffer<Spans<'a>>,
-    /// scroll for the paragraph
     pub id: u8,
     pub state: ContainerState,
 }
@@ -44,15 +43,19 @@ impl<'a> Container<'a> {
         }
     }
 
-    fn process_line(&self, line: String) -> Spans<'a> {
+    fn process_line(&self, line: String) -> Option<Spans<'a>> {
         // TODO: maybe add smart time coloration?
-        let contains_index = line.find(&self.text).unwrap();
+        let contains_index = line.find(&self.text);
 
-        Spans(vec![
-            Span::from(line[0..contains_index].to_string()),
-            Span::styled(self.text.clone(), Style::default().fg(self.state.color)),
-            Span::from(line[contains_index + self.text.len()..].to_string()),
-        ])
+        if let Some(index) = contains_index {
+            Some(Spans(vec![
+                Span::from(line[0..index].to_string()),
+                Span::styled(self.text.clone(), Style::default().fg(self.state.color)),
+                Span::from(line[index + self.text.len()..].to_string()),
+            ]))
+        } else {
+            None
+        }
     }
 
     pub fn push(&mut self, element: Spans<'a>) {
@@ -61,7 +64,9 @@ impl<'a> Container<'a> {
 
     pub fn proc_and_push_line(&mut self, line: String) {
         let sp = self.process_line(line);
-        let _ = &self.push(sp);
+        if let Some(spans) = sp {
+            let _ = &self.push(spans);
+        }
     }
 
     pub fn update_scroll(&mut self, size: usize, up: &mut u16, down: &mut u16) {
@@ -131,5 +136,29 @@ mod tests {
                 .fg(Color::Blue),
         ));
         assert_eq!(block, expected);
+    }
+
+    #[test]
+    fn test_container_new() {
+        let container = Container::new("key".to_string(), 2);
+        assert_eq!(container.id, 0);
+        assert_eq!(container.text, "key");
+        assert_eq!(container.cb.len(), 0);
+        assert_eq!(container.cb.capacity(), 2);
+        assert_eq!(container.state, ContainerState::default());
+    }
+
+    #[test]
+    fn process_line() {
+        let container = Container::new("stringtomatch".to_string(), 2);
+        let span = container.process_line("this line should not be proc".to_string());
+        assert_eq!(span, None);
+        let span = container.process_line("stringtomatch this line should be proc".to_string());
+        let expected_span = Some(Spans(vec![
+            Span::from("".to_string()),
+            Span::styled("stringtomatch".to_string(), Style::default().fg(Color::Red)),
+            Span::from(" this line should be proc".to_string()),
+        ]));
+        assert_eq!(span, expected_span);
     }
 }

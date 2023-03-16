@@ -9,7 +9,7 @@ pub enum Views {
     Remove,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Eq, PartialEq)]
 pub struct AppState {
     pub running: bool,
     pub paused: bool,
@@ -40,7 +40,7 @@ impl Default for AppState {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct ContainerState {
     pub paused: bool,
     pub wrap: bool,

@@ -1,17 +1,56 @@
-use clap::Parser;
+use pico_args;
 
-/// Simple cli command to show logs in a friendly way
-#[derive(Parser, Debug)]
-#[command(author, version, about, long_about = None)]
+const HELP: &str = "\
+Simple cli command to show logs in a friendly way
+
+Usage: logss [OPTIONS]
+
+Options:
+  -c <CONTAINERS>  Finds the substring
+  -r <RENDER>      Defines render speed in milliseconds [default: 100]
+  -h               Print help
+";
+
+#[derive(Debug)]
 pub struct Args {
-    /// Finds the substring
-    #[arg(short = 'c')]
-    #[arg(long = "contains")]
     pub containers: Vec<String>,
-
-    /// Defines render speed in milliseconds
-    #[arg(short, long, default_value_t = 100, value_parser = render_in_range)]
     pub render: u64,
+}
+
+pub fn parse_args() -> Args {
+    let args = match parser() {
+        Ok(v) => v,
+        Err(e) => {
+            eprintln!("Error: {}.", e);
+            std::process::exit(1);
+        }
+    };
+    args
+}
+
+fn parser() -> Result<Args, pico_args::Error> {
+    let mut pargs = pico_args::Arguments::from_env();
+
+    // Help has a higher priority and should be handled separately.
+    if pargs.contains(["-h", "--help"]) {
+        print!("{}", HELP);
+        std::process::exit(0);
+    }
+
+    let args = Args {
+        containers: pargs.values_from_str("-c")?,
+        render: pargs
+            .opt_value_from_fn("-r", render_in_range)?
+            .unwrap_or(100),
+    };
+
+    // It's up to the caller what to do with the remaining arguments.
+    let remaining = pargs.finish();
+    if !remaining.is_empty() {
+        eprintln!("Warning: unused arguments left: {:?}.", remaining);
+    }
+
+    Ok(args)
 }
 
 fn render_in_range(s: &str) -> Result<u64, String> {

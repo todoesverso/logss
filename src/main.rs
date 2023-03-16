@@ -1,7 +1,6 @@
-use clap::Parser;
 use is_terminal::IsTerminal;
 use logss::app::{App, AppResult};
-use logss::args::Args;
+use logss::args::parse_args;
 use logss::event::{Event, EventHandler};
 use logss::handler::handle_key_events;
 use logss::tui::Tui;
@@ -15,13 +14,13 @@ fn main() -> AppResult<()> {
         return Ok(());
     }
     // Create an application.
-    let args = Args::parse();
+    let args = parse_args();
     let mut app = App::new(Some(args));
 
     // Initialize the terminal user interface.
     let backend = CrosstermBackend::new(io::stderr());
     let terminal = Terminal::new(backend)?;
-    let args = Args::parse();
+    let args = parse_args();
     let events = EventHandler::new(args.render);
     let mut tui = Tui::new(terminal, events);
     tui.init()?;

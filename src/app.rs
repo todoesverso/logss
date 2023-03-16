@@ -1,4 +1,3 @@
-use clap::Parser;
 use crossterm::event::KeyCode;
 use std::collections::HashMap;
 use std::error;
@@ -8,7 +7,7 @@ use tui::layout::{Constraint, Direction, Layout, Rect};
 use tui::terminal::Frame;
 use tui::text::Spans;
 
-use crate::args::Args;
+use crate::args::{parse_args, Args};
 use crate::container::{Container, CONTAINERS_MAX, CONTAINER_BUFFER, CONTAINER_COLORS};
 use crate::help::render_help;
 use crate::input::Input;
@@ -35,7 +34,7 @@ impl<'a> Default for App<'a> {
     fn default() -> Self {
         Self {
             stdin: StdinHandler::new(),
-            args: Args::parse(),
+            args: parse_args(),
             input: Input::default(),
             raw_buffer: Container::new("*".to_string(), CONTAINER_BUFFER),
             containers: HashMap::new(),
@@ -358,5 +357,15 @@ impl<'a> App<'a> {
         // Popups need to go at the bottom
         self.render_help(frame);
         self.render_input(frame);
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn test_new() {
+        let app = App::new(None);
+        assert_eq!(app.state.running, false);
     }
 }
