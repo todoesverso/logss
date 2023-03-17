@@ -19,7 +19,7 @@ pub fn render_help<B: Backend>(frame: &mut Frame<'_, B>) {
             Style::default().bg(Color::Blue),
         )),
         Spans::from(Span::styled(
-            "p       - toggles scrolling",
+            "p|Space - toggles scrolling",
             Style::default().bg(Color::Blue),
         )),
         Spans::from(Span::styled(
