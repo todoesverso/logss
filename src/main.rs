@@ -9,9 +9,9 @@ use tui::backend::CrosstermBackend;
 use tui::Terminal;
 
 fn main() -> AppResult<()> {
-    if !std::io::stdout().is_terminal() {
-        println!("This is not a terminal. Exiting.");
-        return Ok(());
+    if std::io::stdin().is_terminal() {
+        eprintln!("Please pipe some data to this command. Exiting.");
+        std::process::exit(1);
     }
     // Create an application.
     let args = parse_args();

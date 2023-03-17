@@ -19,6 +19,7 @@ impl StdinHandler {
         let (sender, receiver) = mpsc::channel();
         Self { receiver, sender }
     }
+
     pub fn init(&self) {
         let sender = self.sender.clone();
         thread::spawn(move || {
