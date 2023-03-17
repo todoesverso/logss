@@ -18,14 +18,13 @@ pub struct Args {
 }
 
 pub fn parse_args() -> Args {
-    let args = match parser() {
+    match parser() {
         Ok(v) => v,
         Err(e) => {
             eprintln!("Error: {}.", e);
             std::process::exit(1);
         }
-    };
-    args
+    }
 }
 
 fn parser() -> Result<Args, pico_args::Error> {

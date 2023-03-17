@@ -47,15 +47,13 @@ impl<'a> Container<'a> {
         // TODO: maybe add smart time coloration?
         let contains_index = line.find(&self.text);
 
-        if let Some(index) = contains_index {
-            Some(Spans(vec![
+        contains_index.map(|index| {
+            Spans(vec![
                 Span::from(line[0..index].to_string()),
                 Span::styled(self.text.clone(), Style::default().fg(self.state.color)),
                 Span::from(line[index + self.text.len()..].to_string()),
-            ]))
-        } else {
-            None
-        }
+            ])
+        })
     }
 
     pub fn push(&mut self, element: Spans<'a>) {
