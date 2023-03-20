@@ -386,4 +386,48 @@ mod tests {
         app.add_container("text2");
         assert_eq!(app.containers.len(), 2);
     }
+
+    #[test]
+    fn input() {
+        // New all clean
+        let mut app = App::new(None);
+        assert_eq!(app.containers.len(), 0);
+        assert_eq!(app.input.input, "".to_string());
+        // Add a char
+        app.update_input(KeyCode::Char('a'));
+        assert_eq!(app.input.input, "a".to_string());
+        // Remove the char
+        app.update_input(KeyCode::Backspace);
+        assert_eq!(app.input.input, "".to_string());
+        // Re add the char
+        app.update_input(KeyCode::Char('a'));
+        assert_eq!(app.containers.len(), 0);
+        app.update_input(KeyCode::Enter);
+        // Enter the input
+        assert_eq!(app.show_input(), false);
+        assert_eq!(app.input.input, "".to_string());
+        assert_eq!(app.containers.len(), 1);
+    }
+
+    #[test]
+    fn zoom_into() {
+        let mut app = App::new(None);
+        assert_eq!(app.containers.len(), 0);
+        app.add_container("text");
+        app.add_container("text2");
+        app.add_container("text3");
+        assert_eq!(app.containers.len(), 3);
+        assert_eq!(app.state.show, Views::RawBuffer);
+        assert_eq!(app.state.zoom_id, None);
+
+        // Zoom in
+        app.zoom_into(1);
+        assert_eq!(app.state.show, Views::Zoom);
+        assert_eq!(app.state.zoom_id, Some(1));
+
+        // Zoom out
+        app.zoom_into(1);
+        assert_eq!(app.state.zoom_id, None);
+        assert_eq!(app.state.show, Views::Containers);
+    }
 }
