@@ -1,8 +1,8 @@
-use tui::backend::Backend;
-use tui::layout::Rect;
-use tui::style::Style;
-use tui::terminal::Frame;
-use tui::text::{Span, Spans};
+use ratatui::backend::Backend;
+use ratatui::layout::Rect;
+use ratatui::style::Style;
+use ratatui::terminal::Frame;
+use ratatui::text::{Span, Spans};
 use unicode_width::UnicodeWidthStr;
 
 use crate::popup::render_popup;
@@ -38,6 +38,9 @@ impl Input {
     }
     pub fn pop(&mut self) {
         self.input.pop();
+    }
+    pub fn inner_clone(&self) -> String {
+        self.input.clone()
     }
 }
 

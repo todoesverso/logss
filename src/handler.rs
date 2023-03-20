@@ -19,7 +19,7 @@ pub fn handle_key_events(key_event: KeyEvent, app: &mut App) -> AppResult<()> {
             KeyCode::Char('i') => app.flip_show_input(),
             KeyCode::Char('h') => app.flip_help(),
             KeyCode::Char('w') => app.flip_wrap(),
-            KeyCode::Char('p')|KeyCode::Char(' ') => app.flip_pause(),
+            KeyCode::Char('p') | KeyCode::Char(' ') => app.flip_pause(),
             KeyCode::Char('v') => app.flip_direction(),
             KeyCode::Char('0') => view_helper(app, 0, key_event),
             KeyCode::Char('1') => view_helper(app, 1, key_event),

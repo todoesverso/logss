@@ -1,9 +1,9 @@
-use tui::backend::Backend;
-use tui::layout::Rect;
-use tui::style::{Color, Modifier, Style};
-use tui::terminal::Frame;
-use tui::text::{Span, Spans};
-use tui::widgets::{Block, Borders, Paragraph, Wrap};
+use ratatui::backend::Backend;
+use ratatui::layout::Rect;
+use ratatui::style::{Color, Modifier, Style};
+use ratatui::terminal::Frame;
+use ratatui::text::{Span, Spans};
+use ratatui::widgets::{Block, Borders, Paragraph, Wrap};
 
 use crate::cb::CircularBuffer;
 use crate::states::ContainerState;
@@ -20,7 +20,7 @@ pub struct Container<'a> {
 
 pub const CONTAINER_BUFFER: usize = 64;
 pub const CONTAINERS_MAX: u8 = 10;
-pub const CONTAINER_COLORS: [tui::style::Color; 10] = [
+pub const CONTAINER_COLORS: [ratatui::style::Color; 10] = [
     Color::Red,
     Color::Blue,
     Color::Cyan,

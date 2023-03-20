@@ -1,8 +1,8 @@
 use crate::popup::render_popup;
-use tui::backend::Backend;
-use tui::style::{Color, Style};
-use tui::terminal::Frame;
-use tui::text::{Span, Spans};
+use ratatui::backend::Backend;
+use ratatui::style::{Color, Style};
+use ratatui::terminal::Frame;
+use ratatui::text::{Span, Spans};
 
 pub fn render_help<B: Backend>(frame: &mut Frame<'_, B>) {
     let help_text = vec![

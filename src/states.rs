@@ -1,5 +1,5 @@
-use tui::layout::Direction;
-use tui::style::{Color, Style};
+use ratatui::layout::Direction;
+use ratatui::style::{Color, Style};
 
 #[derive(Debug, Eq, PartialEq)]
 pub enum Views {

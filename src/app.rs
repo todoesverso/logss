@@ -1,11 +1,11 @@
 use crossterm::event::KeyCode;
+use ratatui::backend::Backend;
+use ratatui::layout::{Constraint, Direction, Layout, Rect};
+use ratatui::terminal::Frame;
+use ratatui::text::Spans;
 use std::collections::HashMap;
 use std::error;
 use std::sync::mpsc::TryRecvError;
-use tui::backend::Backend;
-use tui::layout::{Constraint, Direction, Layout, Rect};
-use tui::terminal::Frame;
-use tui::text::Spans;
 
 use crate::args::{parse_args, Args};
 use crate::container::{Container, CONTAINERS_MAX, CONTAINER_BUFFER, CONTAINER_COLORS};
@@ -157,7 +157,7 @@ impl<'a> App<'a> {
     }
 
     pub fn add_input_as_container(&mut self) {
-        self.add_container(&self.input.input.clone());
+        self.add_container(&self.input.inner_clone());
         self.input.reset();
     }
 
@@ -255,7 +255,7 @@ impl<'a> App<'a> {
             .constraints(constr.as_ref())
             .split(size);
 
-        ret
+        ret.to_vec()
     }
 
     fn render_containers<B: Backend>(&mut self, frame: &mut Frame<'_, B>) {
@@ -365,7 +365,25 @@ mod tests {
     use super::*;
     #[test]
     fn test_new() {
-        let app = App::new(None);
-        assert_eq!(app.state.running, false);
+        let mut app = App::new(None);
+
+        // Running
+        assert_eq!(app.is_running(), false);
+        app.init();
+        assert_eq!(app.is_running(), true);
+        app.stop();
+        assert_eq!(app.is_running(), false);
+
+        // Direction
+        assert_eq!(app.state.direction, Direction::Vertical);
+        app.flip_direction();
+        assert_eq!(app.state.direction, Direction::Horizontal);
+
+        // Containers
+        assert_eq!(app.containers.len(), 0);
+        app.add_container("text");
+        assert_eq!(app.containers.len(), 1);
+        app.add_container("text2");
+        assert_eq!(app.containers.len(), 2);
     }
 }

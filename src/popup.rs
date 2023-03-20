@@ -1,9 +1,9 @@
-use tui::backend::Backend;
-use tui::layout::{Constraint, Direction, Layout, Rect};
-use tui::terminal::Frame;
-use tui::text::Spans;
-use tui::widgets::Clear;
-use tui::widgets::{Block, Borders, Paragraph};
+use ratatui::backend::Backend;
+use ratatui::layout::{Constraint, Direction, Layout, Rect};
+use ratatui::terminal::Frame;
+use ratatui::text::Spans;
+use ratatui::widgets::Clear;
+use ratatui::widgets::{Block, Borders, Paragraph};
 
 pub fn render_popup<B: Backend>(
     frame: &mut Frame<'_, B>,
@@ -50,7 +50,7 @@ pub fn centered_rect(percent_x: u16, percent_y: u16, r: Rect) -> Rect {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use tui::{
+    use ratatui::{
         backend::TestBackend, buffer::Buffer, layout::Rect, style::Style, text::Span, Terminal,
     };
 

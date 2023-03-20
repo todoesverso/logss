@@ -4,9 +4,9 @@ use logss::args::parse_args;
 use logss::event::{Event, EventHandler};
 use logss::handler::handle_key_events;
 use logss::tui::Tui;
+use ratatui::backend::CrosstermBackend;
+use ratatui::Terminal;
 use std::io;
-use tui::backend::CrosstermBackend;
-use tui::Terminal;
 
 fn main() -> AppResult<()> {
     if std::io::stdin().is_terminal() {
