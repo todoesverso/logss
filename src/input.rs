@@ -47,7 +47,7 @@ impl Input {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use tui::{backend::TestBackend, buffer::Buffer, Terminal};
+    use ratatui::{backend::TestBackend, buffer::Buffer, Terminal};
 
     #[test]
     fn simple_full_test() {

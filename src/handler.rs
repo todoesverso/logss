@@ -69,7 +69,7 @@ fn view_helper(app: &mut App, id: u8, key_event: KeyEvent) {
 mod tests {
     use super::*;
     use crate::states::Views;
-    use tui::layout::Direction;
+    use ratatui::layout::Direction;
 
     #[test]
     fn stop() {
