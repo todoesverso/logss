@@ -66,7 +66,7 @@ jobs:
           args: -- -D warnings
 
   coverage:
-    name: Rust project
+    name: Coverage
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -81,16 +81,16 @@ jobs:
       - name: Run cargo-tarpaulin
         uses: actions-rs/tarpaulin@v0.1
         with:
-          version: '0.25.1'
+          version: '0.1.0'
           args: '-- --test-threads 1'
 
       - name: Upload to codecov.io
-        uses: codecov/codecov-action@v1.0.2
+        uses: codecov/codecov-action@v3.1.1
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
 
       - name: Archive code coverage results
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v3.1.2
         with:
           name: code-coverage-report
           path: cobertura.xml
