@@ -65,12 +65,12 @@ jobs:
           command: clippy
           args: -- -D warnings
 
-  check:
+  coverage:
     name: Rust project
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Install stable toolchain
         uses: actions-rs/toolchain@v1
@@ -87,7 +87,7 @@ jobs:
       - name: Upload to codecov.io
         uses: codecov/codecov-action@v1.0.2
         with:
-          token: ${{secrets.CODECOV_TOKEN}}
+          token: ${{ secrets.CODECOV_TOKEN }}
 
       - name: Archive code coverage results
         uses: actions/upload-artifact@v1
