@@ -5,7 +5,7 @@ use std::thread;
 #[derive(Debug)]
 pub struct StdinHandler {
     receiver: mpsc::Receiver<String>,
-    sender: mpsc::Sender<String>,
+    pub sender: mpsc::Sender<String>,
 }
 
 impl Default for StdinHandler {
@@ -34,7 +34,7 @@ impl StdinHandler {
                             sender.send(line).ok();
                         }
                     }
-                    Err(_) => todo!(),
+                    Err(_) => panic!("BUG!, please report it"),
                 }
             }
         });

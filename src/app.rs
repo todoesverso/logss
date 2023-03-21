@@ -363,6 +363,7 @@ impl<'a> App<'a> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
     #[test]
     fn test_new() {
         let mut app = App::new(None);
@@ -384,6 +385,11 @@ mod tests {
         app.add_container("text");
         assert_eq!(app.containers.len(), 1);
         app.add_container("text2");
+        assert_eq!(app.containers.len(), 2);
+
+        let mut args = parse_args();
+        args.containers = vec!["a".to_string(), "b".to_string()];
+        let app = App::new(Some(args));
         assert_eq!(app.containers.len(), 2);
     }
 
@@ -429,5 +435,40 @@ mod tests {
         app.zoom_into(1);
         assert_eq!(app.state.zoom_id, None);
         assert_eq!(app.state.show, Views::Containers);
+    }
+
+    #[test]
+    fn get_stdin() {
+        let mut app = App::new(None);
+        app.add_container("a");
+        let c = app.containers.get("a").unwrap();
+        assert_eq!(c.cb.is_empty(), true);
+        assert_eq!(app.raw_buffer.cb.is_empty(), true);
+        assert_eq!(app.raw_buffer.cb.len(), 0);
+        app.init();
+        app.stdin.sender.send("abc".to_string()).unwrap();
+        app.tick();
+
+        app.stdin.sender.send("def".to_string()).unwrap();
+        app.tick();
+
+        let c = app.containers.get("a").unwrap();
+        assert_eq!(c.cb.is_empty(), false);
+        assert_eq!(c.cb.len(), 1);
+        assert_eq!(app.raw_buffer.cb.is_empty(), false);
+        assert_eq!(app.raw_buffer.cb.len(), 2);
+    }
+
+    #[test]
+    fn get_layout_blocks() {
+        let mut app = App::new(None);
+        app.add_container("a");
+        let rect = Rect::new(0, 0, 10, 10);
+        let lb = app.get_layout_blocks(rect);
+        assert_eq!(lb, vec![rect]);
+        app.add_container("b");
+        let lb = app.get_layout_blocks(rect);
+        let expected_blocks = vec![Rect::new(0, 0, 10, 5), Rect::new(0, 5, 10, 5)];
+        assert_eq!(lb, expected_blocks);
     }
 }
