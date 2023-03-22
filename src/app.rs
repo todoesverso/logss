@@ -125,10 +125,6 @@ impl<'a> App<'a> {
         self.state.scroll_down = 0;
     }
 
-    pub fn set_direction(&mut self, direction: Direction) {
-        self.state.direction = direction;
-    }
-
     pub fn flip_direction(&mut self) {
         if self.state.direction == Direction::Vertical {
             self.state.direction = Direction::Horizontal;
@@ -261,21 +257,21 @@ impl<'a> App<'a> {
     fn render_containers<B: Backend>(&mut self, frame: &mut Frame<'_, B>) {
         let blocks = self.get_layout_blocks(frame.size());
         // TODO: Review this logic
-        for (i, (_, container)) in self.containers.iter().enumerate() {
-            container.render(frame, blocks[i]);
+        for (_, container) in self.containers.iter() {
+            container.render(frame, blocks[container.id as usize - 1]);
         }
     }
 
-    fn update_containers<B: Backend>(&mut self, frame: &mut Frame<'_, B>) {
-        let blocks = self.get_layout_blocks(frame.size());
+    fn update_containers(&mut self, frame_rect: Rect) {
+        let blocks = self.get_layout_blocks(frame_rect);
         let mut area;
         // General containers
-        for (i, (_, container)) in self.containers.iter_mut().enumerate() {
+        for (_, container) in self.containers.iter_mut() {
             container.state.wrap = self.state.wrap;
             if self.state.show == Views::Zoom {
-                area = frame.size().height;
+                area = frame_rect.height;
             } else {
-                area = blocks[i].height;
+                area = blocks[container.id as usize - 1].height;
             }
             container.state.paused = self.state.paused;
             container.state.wrap = self.state.wrap;
@@ -290,7 +286,7 @@ impl<'a> App<'a> {
         container.state.paused = self.state.paused;
 
         container.update_scroll(
-            frame.size().height as usize,
+            frame_rect.height as usize,
             &mut self.state.scroll_up,
             &mut self.state.scroll_down,
         );
@@ -329,7 +325,7 @@ impl<'a> App<'a> {
 
     /// Renders the user interface widgets.
     pub fn render<B: Backend>(&mut self, frame: &mut Frame<'_, B>) {
-        self.update_containers(frame);
+        self.update_containers(frame.size());
         match self.state.show {
             Views::Containers => {
                 self.render_containers(frame);
@@ -363,6 +359,7 @@ impl<'a> App<'a> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use ratatui::{backend::TestBackend, buffer::Buffer, style::Color, Terminal};
 
     #[test]
     fn test_new() {
@@ -470,5 +467,84 @@ mod tests {
         let lb = app.get_layout_blocks(rect);
         let expected_blocks = vec![Rect::new(0, 0, 10, 5), Rect::new(0, 5, 10, 5)];
         assert_eq!(lb, expected_blocks);
+    }
+
+    #[test]
+    fn render_containers() {
+        let mut app = App::new(None);
+        app.add_container("a");
+        app.add_container("b");
+        for (_, c) in app.containers.iter_mut() {
+            c.state.color = Color::White;
+        }
+        let backend = TestBackend::new(14, 14);
+        let mut terminal = Terminal::new(backend).unwrap();
+        terminal
+            .draw(|f| {
+                app.render_containers(f);
+            })
+            .unwrap();
+        let mut expected = Buffer::with_lines(vec![
+            "┌(1) - a─────┐",
+            "│            │",
+            "│            │",
+            "│            │",
+            "│            │",
+            "│            │",
+            "└────────────┘",
+            "┌(2) - b─────┐",
+            "│            │",
+            "│            │",
+            "│            │",
+            "│            │",
+            "│            │",
+            "└────────────┘",
+        ]);
+        for x in 0..=13 {
+            for y in 0..=13 {
+                expected.get_mut(x, y).set_fg(Color::White);
+                expected.get_mut(x, y).set_bg(Color::Black);
+            }
+        }
+        terminal.backend().assert_buffer(&expected);
+    }
+
+    #[test]
+    fn update_containers() {
+        let mut app = App::new(None);
+        let rect = Rect::new(0, 0, 10, 10);
+        app.add_container("a");
+        app.add_container("b");
+
+        for (_, c) in app.containers.iter() {
+            assert_eq!(c.state.paused, false);
+            assert_eq!(c.state.wrap, false);
+            assert_eq!(c.state.scroll, 0);
+        }
+
+        app.init();
+        for _ in 0..=128 {
+            app.stdin.sender.send("abc".to_string()).unwrap();
+            app.tick();
+        }
+
+        // Change the app state
+        app.state.paused = true;
+        app.state.wrap = true;
+        app.state.scroll_up = 0;
+        app.state.scroll_down = 10;
+        app.update_containers(rect);
+
+        for (_, c) in app.containers.iter() {
+            assert_eq!(c.state.paused, app.state.paused);
+            assert_eq!(c.state.wrap, app.state.wrap);
+            assert_eq!(c.state.scroll, 49);
+        }
+        app.state.scroll_up = 5;
+        app.update_containers(rect);
+
+        for (_, c) in app.containers.iter() {
+            assert_eq!(c.state.scroll, 54);
+        }
     }
 }

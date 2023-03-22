@@ -53,3 +53,21 @@ pub fn render_help<B: Backend>(frame: &mut Frame<'_, B>) {
     ];
     render_popup(frame, "Help", help_text, (50, 50));
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use ratatui::{backend::TestBackend, Terminal};
+
+    #[test]
+    fn test_render_help() {
+        let backend = TestBackend::new(40, 40);
+        let mut terminal = Terminal::new(backend).unwrap();
+        let res = terminal
+            .draw(|f| {
+                render_help(f);
+            })
+            .is_ok();
+        assert_eq!(res, true);
+    }
+}
