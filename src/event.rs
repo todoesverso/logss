@@ -88,4 +88,10 @@ mod tests {
         event.sender.send(Event::Key(key)).unwrap();
         assert_eq!(event.next().unwrap(), Event::Key(key));
     }
+    #[test]
+    fn init() {
+        // just call it and expect not to panic
+        let event = EventHandler::new(1);
+        event.init();
+    }
 }
