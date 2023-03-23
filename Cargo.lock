@@ -102,19 +102,20 @@ checksum = "fed44880c466736ef9a5c5b5facefb5ed0785676d0c02d612db14e54f0d84286"
 
 [[package]]
 name = "io-lifetimes"
-version = "1.0.6"
+version = "1.0.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cfa919a82ea574332e2de6e74b4c36e74d41982b335080fa59d4ef31be20fdf3"
+checksum = "09270fd4fa1111bc614ed2246c7ef56239a3063d5be0d1ec3b589c505d400aeb"
 dependencies = [
+ "hermit-abi",
  "libc",
  "windows-sys",
 ]
 
 [[package]]
 name = "is-terminal"
-version = "0.4.4"
+version = "0.4.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "21b6b32576413a8e69b90e952e4a026476040d81017b80445deda5f2d3921857"
+checksum = "8687c819457e979cc940d09cb16e42a1bf70aa6b60a549de6d3a62a0ee90c69e"
 dependencies = [
  "hermit-abi",
  "io-lifetimes",
@@ -208,9 +209,9 @@ checksum = "5be167a7af36ee22fe3115051bc51f6e6c7054c9348e28deb4f49bd6f705a315"
 
 [[package]]
 name = "ratatui"
-version = "0.20.0"
+version = "0.20.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d690717aac4aca6e901da642fafcceff63ded0ab4c65c18ceff39c9a27f21508"
+checksum = "dcc0d032bccba900ee32151ec0265667535c230169f5a011154cdcd984e16829"
 dependencies = [
  "bitflags",
  "cassowary",
@@ -230,9 +231,9 @@ dependencies = [
 
 [[package]]
 name = "rustix"
-version = "0.36.9"
+version = "0.36.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fd5c6ff11fecd55b40746d1995a02f2eb375bf8c00d192d521ee09f42bef37bc"
+checksum = "db4165c9963ab29e422d6c26fbc1d37f15bace6b2810221f9d925023480fcf0e"
 dependencies = [
  "bitflags",
  "errno",
