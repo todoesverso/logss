@@ -359,7 +359,9 @@ impl<'a> App<'a> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use ratatui::{backend::TestBackend, buffer::Buffer, style::Color, Terminal};
+    use ratatui::{
+        backend::TestBackend, buffer::Buffer, style::Color, style::Modifier, style::Style, Terminal,
+    };
 
     #[test]
     fn test_new() {
@@ -500,8 +502,14 @@ mod tests {
             "│            │",
             "└────────────┘",
         ]);
+        let bolds = [1, 2, 3, 4, 5, 6, 7];
         for x in 0..=13 {
             for y in 0..=13 {
+                if bolds.contains(&x) && (y == 0 || y == 7) {
+                    expected
+                        .get_mut(x, y)
+                        .set_style(Style::default().add_modifier(Modifier::BOLD));
+                }
                 expected.get_mut(x, y).set_fg(Color::White);
                 expected.get_mut(x, y).set_bg(Color::Black);
             }

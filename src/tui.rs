@@ -60,7 +60,12 @@ impl<B: Backend> Tui<B> {
 mod tests {
     use super::*;
     use crate::args::parse_args;
-    use ratatui::{backend::TestBackend, buffer::Buffer, style::Color, Terminal};
+    use ratatui::{
+        backend::TestBackend,
+        buffer::Buffer,
+        style::{Color, Modifier, Style},
+        Terminal,
+    };
 
     #[test]
     fn new() {
@@ -85,8 +90,14 @@ mod tests {
             "│        │",
             "└────────┘",
         ]);
+        let bolds = [1, 2, 3, 4, 5, 6, 7];
         for x in 0..=9 {
             for y in 0..=9 {
+                if bolds.contains(&x) && y == 0 {
+                    expected
+                        .get_mut(x, y)
+                        .set_style(Style::default().add_modifier(Modifier::BOLD));
+                }
                 expected.get_mut(x, y).set_fg(Color::White);
                 expected.get_mut(x, y).set_bg(Color::Black);
             }
