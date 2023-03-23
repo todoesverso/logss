@@ -1,6 +1,6 @@
 [package]
 name = "logss"
-version = "1.0.0-alpha"
+version = "1.1.0-alpha"
 authors = ["Victor Rosales <todoesverso@gmail.com>"]
 edition = "2018"
 publish = false
@@ -13,9 +13,8 @@ license = "MIT"
 crossterm = "0.25.0"
 is-terminal = "0.4.2"
 unicode-width = "0.1.10"
-use = "0.0.0"
 pico-args = "0.5.0"
-ratatui = "0.20.0"
+ratatui = "0.20.1"
 
 [profile.release]
 codegen-units = 1
