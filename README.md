@@ -13,6 +13,9 @@
 <p align="center">
   <img src="https://github.com/todoesverso/logss/actions/workflows/quickstartrs.yml/badge.svg">
   <img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square">
+  <a href="https://codecov.io/gh/todoesverso/logss" >
+    <img src="https://codecov.io/gh/todoesverso/logss/branch/main/graph/badge.svg?token=G6JEXYQQO0"/>
+  </a>
 </p>
 
 <p align="center">
