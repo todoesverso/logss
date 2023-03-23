@@ -76,7 +76,7 @@ mod tests {
         app.raw_buffer.state.color = Color::White;
 
         let mut tui = Tui::new(terminal, events);
-        tui.init().unwrap();
+        //tui.init().unwrap(); // This fails in github tests
         tui.draw(&mut app).unwrap();
         let mut expected = Buffer::with_lines(vec![
             "┌(0) - *─┐",
