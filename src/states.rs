@@ -1,5 +1,5 @@
-use tui::layout::Direction;
-use tui::style::{Color, Style};
+use ratatui::layout::Direction;
+use ratatui::style::{Color, Style};
 
 #[derive(Debug, Eq, PartialEq)]
 pub enum Views {
@@ -9,7 +9,7 @@ pub enum Views {
     Remove,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Eq, PartialEq)]
 pub struct AppState {
     pub running: bool,
     pub paused: bool,
@@ -40,7 +40,7 @@ impl Default for AppState {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct ContainerState {
     pub paused: bool,
     pub wrap: bool,
@@ -58,5 +58,35 @@ impl Default for ContainerState {
             color: Color::Red,
             style: Style::default().fg(Color::White).bg(Color::Black),
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn init_container_state() {
+        let cs = ContainerState::default();
+        assert_eq!(cs.paused, false);
+        assert_eq!(cs.wrap, false);
+        assert_eq!(cs.scroll, 0);
+        assert_eq!(cs.color, Color::Red);
+        assert_eq!(cs.style, Style::default().fg(Color::White).bg(Color::Black));
+    }
+
+    #[test]
+    fn test_app_state() {
+        let appstate = AppState::default();
+        assert_eq!(appstate.wrap, false);
+        assert_eq!(appstate.paused, false);
+        assert_eq!(appstate.running, false);
+        assert_eq!(appstate.show, Views::Containers);
+        assert_eq!(appstate.direction, Direction::Vertical);
+        assert_eq!(appstate.help, false);
+        assert_eq!(appstate.show_input, false);
+        assert_eq!(appstate.zoom_id, None);
+        assert_eq!(appstate.scroll_up, 0);
+        assert_eq!(appstate.scroll_down, 0);
     }
 }

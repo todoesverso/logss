@@ -2,9 +2,9 @@ use crate::app::{App, AppResult};
 use crate::event::EventHandler;
 use crossterm::event::{DisableMouseCapture, EnableMouseCapture};
 use crossterm::terminal::{self, EnterAlternateScreen, LeaveAlternateScreen};
+use ratatui::backend::Backend;
+use ratatui::Terminal;
 use std::io;
-use tui::backend::Backend;
-use tui::Terminal;
 
 /// Representation of a terminal user interface.
 ///
@@ -32,6 +32,7 @@ impl<B: Backend> Tui<B> {
         crossterm::execute!(io::stderr(), EnterAlternateScreen, EnableMouseCapture)?;
         self.terminal.hide_cursor()?;
         self.terminal.clear()?;
+        self.events.init();
         Ok(())
     }
 
@@ -52,5 +53,57 @@ impl<B: Backend> Tui<B> {
         crossterm::execute!(io::stderr(), LeaveAlternateScreen, DisableMouseCapture)?;
         self.terminal.show_cursor()?;
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::args::parse_args;
+    use ratatui::{
+        backend::TestBackend,
+        buffer::Buffer,
+        style::{Color, Modifier, Style},
+        Terminal,
+    };
+
+    #[test]
+    fn new() {
+        let backend = TestBackend::new(10, 10);
+        let terminal = Terminal::new(backend).unwrap();
+        let events = EventHandler::new(1);
+        let mut app = App::new(Some(parse_args()));
+        app.raw_buffer.state.color = Color::White;
+
+        let mut tui = Tui::new(terminal, events);
+        //tui.init().unwrap(); // This fails in github tests
+        tui.draw(&mut app).unwrap();
+        let mut expected = Buffer::with_lines(vec![
+            "┌(0) - *─┐",
+            "│        │",
+            "│        │",
+            "│        │",
+            "│        │",
+            "│        │",
+            "│        │",
+            "│        │",
+            "│        │",
+            "└────────┘",
+        ]);
+        let bolds = [1, 2, 3, 4, 5, 6, 7];
+        for x in 0..=9 {
+            for y in 0..=9 {
+                if bolds.contains(&x) && y == 0 {
+                    expected
+                        .get_mut(x, y)
+                        .set_style(Style::default().add_modifier(Modifier::BOLD));
+                }
+                expected.get_mut(x, y).set_fg(Color::White);
+                expected.get_mut(x, y).set_bg(Color::Black);
+            }
+        }
+
+        tui.terminal.backend().assert_buffer(&expected);
+        tui.exit().unwrap();
     }
 }

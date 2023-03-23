@@ -1,8 +1,8 @@
 use crate::popup::render_popup;
-use tui::backend::Backend;
-use tui::style::{Color, Style};
-use tui::terminal::Frame;
-use tui::text::{Span, Spans};
+use ratatui::backend::Backend;
+use ratatui::style::{Color, Style};
+use ratatui::terminal::Frame;
+use ratatui::text::{Span, Spans};
 
 pub fn render_help<B: Backend>(frame: &mut Frame<'_, B>) {
     let help_text = vec![
@@ -19,7 +19,7 @@ pub fn render_help<B: Backend>(frame: &mut Frame<'_, B>) {
             Style::default().bg(Color::Blue),
         )),
         Spans::from(Span::styled(
-            "p       - toggles scrolling",
+            "p|Space - toggles scrolling",
             Style::default().bg(Color::Blue),
         )),
         Spans::from(Span::styled(
@@ -52,4 +52,22 @@ pub fn render_help<B: Backend>(frame: &mut Frame<'_, B>) {
         )),
     ];
     render_popup(frame, "Help", help_text, (50, 50));
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use ratatui::{backend::TestBackend, Terminal};
+
+    #[test]
+    fn test_render_help() {
+        let backend = TestBackend::new(40, 40);
+        let mut terminal = Terminal::new(backend).unwrap();
+        let res = terminal
+            .draw(|f| {
+                render_help(f);
+            })
+            .is_ok();
+        assert_eq!(res, true);
+    }
 }

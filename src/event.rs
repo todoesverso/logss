@@ -5,7 +5,7 @@ use std::thread;
 use std::time::{Duration, Instant};
 
 /// Terminal events.
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Event {
     /// Terminal tick.
     Tick,
@@ -22,15 +22,25 @@ pub enum Event {
 pub struct EventHandler {
     /// Event receiver channel.
     receiver: mpsc::Receiver<Event>,
+    sender: mpsc::Sender<Event>,
+    tick_rate: u64,
 }
 
 impl EventHandler {
     /// Constructs a new instance of [`EventHandler`].
     pub fn new(tick_rate: u64) -> Self {
-        let tick_rate = Duration::from_millis(tick_rate);
         let (sender, receiver) = mpsc::channel();
 
-        let sender = sender;
+        Self {
+            receiver,
+            sender,
+            tick_rate,
+        }
+    }
+
+    pub fn init(&self) {
+        let tick_rate = Duration::from_millis(self.tick_rate);
+        let sender = self.sender.clone();
         thread::spawn(move || {
             let mut last_tick = Instant::now();
             loop {
@@ -54,8 +64,6 @@ impl EventHandler {
                 }
             }
         });
-
-        Self { receiver }
     }
 
     /// Receive the next event from the handler thread.
@@ -64,5 +72,26 @@ impl EventHandler {
     /// there is no data available and it's possible for more data to be sent.
     pub fn next(&self) -> AppResult<Event> {
         Ok(self.receiver.recv()?)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
+    #[test]
+    fn new() {
+        let event = EventHandler::new(1);
+        event.sender.send(Event::Tick).unwrap();
+        assert_eq!(event.next().unwrap(), Event::Tick);
+        let key = KeyEvent::new(KeyCode::Char('1'), KeyModifiers::NONE);
+        event.sender.send(Event::Key(key)).unwrap();
+        assert_eq!(event.next().unwrap(), Event::Key(key));
+    }
+    #[test]
+    fn init() {
+        // just call it and expect not to panic
+        let event = EventHandler::new(1);
+        event.init();
     }
 }

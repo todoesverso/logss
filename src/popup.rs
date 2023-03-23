@@ -1,9 +1,9 @@
-use tui::backend::Backend;
-use tui::layout::{Constraint, Direction, Layout, Rect};
-use tui::terminal::Frame;
-use tui::text::Spans;
-use tui::widgets::Clear;
-use tui::widgets::{Block, Borders, Paragraph};
+use ratatui::backend::Backend;
+use ratatui::layout::{Constraint, Direction, Layout, Rect};
+use ratatui::terminal::Frame;
+use ratatui::text::Spans;
+use ratatui::widgets::Clear;
+use ratatui::widgets::{Block, Borders, Paragraph};
 
 pub fn render_popup<B: Backend>(
     frame: &mut Frame<'_, B>,
@@ -45,4 +45,49 @@ pub fn centered_rect(percent_x: u16, percent_y: u16, r: Rect) -> Rect {
             .as_ref(),
         )
         .split(popup_layout[1])[1]
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use ratatui::{
+        backend::TestBackend, buffer::Buffer, layout::Rect, style::Style, text::Span, Terminal,
+    };
+
+    #[test]
+    fn test_centered_rect() {
+        let rect = Rect::new(0, 0, 100, 100);
+        let new_rect = centered_rect(50, 50, rect);
+        let expected_rect = Rect::new(25, 25, 50, 50);
+        assert_eq!(new_rect, expected_rect);
+    }
+
+    #[test]
+    fn test_render_popup() {
+        let backend = TestBackend::new(14, 14);
+        let mut terminal = Terminal::new(backend).unwrap();
+        let text = vec![Spans::from(Span::styled("text", Style::default()))];
+        terminal
+            .draw(|f| {
+                render_popup(f, "coso", text, (50, 50));
+            })
+            .unwrap();
+        let expected = Buffer::with_lines(vec![
+            "              ",
+            "              ",
+            "              ",
+            "   ┌coso─┐    ",
+            "   │text │    ",
+            "   │     │    ",
+            "   │     │    ",
+            "   │     │    ",
+            "   │     │    ",
+            "   └─────┘    ",
+            "              ",
+            "              ",
+            "              ",
+            "              ",
+        ]);
+        terminal.backend().assert_buffer(&expected);
+    }
 }

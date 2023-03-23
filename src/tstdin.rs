@@ -5,6 +5,7 @@ use std::thread;
 #[derive(Debug)]
 pub struct StdinHandler {
     receiver: mpsc::Receiver<String>,
+    pub sender: mpsc::Sender<String>,
 }
 
 impl Default for StdinHandler {
@@ -16,7 +17,11 @@ impl Default for StdinHandler {
 impl StdinHandler {
     pub fn new() -> Self {
         let (sender, receiver) = mpsc::channel();
-        let sender = sender;
+        Self { receiver, sender }
+    }
+
+    pub fn init(&self) {
+        let sender = self.sender.clone();
         thread::spawn(move || {
             let stdin = stdin();
             loop {
@@ -29,11 +34,10 @@ impl StdinHandler {
                             sender.send(line).ok();
                         }
                     }
-                    Err(_) => todo!(),
+                    Err(_) => panic!("BUG!, please report it"),
                 }
             }
         });
-        Self { receiver }
     }
 
     pub fn recv(&self) -> Result<String, mpsc::RecvError> {
