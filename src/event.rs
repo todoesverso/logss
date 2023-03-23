@@ -5,7 +5,7 @@ use std::thread;
 use std::time::{Duration, Instant};
 
 /// Terminal events.
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Event {
     /// Terminal tick.
     Tick,
@@ -72,5 +72,20 @@ impl EventHandler {
     /// there is no data available and it's possible for more data to be sent.
     pub fn next(&self) -> AppResult<Event> {
         Ok(self.receiver.recv()?)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
+    #[test]
+    fn new() {
+        let event = EventHandler::new(1);
+        event.sender.send(Event::Tick).unwrap();
+        assert_eq!(event.next().unwrap(), Event::Tick);
+        let key = KeyEvent::new(KeyCode::Char('1'), KeyModifiers::NONE);
+        event.sender.send(Event::Key(key)).unwrap();
+        assert_eq!(event.next().unwrap(), Event::Key(key));
     }
 }

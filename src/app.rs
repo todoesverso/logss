@@ -26,7 +26,7 @@ pub struct App<'a> {
     pub state: AppState,
     pub input: Input,
     stdin: StdinHandler,
-    raw_buffer: Container<'a>,
+    pub raw_buffer: Container<'a>,
     args: Args,
 }
 

@@ -55,3 +55,44 @@ impl<B: Backend> Tui<B> {
         Ok(())
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::args::parse_args;
+    use ratatui::{backend::TestBackend, buffer::Buffer, style::Color, Terminal};
+
+    #[test]
+    fn new() {
+        let backend = TestBackend::new(10, 10);
+        let terminal = Terminal::new(backend).unwrap();
+        let events = EventHandler::new(1);
+        let mut app = App::new(Some(parse_args()));
+        app.raw_buffer.state.color = Color::White;
+
+        let mut tui = Tui::new(terminal, events);
+        tui.init().unwrap();
+        tui.draw(&mut app).unwrap();
+        let mut expected = Buffer::with_lines(vec![
+            "┌(0) - *─┐",
+            "│        │",
+            "│        │",
+            "│        │",
+            "│        │",
+            "│        │",
+            "│        │",
+            "│        │",
+            "│        │",
+            "└────────┘",
+        ]);
+        for x in 0..=9 {
+            for y in 0..=9 {
+                expected.get_mut(x, y).set_fg(Color::White);
+                expected.get_mut(x, y).set_bg(Color::Black);
+            }
+        }
+
+        tui.terminal.backend().assert_buffer(&expected);
+        tui.exit().unwrap();
+    }
+}
