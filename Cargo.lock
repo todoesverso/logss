@@ -156,14 +156,13 @@ dependencies = [
 
 [[package]]
 name = "logss"
-version = "1.0.0-alpha"
+version = "1.1.0-alpha"
 dependencies = [
  "crossterm 0.25.0",
  "is-terminal",
  "pico-args",
  "ratatui",
  "unicode-width",
- "use",
 ]
 
 [[package]]
@@ -296,12 +295,6 @@ name = "unicode-width"
 version = "0.1.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c0edd1e5b14653f783770bce4a4dabb4a5108a5370a5f5d8cfe8710c361f6c8b"
-
-[[package]]
-name = "use"
-version = "0.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "89452352a9cec4cf2d44c40f96d3696e09866e922b1fa28bccfe77b803055e66"
 
 [[package]]
 name = "wasi"

@@ -15,7 +15,7 @@ pub fn render_help<B: Backend>(frame: &mut Frame<'_, B>) {
             Style::default().bg(Color::Blue),
         )),
         Spans::from(Span::styled(
-            "i       - input new container (Enter/Esc)",
+            "i|/     - input new container (Enter/Esc)",
             Style::default().bg(Color::Blue),
         )),
         Spans::from(Span::styled(
