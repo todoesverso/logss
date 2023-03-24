@@ -221,10 +221,9 @@ impl<'a> App<'a> {
                     }
                 }
             }
-            Err(TryRecvError::Disconnected) => {
+            Err(TryRecvError::Disconnected) | Err(TryRecvError::Empty) => {
                 self.stop();
             }
-            _ => {}
         }
     }
 
@@ -256,30 +255,44 @@ impl<'a> App<'a> {
 
     fn render_containers<B: Backend>(&mut self, frame: &mut Frame<'_, B>) {
         let blocks = self.get_layout_blocks(frame.size());
-        // TODO: Review this logic
-        for (_, container) in self.containers.iter() {
-            container.render(frame, blocks[container.id as usize - 1]);
+        let used_ids = self.get_used_id();
+
+        for (i, id) in used_ids.into_iter().enumerate() {
+            let container_key = self.get_container_key_by_id(id).unwrap();
+            let container = self.containers.get(&container_key.clone()).unwrap();
+            container.render(frame, blocks[i]);
         }
+    }
+
+    fn get_used_id(&self) -> Vec<u8> {
+        let mut used_ids: Vec<u8> = self.containers.iter().map(|c| c.1.id).collect();
+        used_ids.sort();
+        used_ids
     }
 
     fn update_containers(&mut self, frame_rect: Rect) {
         let blocks = self.get_layout_blocks(frame_rect);
         let mut area;
+
+        let used_ids = self.get_used_id();
         // General containers
-        for (_, container) in self.containers.iter_mut() {
-            container.state.wrap = self.state.wrap;
-            if self.state.show == Views::Zoom {
-                area = frame_rect.height;
-            } else {
-                area = blocks[container.id as usize - 1].height;
+        for (i, id) in used_ids.into_iter().enumerate() {
+            if let Some(container_key) = self.get_container_key_by_id(id) {
+                let mut container = self.containers.get_mut(&container_key.clone()).unwrap();
+                container.state.wrap = self.state.wrap;
+                if self.state.show == Views::Zoom {
+                    area = frame_rect.height;
+                } else {
+                    area = blocks[i].height;
+                }
+                container.state.paused = self.state.paused;
+                container.state.wrap = self.state.wrap;
+                container.update_scroll(
+                    area as usize,
+                    &mut self.state.scroll_up,
+                    &mut self.state.scroll_down,
+                );
             }
-            container.state.paused = self.state.paused;
-            container.state.wrap = self.state.wrap;
-            container.update_scroll(
-                area as usize,
-                &mut self.state.scroll_up,
-                &mut self.state.scroll_down,
-            );
         }
         // Raw buffer
         let mut container = &mut self.raw_buffer;
@@ -290,6 +303,15 @@ impl<'a> App<'a> {
             &mut self.state.scroll_up,
             &mut self.state.scroll_down,
         );
+    }
+
+    fn get_container_key_by_id(&self, id: u8) -> Option<&String> {
+        for (key, container) in self.containers.iter() {
+            if container.id == id {
+                return Some(key);
+            }
+        }
+        None
     }
 
     fn render_raw<B: Backend>(&mut self, frame: &mut Frame<'_, B>) {
@@ -319,7 +341,7 @@ impl<'a> App<'a> {
 
     fn render_input<B: Backend>(&self, frame: &mut Frame<'_, B>) {
         if self.state.show_input {
-            self.input.render(frame, frame.size());
+            self.input.render(frame);
         }
     }
 

@@ -1,11 +1,10 @@
 use ratatui::backend::Backend;
-use ratatui::layout::Rect;
 use ratatui::style::Style;
 use ratatui::terminal::Frame;
 use ratatui::text::{Span, Spans};
 use unicode_width::UnicodeWidthStr;
 
-use crate::popup::render_popup;
+use crate::popup::{centered_rect, render_popup};
 
 #[derive(Debug, Default)]
 pub struct Input {
@@ -18,8 +17,9 @@ impl Input {
         Input::default()
     }
 
-    pub fn render<B: Backend>(&self, frame: &mut Frame<'_, B>, area: Rect) {
+    pub fn render<B: Backend>(&self, frame: &mut Frame<'_, B>) {
         let pos = (40, 8);
+        let area = centered_rect(pos.0, pos.1, frame.size());
         let text = vec![Spans::from(Span::styled(
             self.input.clone(),
             Style::default(),
@@ -71,7 +71,7 @@ mod tests {
         input.push('b');
         let backend = TestBackend::new(20, 38);
         let mut terminal = Terminal::new(backend).unwrap();
-        terminal.draw(|f| input.render(f, f.size())).unwrap();
+        terminal.draw(|f| input.render(f)).unwrap();
         let expected = Buffer::with_lines(vec![
             "                    ",
             "                    ",
