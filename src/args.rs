@@ -1,4 +1,5 @@
 use pico_args;
+use regex::Regex;
 
 const HELP: &str = "\
 Simple cli command to show logs in a friendly way
@@ -43,6 +44,8 @@ fn parser() -> Result<Args, pico_args::Error> {
             .unwrap_or(100),
     };
 
+    validate_regex(&args.containers);
+
     // It's up to the caller what to do with the remaining arguments.
     let remaining = pargs.finish();
     if !remaining.is_empty() {
@@ -50,6 +53,15 @@ fn parser() -> Result<Args, pico_args::Error> {
     }
 
     Ok(args)
+}
+
+fn validate_regex(containers: &Vec<String>) {
+    for c in containers {
+        if Regex::new(c).is_err() {
+            eprintln!("Error: Failed to parse regexp '{c}'.");
+            std::process::exit(1);
+        }
+    }
 }
 
 fn render_in_range(s: &str) -> Result<u64, String> {

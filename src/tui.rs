@@ -79,7 +79,7 @@ mod tests {
         //tui.init().unwrap(); // This fails in github tests
         tui.draw(&mut app).unwrap();
         let mut expected = Buffer::with_lines(vec![
-            "┌(0) - *─┐",
+            "┌(0) - .*┐",
             "│        │",
             "│        │",
             "│        │",
@@ -90,7 +90,7 @@ mod tests {
             "│        │",
             "└────────┘",
         ]);
-        let bolds = [1, 2, 3, 4, 5, 6, 7];
+        let bolds = [1, 2, 3, 4, 5, 6, 7, 8];
         for x in 0..=9 {
             for y in 0..=9 {
                 if bolds.contains(&x) && y == 0 {
