@@ -7,7 +7,7 @@ Simple cli command to show logs in a friendly way
 Usage: logss [OPTIONS]
 
 Options:
-  -c <CONTAINERS>  Finds the substring
+  -c <CONTAINERS>  Finds the substring (regexp)
   -r <RENDER>      Defines render speed in milliseconds [default: 100]
   -h               Print help
 ";
