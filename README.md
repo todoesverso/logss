@@ -39,6 +39,7 @@
 * Dedicated container for raw stream
 * Toggle line wraping
 * Zoom into a specific container
+* Support for regexp
 
 
 ## Usage
@@ -50,12 +51,11 @@
   Usage: logss [OPTIONS]
 
   Options:
-    -c, --contains <CONTAINERS>  Finds the substring
+    -c, --contains <CONTAINERS>  Finds the substring (regexp)
     -r, --render <RENDER>        Defines render speed in milliseconds [default: 100]
     -h, --help                   Print help
-    -V, --version                Print version
   
-  $ cat shakespeare.txt | logss -c to -c be -c or
+  $ cat shakespeare.txt | logss -c to -c be -c or -c 'in.*of'
   ```
 
 ## Screenshots
@@ -100,7 +100,6 @@ This is a list of things I plan to do:
 * Refactoring (as I learn more Rust things)
 * Tests
 * Container hide/show
-* Accept regexp
 * Configuration file (to start with a predefined state)
 * Smart timestamp highlights
 * ... whatever I can think of when I am using it

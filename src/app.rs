@@ -36,7 +36,7 @@ impl<'a> Default for App<'a> {
             stdin: StdinHandler::new(),
             args: parse_args(),
             input: Input::default(),
-            raw_buffer: Container::new("*".to_string(), CONTAINER_BUFFER),
+            raw_buffer: Container::new(".*".to_string(), CONTAINER_BUFFER),
             containers: HashMap::new(),
             state: AppState::default(),
         }
@@ -211,13 +211,9 @@ impl<'a> App<'a> {
                 if !self.state.paused {
                     self.raw_buffer.cb.push(Spans::from(line.clone()));
                 }
-                let keys = self.containers.keys().cloned().collect::<Vec<String>>();
-                for key in keys {
-                    if line.contains(&key.to_string()) && !self.state.paused {
-                        self.containers
-                            .get_mut(&key)
-                            .unwrap()
-                            .proc_and_push_line(line.clone());
+                for (_, c) in self.containers.iter_mut() {
+                    if c.re.is_match(&line) && !self.state.paused {
+                        c.proc_and_push_line(line.clone());
                     }
                 }
             }

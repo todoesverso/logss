@@ -4,6 +4,7 @@ use ratatui::style::{Color, Modifier, Style};
 use ratatui::terminal::Frame;
 use ratatui::text::{Span, Spans};
 use ratatui::widgets::{Block, Borders, Paragraph, Wrap};
+use regex::Regex;
 
 use crate::cb::CircularBuffer;
 use crate::states::ContainerState;
@@ -12,6 +13,7 @@ use crate::states::ContainerState;
 pub struct Container<'a> {
     /// matching text
     text: String,
+    pub re: Regex,
     /// circular buffer with matching lines
     pub cb: CircularBuffer<Spans<'a>>,
     pub id: u8,
@@ -36,7 +38,8 @@ pub const CONTAINER_COLORS: [ratatui::style::Color; 10] = [
 impl<'a> Container<'a> {
     pub fn new(text: String, buffersize: usize) -> Self {
         Self {
-            text,
+            text: text.clone(),
+            re: Regex::new(&text).unwrap(),
             cb: CircularBuffer::new(buffersize),
             id: 0,
             state: ContainerState::default(),
@@ -45,15 +48,20 @@ impl<'a> Container<'a> {
 
     fn process_line(&self, line: String) -> Option<Spans<'a>> {
         // TODO: maybe add smart time coloration?
-        let contains_index = line.find(&self.text);
+        if let Some(mat) = self.re.find(&line) {
+            let start = mat.start();
+            let end = mat.end();
 
-        contains_index.map(|index| {
-            Spans(vec![
-                Span::from(line[0..index].to_string()),
-                Span::styled(self.text.clone(), Style::default().fg(self.state.color)),
-                Span::from(line[index + self.text.len()..].to_string()),
-            ])
-        })
+            return Some(Spans(vec![
+                Span::from(line[0..start].to_string()),
+                Span::styled(
+                    line[start..end].to_string(),
+                    Style::default().fg(self.state.color),
+                ),
+                Span::from(line[end..].to_string()),
+            ]));
+        }
+        None
     }
 
     pub fn push(&mut self, element: Spans<'a>) {
