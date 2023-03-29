@@ -340,9 +340,11 @@ impl<'a> App<'a> {
                     self.remove_id(id);
                     if self.containers.is_empty() {
                         self.state.show = Views::RawBuffer;
+                        self.render_raw(frame);
                     } else {
                         self.state.show = Views::Containers;
                         self.state.zoom_id = None;
+                        self.render_containers(frame);
                     }
                 }
             }
@@ -503,6 +505,137 @@ mod tests {
         for x in 0..=13 {
             for y in 0..=13 {
                 if bolds.contains(&x) && (y == 0 || y == 7) {
+                    expected
+                        .get_mut(x, y)
+                        .set_style(Style::default().add_modifier(Modifier::BOLD));
+                }
+                expected.get_mut(x, y).set_fg(Color::White);
+                expected.get_mut(x, y).set_bg(Color::Black);
+            }
+        }
+        terminal.backend().assert_buffer(&expected);
+    }
+
+    #[test]
+    fn render_id() {
+        let mut app = App::new(None);
+        app.add_container("a");
+        app.add_container("b");
+        for c in app.containers.iter_mut() {
+            c.state.color = Color::White;
+        }
+        app.zoom_into(1);
+        let backend = TestBackend::new(14, 14);
+        let mut terminal = Terminal::new(backend).unwrap();
+        terminal
+            .draw(|f| {
+                app.render(f);
+            })
+            .unwrap();
+        let mut expected = Buffer::with_lines(vec![
+            "┌(1) - a─────┐",
+            "│            │",
+            "│            │",
+            "│            │",
+            "│            │",
+            "│            │",
+            "│            │",
+            "│            │",
+            "│            │",
+            "│            │",
+            "│            │",
+            "│            │",
+            "│            │",
+            "└────────────┘",
+        ]);
+        let bolds = [1, 2, 3, 4, 5, 6, 7];
+        for x in 0..=13 {
+            for y in 0..=13 {
+                if bolds.contains(&x) && (y == 0) {
+                    expected
+                        .get_mut(x, y)
+                        .set_style(Style::default().add_modifier(Modifier::BOLD));
+                }
+                expected.get_mut(x, y).set_fg(Color::White);
+                expected.get_mut(x, y).set_bg(Color::Black);
+            }
+        }
+        terminal.backend().assert_buffer(&expected);
+        app.zoom_into(1);
+        app.zoom_into(2);
+        terminal
+            .draw(|f| {
+                app.render(f);
+            })
+            .unwrap();
+        let mut expected = Buffer::with_lines(vec![
+            "┌(2) - b─────┐",
+            "│            │",
+            "│            │",
+            "│            │",
+            "│            │",
+            "│            │",
+            "│            │",
+            "│            │",
+            "│            │",
+            "│            │",
+            "│            │",
+            "│            │",
+            "│            │",
+            "└────────────┘",
+        ]);
+        let bolds = [1, 2, 3, 4, 5, 6, 7];
+        for x in 0..=13 {
+            for y in 0..=13 {
+                if bolds.contains(&x) && (y == 0) {
+                    expected
+                        .get_mut(x, y)
+                        .set_style(Style::default().add_modifier(Modifier::BOLD));
+                }
+                expected.get_mut(x, y).set_fg(Color::White);
+                expected.get_mut(x, y).set_bg(Color::Black);
+            }
+        }
+        terminal.backend().assert_buffer(&expected);
+    }
+
+    #[test]
+    fn remove_view() {
+        let mut app = App::new(None);
+        app.add_container("a");
+        app.add_container("b");
+        for c in app.containers.iter_mut() {
+            c.state.color = Color::White;
+        }
+        app.flip_raw_view();
+        app.remove_view(1);
+        let backend = TestBackend::new(14, 14);
+        let mut terminal = Terminal::new(backend).unwrap();
+        terminal
+            .draw(|f| {
+                app.render(f);
+            })
+            .unwrap();
+        let mut expected = Buffer::with_lines(vec![
+            "┌(2) - b─────┐",
+            "│            │",
+            "│            │",
+            "│            │",
+            "│            │",
+            "│            │",
+            "│            │",
+            "│            │",
+            "│            │",
+            "│            │",
+            "│            │",
+            "│            │",
+            "│            │",
+            "└────────────┘",
+        ]);
+        let bolds = [1, 2, 3, 4, 5, 6, 7];
+        for x in 0..=13 {
+            for y in 0..=13 {
+                if bolds.contains(&x) && (y == 0) {
                     expected
                         .get_mut(x, y)
                         .set_style(Style::default().add_modifier(Modifier::BOLD));
