@@ -3,7 +3,6 @@ use ratatui::backend::Backend;
 use ratatui::layout::{Constraint, Direction, Layout, Rect};
 use ratatui::terminal::Frame;
 use ratatui::text::Spans;
-use std::collections::HashMap;
 use std::error;
 use std::sync::mpsc::TryRecvError;
 
@@ -22,7 +21,7 @@ pub type AppResult<T> = std::result::Result<T, Box<dyn error::Error>>;
 /// This is the main application.
 #[derive(Debug)]
 pub struct App<'a> {
-    pub containers: HashMap<String, Container<'a>>,
+    pub containers: Vec<Container<'a>>,
     pub state: AppState,
     pub input: Input,
     stdin: StdinHandler,
@@ -37,7 +36,7 @@ impl<'a> Default for App<'a> {
             args: parse_args(),
             input: Input::default(),
             raw_buffer: Container::new(".*".to_string(), CONTAINER_BUFFER),
-            containers: HashMap::new(),
+            containers: Vec::new(),
             state: AppState::default(),
         }
     }
@@ -56,7 +55,7 @@ impl<'a> App<'a> {
             let mut con = Container::new(c.clone(), CONTAINER_BUFFER);
             con.state.color = CONTAINER_COLORS[(id - 1) as usize];
             con.id = id;
-            ret.containers.insert(c.to_string(), con);
+            ret.containers.push(con);
         }
         if ret.containers.is_empty() {
             ret.state.show = Views::RawBuffer;
@@ -138,6 +137,7 @@ impl<'a> App<'a> {
             KeyCode::Enter => {
                 self.add_input_as_container();
                 self.hide_show_input();
+                self.state.show = Views::Containers;
             }
             KeyCode::Char(c) => {
                 self.input.push(c);
@@ -163,12 +163,12 @@ impl<'a> App<'a> {
         if let Some(inner_id) = first_free_id.first() {
             con.state.color = CONTAINER_COLORS[(inner_id - 1) as usize];
             con.id = *inner_id;
-            self.containers.insert(text.to_string(), con);
+            self.containers.push(con);
         }
     }
 
     pub fn zoom_into(&mut self, id: u8) {
-        if !self.containers.values().map(|c| c.id).any(|x| x == id) {
+        if !self.containers.iter().map(|c| c.id).any(|x| x == id) {
             return;
         }
 
@@ -182,7 +182,7 @@ impl<'a> App<'a> {
     }
 
     pub fn remove_view(&mut self, id: u8) {
-        if !self.containers.values().map(|c| c.id).any(|x| x == id) {
+        if !self.containers.iter().map(|c| c.id).any(|x| x == id) {
             return;
         }
         self.state.show = Views::Remove;
@@ -211,7 +211,7 @@ impl<'a> App<'a> {
                 if !self.state.paused {
                     self.raw_buffer.cb.push(Spans::from(line.clone()));
                 }
-                for (_, c) in self.containers.iter_mut() {
+                for c in self.containers.iter_mut() {
                     if c.re.is_match(&line) && !self.state.paused {
                         c.proc_and_push_line(line.clone());
                     }
@@ -224,7 +224,7 @@ impl<'a> App<'a> {
     }
 
     fn get_free_ids(&self) -> Vec<u8> {
-        let used_ids: Vec<u8> = self.containers.iter().map(|c| c.1.id).collect();
+        let used_ids: Vec<u8> = self.containers.iter().map(|c| c.id).collect();
         let mut free_ids: Vec<u8> = Vec::new();
 
         for id in 1_u8..CONTAINERS_MAX {
@@ -251,44 +251,31 @@ impl<'a> App<'a> {
 
     fn render_containers<B: Backend>(&mut self, frame: &mut Frame<'_, B>) {
         let blocks = self.get_layout_blocks(frame.size());
-        let used_ids = self.get_used_id();
 
-        for (i, id) in used_ids.into_iter().enumerate() {
-            let container_key = self.get_container_key_by_id(id).unwrap();
-            let container = self.containers.get(&container_key.clone()).unwrap();
+        for (i, container) in self.containers.iter().enumerate() {
             container.render(frame, blocks[i]);
         }
-    }
-
-    fn get_used_id(&self) -> Vec<u8> {
-        let mut used_ids: Vec<u8> = self.containers.iter().map(|c| c.1.id).collect();
-        used_ids.sort();
-        used_ids
     }
 
     fn update_containers(&mut self, frame_rect: Rect) {
         let blocks = self.get_layout_blocks(frame_rect);
         let mut area;
 
-        let used_ids = self.get_used_id();
         // General containers
-        for (i, id) in used_ids.into_iter().enumerate() {
-            if let Some(container_key) = self.get_container_key_by_id(id) {
-                let mut container = self.containers.get_mut(&container_key.clone()).unwrap();
-                container.state.wrap = self.state.wrap;
-                if self.state.show == Views::Zoom {
-                    area = frame_rect.height;
-                } else {
-                    area = blocks[i].height;
-                }
-                container.state.paused = self.state.paused;
-                container.state.wrap = self.state.wrap;
-                container.update_scroll(
-                    area as usize,
-                    &mut self.state.scroll_up,
-                    &mut self.state.scroll_down,
-                );
+        for (i, container) in self.containers.iter_mut().enumerate() {
+            container.state.wrap = self.state.wrap;
+            if self.state.show == Views::Zoom {
+                area = frame_rect.height;
+            } else {
+                area = blocks[i].height;
             }
+            container.state.paused = self.state.paused;
+            container.state.wrap = self.state.wrap;
+            container.update_scroll(
+                area as usize,
+                &mut self.state.scroll_up,
+                &mut self.state.scroll_down,
+            );
         }
         // Raw buffer
         let mut container = &mut self.raw_buffer;
@@ -301,22 +288,13 @@ impl<'a> App<'a> {
         );
     }
 
-    fn get_container_key_by_id(&self, id: u8) -> Option<&String> {
-        for (key, container) in self.containers.iter() {
-            if container.id == id {
-                return Some(key);
-            }
-        }
-        None
-    }
-
     fn render_raw<B: Backend>(&mut self, frame: &mut Frame<'_, B>) {
         let container = &self.raw_buffer;
         container.render(frame, frame.size());
     }
 
     fn render_id<B: Backend>(&mut self, frame: &mut Frame<'_, B>, id: u8) {
-        for (_, container) in self.containers.iter() {
+        for container in self.containers.iter() {
             if container.id == id {
                 container.render(frame, frame.size());
             }
@@ -324,9 +302,10 @@ impl<'a> App<'a> {
     }
 
     fn remove_id(&mut self, id: u8) {
-        if let Some(key) = self.containers.iter().find(|c| c.1.id == id).map(|c| c.0) {
-            self.containers.remove(&key.clone());
+        if let Some(index) = self.containers.iter().position(|c| c.id == id) {
+            self.containers.swap_remove(index);
         }
+        self.containers.sort_by_key(|container| container.id);
     }
 
     fn render_help<B: Backend>(&self, frame: &mut Frame<'_, B>) {
@@ -458,7 +437,7 @@ mod tests {
     fn get_stdin() {
         let mut app = App::new(None);
         app.add_container("a");
-        let c = app.containers.get("a").unwrap();
+        let c = app.containers.get(0).unwrap();
         assert_eq!(c.cb.is_empty(), true);
         assert_eq!(app.raw_buffer.cb.is_empty(), true);
         assert_eq!(app.raw_buffer.cb.len(), 0);
@@ -469,7 +448,7 @@ mod tests {
         app.stdin.sender.send("def".to_string()).unwrap();
         app.tick();
 
-        let c = app.containers.get("a").unwrap();
+        let c = app.containers.get(0).unwrap();
         assert_eq!(c.cb.is_empty(), false);
         assert_eq!(c.cb.len(), 1);
         assert_eq!(app.raw_buffer.cb.is_empty(), false);
@@ -494,7 +473,7 @@ mod tests {
         let mut app = App::new(None);
         app.add_container("a");
         app.add_container("b");
-        for (_, c) in app.containers.iter_mut() {
+        for c in app.containers.iter_mut() {
             c.state.color = Color::White;
         }
         let backend = TestBackend::new(14, 14);
@@ -542,7 +521,7 @@ mod tests {
         app.add_container("a");
         app.add_container("b");
 
-        for (_, c) in app.containers.iter() {
+        for c in app.containers.iter() {
             assert_eq!(c.state.paused, false);
             assert_eq!(c.state.wrap, false);
             assert_eq!(c.state.scroll, 0);
@@ -561,7 +540,7 @@ mod tests {
         app.state.scroll_down = 10;
         app.update_containers(rect);
 
-        for (_, c) in app.containers.iter() {
+        for c in app.containers.iter() {
             assert_eq!(c.state.paused, app.state.paused);
             assert_eq!(c.state.wrap, app.state.wrap);
             assert_eq!(c.state.scroll, 49);
@@ -569,7 +548,7 @@ mod tests {
         app.state.scroll_up = 5;
         app.update_containers(rect);
 
-        for (_, c) in app.containers.iter() {
+        for c in app.containers.iter() {
             assert_eq!(c.state.scroll, 54);
         }
     }
