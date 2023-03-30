@@ -228,9 +228,10 @@ impl<'a> App<'a> {
                     }
                 }
             }
-            Err(TryRecvError::Disconnected) | Err(TryRecvError::Empty) => {
+            Err(TryRecvError::Disconnected) => {
                 self.stop();
             }
+            _ => {}
         }
     }
 
