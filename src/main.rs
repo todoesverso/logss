@@ -46,7 +46,7 @@ fn main() -> AppResult<()> {
 }
 #[cfg(test)]
 mod tests {
-    use super::*;
+    //use super::*;
 
     // Unit test for main function
     #[test]
