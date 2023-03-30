@@ -189,6 +189,17 @@ impl<'a> App<'a> {
         self.state.zoom_id = Some(id);
     }
 
+    pub fn hide_view(&mut self, id: u8) {
+        if !self.containers.iter().map(|c| c.id).any(|x| x == id) {
+            return;
+        }
+        for container in self.containers.iter_mut() {
+            if container.id == id {
+                container.state.hide = !container.state.hide;
+            }
+        }
+    }
+
     pub fn flip_raw_view(&mut self) {
         if !self.containers.is_empty() {
             if self.state.show == Views::RawBuffer {
@@ -238,8 +249,9 @@ impl<'a> App<'a> {
 
     fn get_layout_blocks(&self, size: Rect) -> Vec<Rect> {
         let mut constr = vec![];
-        for _ in 0..self.containers.len() {
-            constr.push(Constraint::Ratio(1, self.containers.len() as u32));
+        let show_cont = self.containers.iter().filter(|c| !c.state.hide).count();
+        for _ in 0..show_cont {
+            constr.push(Constraint::Ratio(1, show_cont as u32));
         }
         let ret = Layout::default()
             .direction(self.state.direction.clone())
@@ -252,7 +264,7 @@ impl<'a> App<'a> {
     fn render_containers<B: Backend>(&mut self, frame: &mut Frame<'_, B>) {
         let blocks = self.get_layout_blocks(frame.size());
 
-        for (i, container) in self.containers.iter().enumerate() {
+        for (i, container) in self.containers.iter().filter(|c| !c.state.hide).enumerate() {
             container.render(frame, blocks[i]);
         }
     }
@@ -262,7 +274,12 @@ impl<'a> App<'a> {
         let mut area;
 
         // General containers
-        for (i, container) in self.containers.iter_mut().enumerate() {
+        for (i, container) in self
+            .containers
+            .iter_mut()
+            .filter(|c| !c.state.hide)
+            .enumerate()
+        {
             container.state.wrap = self.state.wrap;
             if self.state.show == Views::Zoom {
                 area = frame_rect.height;
@@ -636,6 +653,90 @@ mod tests {
         for x in 0..=13 {
             for y in 0..=13 {
                 if bolds.contains(&x) && (y == 0) {
+                    expected
+                        .get_mut(x, y)
+                        .set_style(Style::default().add_modifier(Modifier::BOLD));
+                }
+                expected.get_mut(x, y).set_fg(Color::White);
+                expected.get_mut(x, y).set_bg(Color::Black);
+            }
+        }
+        terminal.backend().assert_buffer(&expected);
+    }
+
+    #[test]
+    fn hide_view() {
+        let mut app = App::new(None);
+        app.add_container("a");
+        app.add_container("b");
+        for c in app.containers.iter_mut() {
+            c.state.color = Color::White;
+        }
+        app.flip_raw_view();
+        app.hide_view(1);
+        let backend = TestBackend::new(14, 14);
+        let mut terminal = Terminal::new(backend).unwrap();
+        terminal
+            .draw(|f| {
+                app.render(f);
+            })
+            .unwrap();
+        let mut expected = Buffer::with_lines(vec![
+            "┌(2) - b─────┐",
+            "│            │",
+            "│            │",
+            "│            │",
+            "│            │",
+            "│            │",
+            "│            │",
+            "│            │",
+            "│            │",
+            "│            │",
+            "│            │",
+            "│            │",
+            "│            │",
+            "└────────────┘",
+        ]);
+        let bolds = [1, 2, 3, 4, 5, 6, 7];
+        for x in 0..=13 {
+            for y in 0..=13 {
+                if bolds.contains(&x) && (y == 0) {
+                    expected
+                        .get_mut(x, y)
+                        .set_style(Style::default().add_modifier(Modifier::BOLD));
+                }
+                expected.get_mut(x, y).set_fg(Color::White);
+                expected.get_mut(x, y).set_bg(Color::Black);
+            }
+        }
+        terminal.backend().assert_buffer(&expected);
+
+        app.hide_view(1);
+        terminal
+            .draw(|f| {
+                app.render(f);
+            })
+            .unwrap();
+        let mut expected = Buffer::with_lines(vec![
+            "┌(1) - a─────┐",
+            "│            │",
+            "│            │",
+            "│            │",
+            "│            │",
+            "│            │",
+            "└────────────┘",
+            "┌(2) - b─────┐",
+            "│            │",
+            "│            │",
+            "│            │",
+            "│            │",
+            "│            │",
+            "└────────────┘",
+        ]);
+        let bolds = [1, 2, 3, 4, 5, 6, 7];
+        for x in 0..=13 {
+            for y in 0..=13 {
+                if bolds.contains(&x) && (y == 0 || y == 7) {
                     expected
                         .get_mut(x, y)
                         .set_style(Style::default().add_modifier(Modifier::BOLD));

@@ -44,7 +44,9 @@ fn parser() -> Result<Args, pico_args::Error> {
             .unwrap_or(100),
     };
 
-    validate_regex(&args.containers);
+    if !validate_regex(&args.containers) {
+        std::process::exit(1);
+    }
 
     // It's up to the caller what to do with the remaining arguments.
     let remaining = pargs.finish();
@@ -55,13 +57,14 @@ fn parser() -> Result<Args, pico_args::Error> {
     Ok(args)
 }
 
-fn validate_regex(containers: &Vec<String>) {
+fn validate_regex(containers: &Vec<String>) -> bool {
     for c in containers {
         if Regex::new(c).is_err() {
             eprintln!("Error: Failed to parse regexp '{c}'.");
-            std::process::exit(1);
+            return false;
         }
     }
+    true
 }
 
 fn render_in_range(s: &str) -> Result<u64, String> {
@@ -86,5 +89,14 @@ mod tests {
             Err("Values lower than 25 make the application unresponsive.".to_string())
         );
         assert_eq!(render_in_range("30"), Ok(30));
+    }
+
+    #[test]
+    fn test_validate_regex() {
+        let c = vec!["a".to_string()];
+        assert_eq!(validate_regex(&c), true);
+
+        let c = vec!["*".to_string()];
+        assert_eq!(validate_regex(&c), false);
     }
 }

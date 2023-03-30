@@ -31,11 +31,15 @@ pub fn render_help<B: Backend>(frame: &mut Frame<'_, B>) {
             Style::default().bg(Color::Blue),
         )),
         Spans::from(Span::styled(
-            "0-9     - toggles zoom to specific container",
+            "1-9     - toggles zoom to specific container",
             Style::default().bg(Color::Blue),
         )),
         Spans::from(Span::styled(
-            "Alt+0-9 - removes specific container",
+            "Alt+1-9 - removes specific container",
+            Style::default().bg(Color::Blue),
+        )),
+        Spans::from(Span::styled(
+            "F1/9    - toggles hide/show for container",
             Style::default().bg(Color::Blue),
         )),
         Spans::from(Span::styled(

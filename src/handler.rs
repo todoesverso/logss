@@ -21,16 +21,24 @@ pub fn handle_key_events(key_event: KeyEvent, app: &mut App) -> AppResult<()> {
             KeyCode::Char('w') => app.flip_wrap(),
             KeyCode::Char('p') | KeyCode::Char(' ') => app.flip_pause(),
             KeyCode::Char('v') => app.flip_direction(),
-            KeyCode::Char('0') => view_helper(app, 0, key_event),
             KeyCode::Char('1') => view_helper(app, 1, key_event),
+            KeyCode::F(1) => app.hide_view(1),
             KeyCode::Char('2') => view_helper(app, 2, key_event),
+            KeyCode::F(2) => app.hide_view(2),
             KeyCode::Char('3') => view_helper(app, 3, key_event),
+            KeyCode::F(3) => app.hide_view(3),
             KeyCode::Char('4') => view_helper(app, 4, key_event),
+            KeyCode::F(4) => app.hide_view(4),
             KeyCode::Char('5') => view_helper(app, 5, key_event),
+            KeyCode::F(5) => app.hide_view(5),
             KeyCode::Char('6') => view_helper(app, 6, key_event),
+            KeyCode::F(6) => app.hide_view(6),
             KeyCode::Char('7') => view_helper(app, 7, key_event),
+            KeyCode::F(7) => app.hide_view(7),
             KeyCode::Char('8') => view_helper(app, 8, key_event),
+            KeyCode::F(8) => app.hide_view(8),
             KeyCode::Char('9') => view_helper(app, 9, key_event),
+            KeyCode::F(9) => app.hide_view(9),
             KeyCode::Up => {
                 app.pause();
                 if key_event.kind == KeyEventKind::Press {
@@ -58,10 +66,10 @@ pub fn handle_key_events(key_event: KeyEvent, app: &mut App) -> AppResult<()> {
 }
 
 fn view_helper(app: &mut App, id: u8, key_event: KeyEvent) {
-    if key_event.modifiers == KeyModifiers::ALT {
-        app.remove_view(id);
-    } else {
-        app.zoom_into(id);
+    match key_event.modifiers {
+        KeyModifiers::ALT => app.remove_view(id),
+        KeyModifiers::NONE => app.zoom_into(id),
+        _ => {}
     }
 }
 
