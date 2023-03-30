@@ -97,6 +97,9 @@ impl<'a> Container<'a> {
     }
 
     pub fn render<B: Backend>(&self, frame: &mut Frame<'_, B>, area: Rect) {
+        if self.state.hide {
+            return;
+        }
         let title = format!("({}) - {}", self.id, self.text);
         let mut paragraph = Paragraph::new(self.cb.ordered_clone().buffer.clone())
             .block(create_block(&title, self.state.color, self.state.paused))

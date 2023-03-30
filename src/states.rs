@@ -43,6 +43,7 @@ impl Default for AppState {
 #[derive(Debug, PartialEq)]
 pub struct ContainerState {
     pub paused: bool,
+    pub hide: bool,
     pub wrap: bool,
     pub scroll: u16,
     pub color: Color,
@@ -53,6 +54,7 @@ impl Default for ContainerState {
     fn default() -> Self {
         Self {
             paused: false,
+            hide: false,
             wrap: false,
             scroll: 0,
             color: Color::Red,
