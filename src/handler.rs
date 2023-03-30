@@ -78,6 +78,7 @@ mod tests {
     use super::*;
     use crate::states::Views;
     use ratatui::layout::Direction;
+    use std::char::from_digit;
 
     #[test]
     fn stop() {
@@ -220,25 +221,44 @@ mod tests {
 
     #[test]
     fn container_number() {
+        for i in 1..9_u8 {
+            let mut app = App::default();
+            for a in 1..9_u8 {
+                app.add_container(&a.to_string());
+            }
+            assert_eq!(app.state.show, Views::Containers);
+            assert_eq!(app.state.zoom_id, None);
+            let key = KeyEvent::new(
+                KeyCode::Char(from_digit(i as u32, 10).unwrap()),
+                KeyModifiers::NONE,
+            );
+            handle_key_events(key, &mut app).ok();
+            assert_eq!(app.state.show, Views::Zoom);
+            assert_eq!(app.state.zoom_id, Some(i));
+            // Flip
+            handle_key_events(key, &mut app).ok();
+            assert_eq!(app.state.show, Views::Containers);
+            assert_eq!(app.state.zoom_id, None);
+            // remove
+            let key = KeyEvent::new(
+                KeyCode::Char(from_digit(i as u32, 10).unwrap()),
+                KeyModifiers::ALT,
+            );
+            handle_key_events(key, &mut app).ok();
+            assert_eq!(app.state.show, Views::Remove);
+            assert_eq!(app.state.zoom_id, Some(i));
+        }
+    }
+
+    #[test]
+    fn container_hide() {
         let mut app = App::default();
-        app.add_container("1");
-        app.add_container("2");
-        assert_eq!(app.containers.len(), 2);
-
-        assert_eq!(app.state.show, Views::Containers);
-        assert_eq!(app.state.zoom_id, None);
-        let key = KeyEvent::new(KeyCode::Char('1'), KeyModifiers::NONE);
-        handle_key_events(key, &mut app).ok();
-        assert_eq!(app.state.show, Views::Zoom);
-        assert_eq!(app.state.zoom_id, Some(1));
-        // Flip
-        handle_key_events(key, &mut app).ok();
-        assert_eq!(app.state.show, Views::Containers);
-        assert_eq!(app.state.zoom_id, None);
-
-        let key = KeyEvent::new(KeyCode::Char('1'), KeyModifiers::ALT);
-        handle_key_events(key, &mut app).ok();
-        assert_eq!(app.state.show, Views::Remove);
-        assert_eq!(app.state.zoom_id, Some(1));
+        for i in 1..9_u8 {
+            app.add_container(&i.to_string());
+            assert_eq!(app.containers[(i - 1) as usize].state.hide, false);
+            let key = KeyEvent::new(KeyCode::F(i), KeyModifiers::NONE);
+            handle_key_events(key, &mut app).ok();
+            assert_eq!(app.containers[(i - 1) as usize].state.hide, true);
+        }
     }
 }
