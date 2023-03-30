@@ -44,3 +44,14 @@ fn main() -> AppResult<()> {
     tui.exit()?;
     Ok(())
 }
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    // Unit test for main function
+    #[test]
+    fn test_main() {
+        let result = main();
+        assert!(result.is_ok());
+    }
+}
