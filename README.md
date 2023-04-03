@@ -51,10 +51,11 @@
   Usage: logss [OPTIONS]
 
   Options:
-    -c, --contains <CONTAINERS>  Finds the substring (regexp)
-    -r, --render <RENDER>        Defines render speed in milliseconds [default: 100]
-    -h, --help                   Print help
-  
+    -c <CONTAINERS>  Finds the substring (regexp)
+    -r <RENDER>      Defines render speed in milliseconds [default: 100]
+    -f <FILE>        Input config file (overrides cli arguments)
+    -h               Print help
+
   $ cat shakespeare.txt | logss -c to -c be -c or -c 'in.*of'
   ```
 
@@ -84,6 +85,16 @@
   ![](./assets/input_and_delete.gif)
 
 </details>
+
+<details>
+  <summary>Configuration file</summary>
+
+  ```sh
+  $ cat shakespeare.txt | logss -f example_config.yml
+  ```
+
+</details>
+
 
 ## Download
 

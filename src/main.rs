@@ -21,7 +21,7 @@ fn main() -> AppResult<()> {
     let backend = CrosstermBackend::new(io::stderr());
     let terminal = Terminal::new(backend)?;
     let args = parse_args();
-    let events = EventHandler::new(args.render);
+    let events = EventHandler::new(args.render.unwrap());
     let mut tui = Tui::new(terminal, events);
     tui.init()?;
     // TODO: make it fail and propagate

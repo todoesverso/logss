@@ -1,5 +1,7 @@
 use pico_args;
 use regex::Regex;
+use serde::{Deserialize, Serialize};
+use serde_yaml;
 
 const HELP: &str = "\
 Simple cli command to show logs in a friendly way
@@ -9,13 +11,15 @@ Usage: logss [OPTIONS]
 Options:
   -c <CONTAINERS>  Finds the substring (regexp)
   -r <RENDER>      Defines render speed in milliseconds [default: 100]
+  -f <FILE>        Input config file (overrides cli arguments)
   -h               Print help
 ";
 
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Args {
     pub containers: Vec<String>,
-    pub render: u64,
+    pub render: Option<u64>,
+    pub config_file: Option<std::path::PathBuf>,
 }
 
 pub fn parse_args() -> Args {
@@ -37,12 +41,15 @@ fn parser() -> Result<Args, pico_args::Error> {
         std::process::exit(0);
     }
 
-    let args = Args {
+    let mut args = Args {
         containers: pargs.values_from_str("-c")?,
+        config_file: pargs.opt_value_from_os_str("-f", parse_path)?,
         render: pargs
             .opt_value_from_fn("-r", render_in_range)?
-            .unwrap_or(100),
+            .unwrap_or(Some(100)),
     };
+
+    let render = args.render;
 
     if !validate_regex(&args.containers) {
         std::process::exit(1);
@@ -54,7 +61,40 @@ fn parser() -> Result<Args, pico_args::Error> {
         eprintln!("Warning: unused arguments left: {:?}.", remaining);
     }
 
+    if let Some(config_file) = args.config_file {
+        args = parse_yaml(config_file);
+    }
+
+    if args.render.is_none() {
+        args.render = render;
+    }
+
     Ok(args)
+}
+
+fn parse_yaml(config_file: std::path::PathBuf) -> Args {
+    let f = std::fs::File::open(&config_file)
+        .map_err(|_| {
+            eprintln!(
+                "Failed to open {file}",
+                file = &config_file.as_path().display()
+            );
+            std::process::exit(1);
+        })
+        .unwrap();
+    let scrape_config: Args = serde_yaml::from_reader(f)
+        .map_err(|err| {
+            eprintln!("Failed to parse yaml: {err}");
+            std::process::exit(1);
+        })
+        .unwrap();
+    if let Some(render) = scrape_config.render {
+        if render < 25 {
+            eprintln!("Values lower than 25 for 'render' make the application unresponsive.");
+            std::process::exit(1);
+        }
+    }
+    scrape_config
 }
 
 fn validate_regex(containers: &Vec<String>) -> bool {
@@ -67,7 +107,11 @@ fn validate_regex(containers: &Vec<String>) -> bool {
     true
 }
 
-fn render_in_range(s: &str) -> Result<u64, String> {
+fn parse_path(s: &std::ffi::OsStr) -> Result<std::path::PathBuf, &'static str> {
+    Ok(s.into())
+}
+
+fn render_in_range(s: &str) -> Result<Option<u64>, String> {
     let render: u64 = s
         .parse()
         .map_err(|_| format!("`{s}` isn't a valid number"))?;
@@ -75,7 +119,7 @@ fn render_in_range(s: &str) -> Result<u64, String> {
     if render < 25 {
         Err("Values lower than 25 make the application unresponsive.".to_string())
     } else {
-        Ok(render)
+        Ok(Some(render))
     }
 }
 
@@ -88,7 +132,7 @@ mod tests {
             render_in_range("12"),
             Err("Values lower than 25 make the application unresponsive.".to_string())
         );
-        assert_eq!(render_in_range("30"), Ok(30));
+        assert_eq!(render_in_range("30"), Ok(Some(30)));
     }
 
     #[test]
