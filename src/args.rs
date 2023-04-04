@@ -32,7 +32,7 @@ pub fn parse_args() -> Args {
     }
 }
 
-fn parser() -> Result<Args, pico_args::Error> {
+fn parser() -> Result<Args, Box<dyn std::error::Error>> {
     let mut pargs = pico_args::Arguments::from_env();
 
     // Help has a higher priority and should be handled separately.
@@ -62,7 +62,7 @@ fn parser() -> Result<Args, pico_args::Error> {
     }
 
     if let Some(config_file) = args.config_file {
-        args = parse_yaml(config_file);
+        args = parse_yaml(config_file)?;
     }
 
     if args.render.is_none() {
@@ -72,29 +72,15 @@ fn parser() -> Result<Args, pico_args::Error> {
     Ok(args)
 }
 
-fn parse_yaml(config_file: std::path::PathBuf) -> Args {
-    let f = std::fs::File::open(&config_file)
-        .map_err(|_| {
-            eprintln!(
-                "Failed to open {file}",
-                file = &config_file.as_path().display()
-            );
-            std::process::exit(1);
-        })
-        .unwrap();
-    let scrape_config: Args = serde_yaml::from_reader(f)
-        .map_err(|err| {
-            eprintln!("Failed to parse yaml: {err}");
-            std::process::exit(1);
-        })
-        .unwrap();
+fn parse_yaml(config_file: std::path::PathBuf) -> Result<Args, Box<dyn std::error::Error>> {
+    let f = std::fs::File::open(config_file)?;
+    let scrape_config: Args = serde_yaml::from_reader(f)?;
     if let Some(render) = scrape_config.render {
         if render < 25 {
-            eprintln!("Values lower than 25 for 'render' make the application unresponsive.");
-            std::process::exit(1);
+            return Err("Values lower than 25 make the application unresponsive.".into());
         }
     }
-    scrape_config
+    Ok(scrape_config)
 }
 
 fn validate_regex(containers: &Vec<String>) -> bool {
@@ -142,5 +128,22 @@ mod tests {
 
         let c = vec!["*".to_string()];
         assert_eq!(validate_regex(&c), false);
+    }
+
+    #[test]
+    fn test_parse_yaml() {
+        let path = std::path::PathBuf::from("example_config.yml");
+        let args = parse_yaml(path).unwrap();
+        assert_eq!(args.render.unwrap(), 26);
+        assert_eq!(
+            args.containers,
+            vec![
+                "to".to_string(),
+                "be".to_string(),
+                "or".to_string(),
+                "not".to_string(),
+                "to.*be".to_string()
+            ]
+        );
     }
 }
