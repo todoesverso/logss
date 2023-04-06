@@ -10,15 +10,19 @@ Usage: logss [OPTIONS]
 
 Options:
   -c <CONTAINERS>  Finds the substring (regexp)
+  -C <COMMAND>     Gets input from this command
   -r <RENDER>      Defines render speed in milliseconds [default: 100]
   -f <FILE>        Input config file (overrides cli arguments)
+  -V               Start in vertical view mode
   -h               Print help
 ";
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Args {
     pub containers: Vec<String>,
+    pub vertical: Option<bool>,
     pub render: Option<u64>,
+    pub command: Option<Vec<String>>,
     pub config_file: Option<std::path::PathBuf>,
 }
 
@@ -43,7 +47,9 @@ fn parser() -> Result<Args, Box<dyn std::error::Error>> {
 
     let mut args = Args {
         containers: pargs.values_from_str("-c")?,
+        command: pargs.opt_value_from_fn("-C", parse_cmd)?,
         config_file: pargs.opt_value_from_os_str("-f", parse_path)?,
+        vertical: pargs.contains("-V").then_some(true),
         render: pargs
             .opt_value_from_fn("-r", render_in_range)?
             .unwrap_or(Some(100)),
@@ -95,6 +101,10 @@ fn validate_regex(containers: &Vec<String>) -> bool {
 
 fn parse_path(s: &std::ffi::OsStr) -> Result<std::path::PathBuf, &'static str> {
     Ok(s.into())
+}
+
+fn parse_cmd(s: &str) -> Result<Vec<String>, Box<dyn std::error::Error>> {
+    Ok(s.split_whitespace().map(str::to_string).collect())
 }
 
 fn render_in_range(s: &str) -> Result<Option<u64>, String> {
