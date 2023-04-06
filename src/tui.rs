@@ -38,7 +38,7 @@ impl<B: Backend> Tui<B> {
 
     /// [`Draw`] the terminal interface by [`rendering`] the widgets.
     ///
-    /// [`Draw`]: tui::Terminal::draw
+    /// [`Draw`]: ratatui::Terminal::draw
     /// [`rendering`]: crate::app::App::render
     pub fn draw(&mut self, app: &mut App) -> AppResult<()> {
         self.terminal.draw(|frame| app.render(frame))?;

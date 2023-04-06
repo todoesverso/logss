@@ -48,6 +48,9 @@ impl<'a> App<'a> {
         let mut ret = Self::default();
         if let Some(args_inner) = args {
             ret.args = args_inner;
+            if ret.args.vertical.is_some() {
+                ret.state.direction = Direction::Horizontal;
+            }
         }
 
         // Let 0 for raw_buffer
@@ -63,9 +66,10 @@ impl<'a> App<'a> {
         ret
     }
 
-    pub fn init(&mut self) {
+    pub fn init(&mut self) -> AppResult<()> {
         self.state.running = true;
-        self.stdin.init();
+        self.stdin.init(self.args.command.clone())?;
+        Ok(())
     }
 
     pub fn is_running(&self) -> bool {
@@ -386,7 +390,7 @@ mod tests {
 
         // Running
         assert_eq!(app.is_running(), false);
-        app.init();
+        app.init().unwrap();
         assert_eq!(app.is_running(), true);
         app.stop();
         assert_eq!(app.is_running(), false);
@@ -461,7 +465,7 @@ mod tests {
         assert_eq!(c.cb.is_empty(), true);
         assert_eq!(app.raw_buffer.cb.is_empty(), true);
         assert_eq!(app.raw_buffer.cb.len(), 0);
-        app.init();
+        app.init().unwrap();
         app.stdin.sender.send("abc".to_string()).unwrap();
         app.tick();
 
@@ -762,7 +766,7 @@ mod tests {
             assert_eq!(c.state.scroll, 0);
         }
 
-        app.init();
+        app.init().unwrap();
         for _ in 0..=128 {
             app.stdin.sender.send("abc".to_string()).unwrap();
             app.tick();

@@ -1,3 +1,7 @@
+command: 
+  - cat 
+  - shakespeare.txt
+vertical: true
 render: 26
 containers: 
 - to

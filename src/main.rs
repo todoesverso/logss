@@ -9,13 +9,17 @@ use ratatui::Terminal;
 use std::io;
 
 fn main() -> AppResult<()> {
-    if std::io::stdin().is_terminal() {
+    if parse_args().command.is_none() && std::io::stdin().is_terminal() {
+        eprintln!("No command provided and no data piped.");
         eprintln!("Please pipe some data to this command. Exiting.");
         std::process::exit(1);
     }
+
     // Create an application.
     let args = parse_args();
     let mut app = App::new(Some(args));
+    // First we try to start app so that it can fail and we do not mess with the console
+    app.init()?;
 
     // Initialize the terminal user interface.
     let backend = CrosstermBackend::new(io::stderr());
@@ -24,8 +28,6 @@ fn main() -> AppResult<()> {
     let events = EventHandler::new(args.render.unwrap());
     let mut tui = Tui::new(terminal, events);
     tui.init()?;
-    // TODO: make it fail and propagate
-    app.init();
 
     // Start the main loop.
     while app.is_running() {
