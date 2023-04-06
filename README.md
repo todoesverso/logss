@@ -37,9 +37,12 @@
 * Delete containers on runtime
 * Add new containers on runtime
 * Dedicated container for raw stream
-* Toggle line wraping
+* Toggle line wrapping
 * Zoom into a specific container
+* Containers Show/Hide 
 * Support for regexp
+* Support for configuration file
+* Support for explicit command (no need to pipe into it)
 
 
 ## Usage
@@ -52,8 +55,10 @@
 
   Options:
     -c <CONTAINERS>  Finds the substring (regexp)
+    -C <COMMAND>     Gets input from this command
     -r <RENDER>      Defines render speed in milliseconds [default: 100]
     -f <FILE>        Input config file (overrides cli arguments)
+    -V               Start in vertical view mode
     -h               Print help
 
   $ cat shakespeare.txt | logss -c to -c be -c or -c 'in.*of'
@@ -95,6 +100,15 @@
 
 </details>
 
+<details>
+  <summary>Command</summary>
+
+  ```sh
+  $ logss -C cat shakespeare.txt
+  ```
+
+</details>
+
 
 ## Download
 
@@ -110,8 +124,6 @@ This is a list of things I plan to do:
 * Add documentation (the rust way)
 * Refactoring (as I learn more Rust things)
 * Tests
-* Container hide/show
-* Configuration file (to start with a predefined state)
 * Smart timestamp highlights
 * ... whatever I can think of when I am using it
 
