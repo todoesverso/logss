@@ -40,21 +40,21 @@ Options:
 #[test]
 fn simple_piped_run() {
     let mut cmd = Command::cargo_bin("logss").unwrap();
-    let c_path = Path::new("Cargo.toml");
+    let c_path = Path::new("README.md");
     cmd.pipe_stdin(c_path).unwrap();
     cmd.arg("-e")
         .arg("-c")
-        .arg("version")
+        .arg("logo")
         .arg("-c")
-        .arg("package")
+        .arg("center")
         .arg("-r")
         .arg("25");
 
     cmd.assert()
         .success()
-        .stderr(predicate::str::contains("package"))
-        .stderr(predicate::str::contains("version"))
-        .stderr(predicate::str::contains("name").not())
+        .stderr(predicate::str::contains("logo"))
+        .stderr(predicate::str::contains("center"))
+        .stderr(predicate::str::contains("Features").not())
         .stdout(predicate::str::is_empty());
 }
 
