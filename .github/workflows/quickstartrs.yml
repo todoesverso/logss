@@ -32,6 +32,7 @@ jobs:
       - uses: actions-rs/cargo@v1.0.1
         with:
           command: test
+          args: -- --test-threads=1
 
   fmt:
     name: Rustfmt
