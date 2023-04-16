@@ -31,7 +31,7 @@ jobs:
         uses: Swatinem/rust-cache@v2.2.1
       - uses: actions-rs/cargo@v1.0.1
         with:
-          command: test
+          command: test -- --test-threads 1
 
   fmt:
     name: Rustfmt
