@@ -1,4 +1,4 @@
-use std::io::stdin;
+use std::io::{stdin, Error, ErrorKind};
 use std::sync::mpsc;
 use std::thread;
 
@@ -26,17 +26,17 @@ impl StdinHandler {
     }
 
     pub fn init(&self, cmd: Option<Vec<String>>) -> AppResult<()> {
+        // TODO: refactor to avoid duplicate code
         let sender = self.sender.clone();
         if let Some(inner_cmd) = cmd {
             let child = Command::new(&inner_cmd[0])
                 .args(&inner_cmd[1..])
                 .stdout(Stdio::piped())
                 .spawn()?;
-            //child.stderr.take();
 
             let stdout = child
                 .stdout
-                .ok_or_else(|| panic!("Failed to run command"))
+                .ok_or_else(|| Error::new(ErrorKind::Other, "Failed to run command"))
                 .unwrap();
             let mut reader = BufReader::new(stdout);
             loop {

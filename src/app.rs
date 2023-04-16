@@ -235,6 +235,9 @@ impl<'a> App<'a> {
             Err(TryRecvError::Disconnected) => {
                 self.stop();
             }
+            Err(TryRecvError::Empty) if self.args.exit.unwrap_or_default() => {
+                self.stop();
+            }
             _ => {}
         }
     }

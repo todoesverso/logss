@@ -1,6 +1,6 @@
 [package]
 name = "logss"
-version = "1.1.0-alpha"
+version = "1.2.0-alpha"
 authors = ["Victor Rosales <todoesverso@gmail.com>"]
 edition = "2018"
 publish = false
@@ -22,3 +22,9 @@ serde = {version = "1.0.159", features = ["derive"]}
 [profile.release]
 codegen-units = 1
 lto = "fat"
+opt-level = 3
+strip = true
+
+[dev-dependencies]
+assert_cmd = "2.0.10"
+predicates = "3.0.2"
