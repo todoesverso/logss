@@ -40,7 +40,7 @@ Options:
 #[test]
 fn simple_piped_run() {
     let mut cmd = Command::cargo_bin("logss").unwrap();
-    let c_path = Path::new("Cargo.toml");
+    let c_path = Path::new("README.md");
     cmd.pipe_stdin(c_path).unwrap();
     cmd.arg("-e")
         .arg("-c")
