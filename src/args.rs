@@ -68,7 +68,6 @@ fn parser() -> Result<Args, Box<dyn std::error::Error>> {
     let remaining = pargs.finish();
     if !remaining.is_empty() {
         eprintln!("Error: non valid arguments: {:?}.", remaining);
-        std::process::exit(1);
     }
 
     if let Some(config_file) = args.config_file {

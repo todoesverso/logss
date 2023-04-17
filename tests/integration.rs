@@ -5,7 +5,7 @@ use std::path::Path;
 #[test]
 fn non_valid_arg() {
     let mut cmd = Command::cargo_bin("logss").unwrap();
-    cmd.arg("--non-valid-arg");
+    cmd.arg("-e").arg("--non-valid-arg");
 
     cmd.assert()
         .stdout(predicate::str::is_empty())
@@ -40,21 +40,21 @@ Options:
 #[test]
 fn simple_piped_run() {
     let mut cmd = Command::cargo_bin("logss").unwrap();
-    let c_path = Path::new("README.md");
+    let c_path = Path::new("Cargo.toml");
     cmd.pipe_stdin(c_path).unwrap();
     cmd.arg("-e")
         .arg("-c")
-        .arg("logo")
+        .arg("version")
         .arg("-c")
-        .arg("center")
+        .arg("package")
         .arg("-r")
         .arg("25");
 
     cmd.assert()
         .success()
-        .stderr(predicate::str::contains("logo"))
-        .stderr(predicate::str::contains("center"))
-        .stderr(predicate::str::contains("Features").not())
+        .stderr(predicate::str::contains("package"))
+        .stderr(predicate::str::contains("version"))
+        .stderr(predicate::str::contains("name").not())
         .stdout(predicate::str::is_empty());
 }
 
