@@ -10,9 +10,10 @@ Usage: logss [OPTIONS]
 
 Options:
   -c <CONTAINERS>  Finds the substring (regexp)
+  -e               Exit on empty input [default: false]
   -C <COMMAND>     Gets input from this command
-  -r <RENDER>      Defines render speed in milliseconds [default: 100]
   -f <FILE>        Input config file (overrides cli arguments)
+  -r <RENDER>      Defines render speed in milliseconds [default: 100]
   -V               Start in vertical view mode
   -h               Print help
 ";
@@ -20,6 +21,7 @@ Options:
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Args {
     pub containers: Vec<String>,
+    pub exit: Option<bool>,
     pub vertical: Option<bool>,
     pub render: Option<u64>,
     pub command: Option<Vec<String>>,
@@ -49,6 +51,7 @@ fn parser() -> Result<Args, Box<dyn std::error::Error>> {
         containers: pargs.values_from_str("-c")?,
         command: pargs.opt_value_from_fn("-C", parse_cmd)?,
         config_file: pargs.opt_value_from_os_str("-f", parse_path)?,
+        exit: pargs.contains("-e").then_some(true),
         vertical: pargs.contains("-V").then_some(true),
         render: pargs
             .opt_value_from_fn("-r", render_in_range)?
@@ -64,7 +67,7 @@ fn parser() -> Result<Args, Box<dyn std::error::Error>> {
     // It's up to the caller what to do with the remaining arguments.
     let remaining = pargs.finish();
     if !remaining.is_empty() {
-        eprintln!("Warning: unused arguments left: {:?}.", remaining);
+        eprintln!("Error: non valid arguments: {:?}.", remaining);
     }
 
     if let Some(config_file) = args.config_file {
