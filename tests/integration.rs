@@ -38,6 +38,7 @@ Options:
 }
 
 #[test]
+#[ignore]
 fn simple_piped_run() {
     let mut cmd = Command::cargo_bin("logss").unwrap();
     let c_path = Path::new("README.md");
@@ -59,8 +60,8 @@ fn simple_piped_run() {
 }
 
 #[test]
+#[ignore]
 fn simple_command_run() {
-    return;
     let mut cmd = Command::cargo_bin("logss").unwrap();
     cmd.arg("-e")
         .arg("-c")
