@@ -38,8 +38,10 @@ impl StdinHandler {
                 .stdout
                 .ok_or_else(|| Error::new(ErrorKind::Other, "Failed to run command"))
                 .unwrap();
+
             let mut reader = BufReader::new(stdout);
-            loop {
+
+            thread::spawn(move || loop {
                 let mut line = String::new();
                 match reader.read_line(&mut line) {
                     Ok(len) => {
@@ -51,25 +53,25 @@ impl StdinHandler {
                     }
                     Err(_) => panic!("BUG!, please report it"),
                 }
-            }
+            });
         } else {
-            thread::spawn(move || {
-                let stdin = stdin();
-                loop {
-                    let mut line = String::new();
-                    match stdin.read_line(&mut line) {
-                        Ok(len) => {
-                            if len == 0 {
-                                break;
-                            } else {
-                                sender.send(line).ok();
-                            }
+            let reader = stdin();
+
+            thread::spawn(move || loop {
+                let mut line = String::new();
+                match reader.read_line(&mut line) {
+                    Ok(len) => {
+                        if len == 0 {
+                            break;
+                        } else {
+                            sender.send(line).ok();
                         }
-                        Err(_) => panic!("BUG!, please report it"),
                     }
+                    Err(_) => panic!("BUG!, please report it"),
                 }
             });
         }
+
         Ok(())
     }
 
