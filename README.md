@@ -62,10 +62,27 @@
     -h               Print help
 
   $ cat shakespeare.txt | logss -c to -c be -c or -c 'in.*of'
+  $ # 
+  $ cat real_curl_example.yaml
+    command:
+      - curl
+      - -s
+      - https://raw.githubusercontent.com/linuxacademy/content-elastic-log-samples/master/access.log
+    render: 75
+    containers:
+      - GET
+      - "404"
+      - ".*ERROR|error.*"
+  $ logss -f real_curl_example.yaml 
   ```
 
 ## Screenshots
+<details>
+  <summary>File Configuration</summary>
 
+  [![asciicast](https://asciinema.org/a/581505.svg)](https://asciinema.org/a/581505)
+
+</details>
 <details>
   <summary>Zooms</summary>
 
@@ -117,7 +134,7 @@ Pre compiled binaries for several platforms can be downloaded from the [release]
 ## Roadmap
 
 This is just a personal project intended to learn Rust, so things move slowly. 
-Currently it is a Alpha release because there are several things missing but it works and can be useful for someone.
+Currently it is an Alpha release because there are several things missing but it works and can be useful for someone.
 
 This is a list of things I plan to do:
 
