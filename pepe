@@ -1,2 +1,0 @@
-#!/bin/sh
-journalctl --no-pager -q --since yesterday
