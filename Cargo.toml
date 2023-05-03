@@ -1,8 +1,8 @@
 [package]
 name = "logss"
-version = "1.2.0-alpha"
+version = "1.0.0-beta"
 authors = ["Victor Rosales <todoesverso@gmail.com>"]
-edition = "2018"
+edition = "2021"
 publish = false
 repository = "https://github.com/todoesverso/logss"
 keywords = ["terminal", "logs", "cli", "split"]
