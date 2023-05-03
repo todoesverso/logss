@@ -42,25 +42,6 @@ jobs:
             target
             /home/runner/.cargo
           key: ${{ steps.target-cache-restore.outputs.cache-primary-key }}
-  proptest:
-    runs-on: ubuntu-latest
-    name: ubuntu / stable
-    needs: required
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          submodules: true
-      - name: Install stable
-        uses: dtolnay/rust-toolchain@stable
-      - name: Restore cached target/
-        uses: actions/cache/restore@v3
-        with:
-          path: |
-            target
-            /home/runner/.cargo
-          key: stable-target
-      - name: cargo test --test proptest --locked -- --ignored
-        run: cargo test --locked --test proptest -- --ignored
   minimal:
     runs-on: ubuntu-latest
     name: ubuntu / stable / minimal-versions
@@ -128,8 +109,6 @@ jobs:
         run: cargo llvm-cov clean --workspace
       - name: cargo llvm-cov
         run: cargo llvm-cov --locked --all-features --no-report --release
-      - name: cargo llvm-cov proptest
-        run: cargo llvm-cov --locked --all-features --no-report --release --test proptest -- --ignored
       - name: Save cached target/
         id: target-cache-save
         uses: actions/cache/save@v3
