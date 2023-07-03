@@ -74,7 +74,7 @@ jobs:
     # https://docs.github.com/en/actions/learn-github-actions/contexts#context-availability
     strategy:
       matrix:
-        msrv: [1.64.0] # crates-index
+        msrv: [1.65.0] # crates-index
     name: ubuntu / ${{ matrix.msrv }}
     steps:
       - uses: actions/checkout@v3
