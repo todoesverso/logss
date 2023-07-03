@@ -1,7 +1,7 @@
 use ratatui::backend::Backend;
 use ratatui::style::Style;
 use ratatui::terminal::Frame;
-use ratatui::text::{Span, Spans};
+use ratatui::text::{Line, Span};
 use unicode_width::UnicodeWidthStr;
 
 use crate::popup::{centered_rect, render_popup};
@@ -20,7 +20,7 @@ impl Input {
     pub fn render<B: Backend>(&self, frame: &mut Frame<'_, B>) {
         let pos = (40, 8);
         let area = centered_rect(pos.0, pos.1, frame.size());
-        let text = vec![Spans::from(Span::styled(
+        let text = vec![Line::from(Span::styled(
             self.input.clone(),
             Style::default(),
         ))];

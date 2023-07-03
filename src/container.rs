@@ -2,7 +2,7 @@ use ratatui::backend::Backend;
 use ratatui::layout::Rect;
 use ratatui::style::{Color, Modifier, Style};
 use ratatui::terminal::Frame;
-use ratatui::text::{Span, Spans};
+use ratatui::text::{Line, Span};
 use ratatui::widgets::{Block, Borders, Paragraph, Wrap};
 use regex::Regex;
 
@@ -15,7 +15,7 @@ pub struct Container<'a> {
     text: String,
     pub re: Regex,
     /// circular buffer with matching lines
-    pub cb: CircularBuffer<Spans<'a>>,
+    pub cb: CircularBuffer<Line<'a>>,
     pub id: u8,
     pub state: ContainerState,
 }
@@ -46,13 +46,13 @@ impl<'a> Container<'a> {
         }
     }
 
-    fn process_line(&self, line: String) -> Option<Spans<'a>> {
+    fn process_line(&self, line: String) -> Option<Line<'a>> {
         // TODO: maybe add smart time coloration?
         if let Some(mat) = self.re.find(&line) {
             let start = mat.start();
             let end = mat.end();
 
-            return Some(Spans(vec![
+            return Some(Line::from(vec![
                 Span::from(line[0..start].to_string()),
                 Span::styled(
                     line[start..end].to_string(),
@@ -64,7 +64,7 @@ impl<'a> Container<'a> {
         None
     }
 
-    pub fn push(&mut self, element: Spans<'a>) {
+    pub fn push(&mut self, element: Line<'a>) {
         let _ = &self.cb.push(element);
     }
 
@@ -163,7 +163,7 @@ mod tests {
         let span = container.process_line("this line should not be proc".to_string());
         assert_eq!(span, None);
         let span = container.process_line("stringtomatch this line should be proc".to_string());
-        let expected_span = Some(Spans(vec![
+        let expected_span = Some(Line::from(vec![
             Span::from("".to_string()),
             Span::styled("stringtomatch".to_string(), Style::default().fg(Color::Red)),
             Span::from(" this line should be proc".to_string()),

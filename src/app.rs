@@ -2,7 +2,7 @@ use crossterm::event::KeyCode;
 use ratatui::backend::Backend;
 use ratatui::layout::{Constraint, Direction, Layout, Rect};
 use ratatui::terminal::Frame;
-use ratatui::text::Spans;
+use ratatui::text::Line;
 use std::error;
 use std::sync::mpsc::TryRecvError;
 
@@ -224,7 +224,7 @@ impl<'a> App<'a> {
             Ok(line) => {
                 // save all lines to a raw buffer
                 if !self.state.paused {
-                    self.raw_buffer.cb.push(Spans::from(line.clone()));
+                    self.raw_buffer.cb.push(Line::from(line.clone()));
                 }
                 for c in self.containers.iter_mut() {
                     if c.re.is_match(&line) && !self.state.paused {

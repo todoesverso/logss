@@ -1,14 +1,14 @@
 use ratatui::backend::Backend;
 use ratatui::layout::{Constraint, Direction, Layout, Rect};
 use ratatui::terminal::Frame;
-use ratatui::text::Spans;
+use ratatui::text::Line;
 use ratatui::widgets::Clear;
 use ratatui::widgets::{Block, Borders, Paragraph};
 
 pub fn render_popup<B: Backend>(
     frame: &mut Frame<'_, B>,
     title: &str,
-    text: Vec<Spans>,
+    text: Vec<Line>,
     percent_area: (u16, u16),
 ) {
     let size = frame.size();
@@ -66,7 +66,7 @@ mod tests {
     fn test_render_popup() {
         let backend = TestBackend::new(14, 14);
         let mut terminal = Terminal::new(backend).unwrap();
-        let text = vec![Spans::from(Span::styled("text", Style::default()))];
+        let text = vec![Line::from(Span::styled("text", Style::default()))];
         terminal
             .draw(|f| {
                 render_popup(f, "coso", text, (50, 50));
