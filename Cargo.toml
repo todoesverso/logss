@@ -18,7 +18,7 @@ ratatui = "0.21.0"
 regex = "1.9.1"
 serde_yaml = "0.9.22"
 serde = {version = "1.0.171", features = ["derive"]}
-proc-macro2 = "1.0.63"
+proc-macro2 = "1.0.64"
 
 [profile.release]
 codegen-units = 1
