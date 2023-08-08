@@ -72,11 +72,11 @@ impl<'a> App<'a> {
         Ok(())
     }
 
-    pub fn is_running(&self) -> bool {
+    pub const fn is_running(&self) -> bool {
         self.state.running
     }
 
-    pub fn show_input(&self) -> bool {
+    pub const fn show_input(&self) -> bool {
         self.state.show_input
     }
 
@@ -303,7 +303,7 @@ impl<'a> App<'a> {
             );
         }
         // Raw buffer
-        let mut container = &mut self.raw_buffer;
+        let container = &mut self.raw_buffer;
         container.state.paused = self.state.paused;
 
         container.update_scroll(

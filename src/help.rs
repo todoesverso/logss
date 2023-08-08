@@ -55,7 +55,7 @@ pub fn render_help<B: Backend>(frame: &mut Frame<'_, B>) {
             Style::default().bg(Color::Red),
         )),
     ];
-    render_popup(frame, "Help", help_text, (50, 50));
+    render_popup(frame, "Help", &help_text, (50, 50));
 }
 
 #[cfg(test)]

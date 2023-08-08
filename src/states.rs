@@ -40,7 +40,7 @@ impl Default for AppState {
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Eq, PartialEq)]
 pub struct ContainerState {
     pub paused: bool,
     pub hide: bool,

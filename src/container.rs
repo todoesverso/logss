@@ -114,10 +114,11 @@ impl<'a> Container<'a> {
 }
 
 fn create_block(title: &str, color: Color, paused: bool) -> Block {
-    let mut modifier = Modifier::BOLD;
-    if paused {
-        modifier = Modifier::BOLD | Modifier::SLOW_BLINK;
-    }
+    let modifier = if paused {
+        Modifier::BOLD | Modifier::SLOW_BLINK
+    } else {
+        Modifier::BOLD
+    };
     Block::default().borders(Borders::ALL).title(Span::styled(
         title,
         Style::default().add_modifier(modifier).fg(color),

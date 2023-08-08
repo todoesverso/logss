@@ -66,10 +66,10 @@ where
     }
 
     /// Clones and returns a new instance of [`CircularBuffer`] in the write order
-    pub fn ordered_clone(&self) -> CircularBuffer<T> {
+    pub fn ordered_clone(&self) -> Self {
         let capacity = self.capacity();
         let len = self.len();
-        let mut cb = CircularBuffer::new(capacity);
+        let mut cb = Self::new(capacity);
 
         if len < capacity {
             cb.buffer = self.buffer.clone();
