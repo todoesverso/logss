@@ -89,30 +89,30 @@ mod tests {
 
         // Test stoping
         app.state.running = true;
-        assert_eq!(app.is_running(), true);
+        assert!(app.is_running());
         let key = KeyEvent::new(KeyCode::Esc, KeyModifiers::NONE);
         handle_key_events(key, &mut app).ok();
-        assert_eq!(app.is_running(), false);
+        assert!(!app.is_running());
 
         app.state.running = true;
         let key = KeyEvent::new(KeyCode::Char('d'), KeyModifiers::NONE);
         handle_key_events(key, &mut app).ok();
-        assert_eq!(app.is_running(), true);
+        assert!(app.is_running());
 
         app.state.running = true;
         let key = KeyEvent::new(KeyCode::Char('D'), KeyModifiers::NONE);
         handle_key_events(key, &mut app).ok();
-        assert_eq!(app.is_running(), true);
+        assert!(app.is_running());
 
         app.state.running = true;
         let key = KeyEvent::new(KeyCode::Char('d'), KeyModifiers::CONTROL);
         handle_key_events(key, &mut app).ok();
-        assert_eq!(app.is_running(), false);
+        assert!(!app.is_running());
 
         app.state.running = true;
         let key = KeyEvent::new(KeyCode::Char('D'), KeyModifiers::CONTROL);
         handle_key_events(key, &mut app).ok();
-        assert_eq!(app.is_running(), false);
+        assert!(!app.is_running());
     }
 
     #[test]
@@ -131,49 +131,49 @@ mod tests {
     #[test]
     fn flip_show_input() {
         let mut app = App::default();
-        assert_eq!(app.state.show_input, false);
+        assert!(!app.state.show_input);
         let key = KeyEvent::new(KeyCode::Char('i'), KeyModifiers::NONE);
         handle_key_events(key, &mut app).ok();
-        assert_eq!(app.state.show_input, true);
+        assert!(app.state.show_input);
         let key = KeyEvent::new(KeyCode::Esc, KeyModifiers::NONE);
         handle_key_events(key, &mut app).ok();
-        assert_eq!(app.state.show_input, false);
+        assert!(!app.state.show_input);
     }
 
     #[test]
     fn flip_help() {
         let mut app = App::default();
-        assert_eq!(app.state.help, false);
+        assert!(!app.state.help);
         let key = KeyEvent::new(KeyCode::Char('h'), KeyModifiers::NONE);
         handle_key_events(key, &mut app).ok();
-        assert_eq!(app.state.help, true);
+        assert!(app.state.help);
         let key = KeyEvent::new(KeyCode::Char('h'), KeyModifiers::NONE);
         handle_key_events(key, &mut app).ok();
-        assert_eq!(app.state.help, false);
+        assert!(!app.state.help);
     }
 
     #[test]
     fn flip_wrap() {
         let mut app = App::default();
-        assert_eq!(app.state.wrap, false);
+        assert!(!app.state.wrap);
         let key = KeyEvent::new(KeyCode::Char('w'), KeyModifiers::NONE);
         handle_key_events(key, &mut app).ok();
-        assert_eq!(app.state.wrap, true);
+        assert!(app.state.wrap);
         let key = KeyEvent::new(KeyCode::Char('w'), KeyModifiers::NONE);
         handle_key_events(key, &mut app).ok();
-        assert_eq!(app.state.help, false);
+        assert!(!app.state.help);
     }
 
     #[test]
     fn flip_pause() {
         let mut app = App::default();
-        assert_eq!(app.state.paused, false);
+        assert!(!app.state.paused);
         let key = KeyEvent::new(KeyCode::Char('p'), KeyModifiers::NONE);
         handle_key_events(key, &mut app).ok();
-        assert_eq!(app.state.paused, true);
+        assert!(app.state.paused);
         let key = KeyEvent::new(KeyCode::Char('p'), KeyModifiers::NONE);
         handle_key_events(key, &mut app).ok();
-        assert_eq!(app.state.help, false);
+        assert!(!app.state.help);
     }
 
     #[test]
@@ -193,30 +193,30 @@ mod tests {
         let mut app = App::default();
         assert_eq!(app.state.scroll_up, 0);
         assert_eq!(app.state.scroll_down, 0);
-        assert_eq!(app.state.paused, false);
+        assert!(!app.state.paused);
         let mut key = KeyEvent::new(KeyCode::Up, KeyModifiers::NONE);
         key.kind = KeyEventKind::Press;
         handle_key_events(key, &mut app).ok();
         assert_eq!(app.state.scroll_up, 1);
         assert_eq!(app.state.scroll_down, 0);
-        assert_eq!(app.state.paused, true);
+        assert!(app.state.paused);
         let mut key = KeyEvent::new(KeyCode::Up, KeyModifiers::NONE);
         key.kind = KeyEventKind::Press;
         handle_key_events(key, &mut app).ok();
         assert_eq!(app.state.scroll_up, 2);
         assert_eq!(app.state.scroll_down, 0);
-        assert_eq!(app.state.paused, true);
+        assert!(app.state.paused);
         let mut key = KeyEvent::new(KeyCode::Down, KeyModifiers::NONE);
         key.kind = KeyEventKind::Press;
         handle_key_events(key, &mut app).ok();
         assert_eq!(app.state.scroll_up, 2);
         assert_eq!(app.state.scroll_down, 1);
-        assert_eq!(app.state.paused, true);
+        assert!(app.state.paused);
         let key = KeyEvent::new(KeyCode::Char('c'), KeyModifiers::NONE);
         handle_key_events(key, &mut app).ok();
         assert_eq!(app.state.scroll_up, 0);
         assert_eq!(app.state.scroll_down, 0);
-        assert_eq!(app.state.paused, false);
+        assert!(!app.state.paused);
     }
 
     #[test]
@@ -255,10 +255,10 @@ mod tests {
         let mut app = App::default();
         for i in 1..9_u8 {
             app.add_container(&i.to_string());
-            assert_eq!(app.containers[(i - 1) as usize].state.hide, false);
+            assert!(!app.containers[(i - 1) as usize].state.hide);
             let key = KeyEvent::new(KeyCode::F(i), KeyModifiers::NONE);
             handle_key_events(key, &mut app).ok();
-            assert_eq!(app.containers[(i - 1) as usize].state.hide, true);
+            assert!(app.containers[(i - 1) as usize].state.hide);
         }
     }
 }

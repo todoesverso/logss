@@ -70,8 +70,8 @@ mod tests {
     #[test]
     fn init_container_state() {
         let cs = ContainerState::default();
-        assert_eq!(cs.paused, false);
-        assert_eq!(cs.wrap, false);
+        assert!(!cs.paused);
+        assert!(!cs.wrap);
         assert_eq!(cs.scroll, 0);
         assert_eq!(cs.color, Color::Red);
         assert_eq!(cs.style, Style::default().fg(Color::White).bg(Color::Black));
@@ -80,13 +80,13 @@ mod tests {
     #[test]
     fn test_app_state() {
         let appstate = AppState::default();
-        assert_eq!(appstate.wrap, false);
-        assert_eq!(appstate.paused, false);
-        assert_eq!(appstate.running, false);
+        assert!(!appstate.wrap);
+        assert!(!appstate.paused);
+        assert!(!appstate.running);
         assert_eq!(appstate.show, Views::Containers);
         assert_eq!(appstate.direction, Direction::Vertical);
-        assert_eq!(appstate.help, false);
-        assert_eq!(appstate.show_input, false);
+        assert!(!appstate.help);
+        assert!(!appstate.show_input);
         assert_eq!(appstate.zoom_id, None);
         assert_eq!(appstate.scroll_up, 0);
         assert_eq!(appstate.scroll_down, 0);

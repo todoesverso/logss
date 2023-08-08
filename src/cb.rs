@@ -91,12 +91,12 @@ mod tests {
         let mut cb: CircularBuffer<i32> = CircularBuffer::new(3);
         assert_eq!(cb.capacity(), 3);
         assert_eq!(cb.len(), 0);
-        assert_eq!(cb.is_empty(), true);
+        assert!(cb.is_empty());
 
         cb.push(1);
         assert_eq!(cb.buffer, vec![1]);
         assert_eq!(cb.len(), 1);
-        assert_eq!(cb.is_empty(), false);
+        assert!(!cb.is_empty());
 
         cb.push(2);
         cb.push(3);

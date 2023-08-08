@@ -137,10 +137,10 @@ mod tests {
     #[test]
     fn test_validate_regex() {
         let c = vec!["a".to_string()];
-        assert_eq!(validate_regex(&c), true);
+        assert!(validate_regex(&c));
 
         let c = vec!["*".to_string()];
-        assert_eq!(validate_regex(&c), false);
+        assert!(!validate_regex(&c));
     }
 
     #[test]

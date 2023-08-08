@@ -392,11 +392,11 @@ mod tests {
         let mut app = App::new(None);
 
         // Running
-        assert_eq!(app.is_running(), false);
+        assert!(!app.is_running());
         app.init().unwrap();
-        assert_eq!(app.is_running(), true);
+        assert!(app.is_running());
         app.stop();
-        assert_eq!(app.is_running(), false);
+        assert!(!app.is_running());
 
         // Direction
         assert_eq!(app.state.direction, Direction::Vertical);
@@ -433,7 +433,7 @@ mod tests {
         assert_eq!(app.containers.len(), 0);
         app.update_input(KeyCode::Enter);
         // Enter the input
-        assert_eq!(app.show_input(), false);
+        assert!(!app.show_input());
         assert_eq!(app.input.input, "".to_string());
         assert_eq!(app.containers.len(), 1);
     }
@@ -465,8 +465,8 @@ mod tests {
         let mut app = App::new(None);
         app.add_container("a");
         let c = app.containers.get(0).unwrap();
-        assert_eq!(c.cb.is_empty(), true);
-        assert_eq!(app.raw_buffer.cb.is_empty(), true);
+        assert!(c.cb.is_empty());
+        assert!(app.raw_buffer.cb.is_empty());
         assert_eq!(app.raw_buffer.cb.len(), 0);
         app.init().unwrap();
         app.stdin.sender.send("abc".to_string()).unwrap();
@@ -476,9 +476,9 @@ mod tests {
         app.tick();
 
         let c = app.containers.get(0).unwrap();
-        assert_eq!(c.cb.is_empty(), false);
+        assert!(!c.cb.is_empty());
         assert_eq!(c.cb.len(), 1);
-        assert_eq!(app.raw_buffer.cb.is_empty(), false);
+        assert!(!app.raw_buffer.cb.is_empty());
         assert_eq!(app.raw_buffer.cb.len(), 2);
     }
 
@@ -764,8 +764,8 @@ mod tests {
         app.add_container("b");
 
         for c in app.containers.iter() {
-            assert_eq!(c.state.paused, false);
-            assert_eq!(c.state.wrap, false);
+            assert!(!c.state.paused);
+            assert!(!c.state.wrap);
             assert_eq!(c.state.scroll, 0);
         }
 

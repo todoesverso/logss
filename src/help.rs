@@ -72,6 +72,6 @@ mod tests {
                 render_help(f);
             })
             .is_ok();
-        assert_eq!(res, true);
+        assert!(res);
     }
 }
