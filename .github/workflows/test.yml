@@ -58,7 +58,7 @@ jobs:
       - name: cargo update -Zminimal-versions
         run: cargo +nightly update -Zminimal-versions
       - name: cargo test
-        run: cargo test --locked --all-features --all-targets -Z macro-backtrace
+        run: cargo test --locked --all-features --all-targets
   os-check:
     runs-on: ${{ matrix.os }}
     name: ${{ matrix.os }} / stable
