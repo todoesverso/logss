@@ -8,6 +8,17 @@ repository = "https://github.com/todoesverso/logss"
 keywords = ["terminal", "logs", "cli", "split"]
 categories = ["visualization", "command-line-utilities", "parsing"]
 license = "MIT"
+rust-version = "1.67.0"
+exclude = [
+  "assets/*",
+  ".github",
+  "Makefile.toml",
+  "CONTRIBUTING.md",
+  "*.log",
+  "tags",
+]
+readme = "README.md"
+
 
 [dependencies]
 crossterm = "0.26.1"
