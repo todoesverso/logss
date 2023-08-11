@@ -14,7 +14,7 @@ pub struct Input {
 
 impl Input {
     pub fn new() -> Self {
-        Input::default()
+        Self::default()
     }
 
     pub fn render<B: Backend>(&self, frame: &mut Frame<'_, B>) {
@@ -26,7 +26,7 @@ impl Input {
         ))];
 
         frame.set_cursor(area.x + self.input.width() as u16 + 1, area.y + 1);
-        render_popup(frame, "Input", text, (pos.0, pos.1));
+        render_popup(frame, "Input", &text, (pos.0, pos.1));
     }
 
     pub fn reset(&mut self) {
@@ -36,9 +36,11 @@ impl Input {
     pub fn push(&mut self, ch: char) {
         self.input.push(ch);
     }
+
     pub fn pop(&mut self) {
         self.input.pop();
     }
+
     pub fn inner_clone(&self) -> String {
         self.input.clone()
     }

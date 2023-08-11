@@ -8,12 +8,12 @@ use ratatui::widgets::{Block, Borders, Paragraph};
 pub fn render_popup<B: Backend>(
     frame: &mut Frame<'_, B>,
     title: &str,
-    text: Vec<Line>,
+    text: &[Line],
     percent_area: (u16, u16),
 ) {
     let size = frame.size();
     let block = Block::default().title(title).borders(Borders::ALL);
-    let paragraph = Paragraph::new(text.clone()).block(block);
+    let paragraph = Paragraph::new(text.to_owned()).block(block);
     let area = centered_rect(percent_area.0, percent_area.1, size);
 
     frame.render_widget(Clear, area); // this clears out the background
@@ -69,7 +69,7 @@ mod tests {
         let text = vec![Line::from(Span::styled("text", Style::default()))];
         terminal
             .draw(|f| {
-                render_popup(f, "coso", text, (50, 50));
+                render_popup(f, "coso", &text, (50, 50));
             })
             .unwrap();
         let expected = Buffer::with_lines(vec![

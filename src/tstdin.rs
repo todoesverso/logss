@@ -36,8 +36,7 @@ impl StdinHandler {
 
             let stdout = child
                 .stdout
-                .ok_or_else(|| Error::new(ErrorKind::Other, "Failed to run command"))
-                .unwrap();
+                .ok_or_else(|| Error::new(ErrorKind::Other, "Failed to run command"))?;
 
             let mut reader = BufReader::new(stdout);
 
