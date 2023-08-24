@@ -28,7 +28,7 @@ pico-args = "0.5.0"
 ratatui = "0.22.0"
 regex = "1.9.1"
 serde_yaml = "0.9.22"
-serde = {version = "1.0.171", features = ["derive"]}
+serde = {version = "1.0.186", features = ["derive"]}
 proc-macro2 = "1.0.64"
 
 [profile.release]
