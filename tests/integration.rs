@@ -29,6 +29,7 @@ Options:
   -e               Exit on empty input [default: false]
   -C <COMMAND>     Gets input from this command
   -f <FILE>        Input config file (overrides cli arguments)
+  -o <OUTPUT_PATH> If defined, files with matched patters will be created
   -r <RENDER>      Defines render speed in milliseconds [default: 100]
   -V               Start in vertical view mode
   -h               Print help

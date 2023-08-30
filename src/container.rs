@@ -1,3 +1,7 @@
+use std::fs::{File, OpenOptions};
+use std::io::Write;
+use std::path::{Path, PathBuf};
+
 use ratatui::backend::Backend;
 use ratatui::layout::Rect;
 use ratatui::style::{Color, Modifier, Style};
@@ -5,6 +9,7 @@ use ratatui::terminal::Frame;
 use ratatui::text::{Line, Span};
 use ratatui::widgets::{Block, Borders, Paragraph, Wrap};
 use regex::Regex;
+use slug;
 
 use crate::cb::CircularBuffer;
 use crate::states::ContainerState;
@@ -18,6 +23,7 @@ pub struct Container<'a> {
     pub cb: CircularBuffer<Line<'a>>,
     pub id: u8,
     pub state: ContainerState,
+    pub file: Option<File>,
 }
 
 pub const CONTAINER_BUFFER: usize = 64;
@@ -36,13 +42,30 @@ pub const CONTAINER_COLORS: [ratatui::style::Color; 10] = [
 ];
 
 impl<'a> Container<'a> {
-    pub fn new(text: String, buffersize: usize) -> Self {
+    pub fn new(text: String, buffersize: usize, output_path: Option<PathBuf>) -> Self {
+        let mut file = None;
+        if let Some(inner_path) = output_path {
+            let file_name = format!(
+                "{}/{}.txt",
+                inner_path.to_string_lossy(),
+                slug::slugify(text.clone())
+            );
+            let file_path = Path::new(&file_name);
+            file = Some(
+                OpenOptions::new()
+                    .append(true)
+                    .create(true)
+                    .open(file_path)
+                    .expect("Failed to create file"),
+            );
+        }
         Self {
             text: text.clone(),
             re: Regex::new(&text).unwrap(),
             cb: CircularBuffer::new(buffersize),
             id: 0,
             state: ContainerState::default(),
+            file,
         }
     }
 
@@ -69,9 +92,14 @@ impl<'a> Container<'a> {
     }
 
     pub fn proc_and_push_line(&mut self, line: String) {
+        let l = line.clone();
         let sp = self.process_line(line);
         if let Some(spans) = sp {
             let _ = &self.push(spans);
+        }
+        if let Some(file) = &mut self.file {
+            file.write_all(l.as_bytes()).expect("Failed to write file");
+            file.flush().expect("Failed to flush");
         }
     }
 
@@ -150,7 +178,7 @@ mod tests {
 
     #[test]
     fn test_container_new() {
-        let container = Container::new("key".to_string(), 2);
+        let container = Container::new("key".to_string(), 2, None);
         assert_eq!(container.id, 0);
         assert_eq!(container.text, "key");
         assert_eq!(container.cb.len(), 0);
@@ -160,7 +188,7 @@ mod tests {
 
     #[test]
     fn process_line() {
-        let container = Container::new("stringtomatch".to_string(), 2);
+        let container = Container::new("stringtomatch".to_string(), 2, None);
         let span = container.process_line("this line should not be proc".to_string());
         assert_eq!(span, None);
         let span = container.process_line("stringtomatch this line should be proc".to_string());
