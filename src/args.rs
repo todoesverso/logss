@@ -156,6 +156,7 @@ mod tests {
     use super::*;
     use std::ffi::OsStr;
     use std::fs::{remove_dir_all, DirBuilder};
+    #[cfg(not(target_arch="windows"))]
     use std::os::unix::fs::DirBuilderExt;
     use std::path::PathBuf;
 
@@ -194,6 +195,7 @@ mod tests {
         let _ = remove_dir_all("test-sarasa");
     }
 
+    #[cfg(not(target_arch="windows"))]
     #[test]
     fn test_validate_path() {
         let _ = remove_dir_all("test-sarasa");
