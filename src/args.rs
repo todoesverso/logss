@@ -185,6 +185,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(not(target_os = "windows"))]
     fn test_validate_path_no_perm() {
         let _ = remove_dir_all("test-sarasa");
         let mut dir = DirBuilder::new();
@@ -195,7 +196,6 @@ mod tests {
         let _ = remove_dir_all("test-sarasa");
     }
 
-    #[cfg(not(target_os = "windows"))]
     #[test]
     fn test_validate_path() {
         let _ = remove_dir_all("test-sarasa");
