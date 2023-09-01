@@ -199,8 +199,7 @@ mod tests {
     #[test]
     fn test_validate_path() {
         let _ = remove_dir_all("test-sarasa");
-        let mut path = PathBuf::new();
-        path.push("test-sarasa");
+        let path = PathBuf::from("test-sarasa");
         let mut dir = DirBuilder::new();
         dir.recursive(true).create("test-sarasa").unwrap();
         assert_eq!(validate_path(OsStr::new("test-sarasa")), Ok(path));

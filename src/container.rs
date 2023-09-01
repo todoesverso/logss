@@ -11,6 +11,7 @@ use ratatui::widgets::{Block, Borders, Paragraph, Wrap};
 use regex::Regex;
 use slug;
 
+use crate::app::AppResult;
 use crate::cb::CircularBuffer;
 use crate::states::ContainerState;
 
@@ -42,31 +43,32 @@ pub const CONTAINER_COLORS: [ratatui::style::Color; 10] = [
 ];
 
 impl<'a> Container<'a> {
-    pub fn new(text: String, buffersize: usize, output_path: Option<PathBuf>) -> Self {
-        let mut file = None;
-        if let Some(inner_path) = output_path {
-            let file_name = format!(
-                "{}/{}.txt",
-                inner_path.to_string_lossy(),
-                slug::slugify(text.clone())
-            );
-            let file_path = Path::new(&file_name);
-            file = Some(
-                OpenOptions::new()
-                    .append(true)
-                    .create(true)
-                    .open(file_path)
-                    .expect("Failed to create file"),
-            );
-        }
+    pub fn new(text: String, buffersize: usize) -> Self {
         Self {
             text: text.clone(),
             re: Regex::new(&text).unwrap(),
             cb: CircularBuffer::new(buffersize),
             id: 0,
             state: ContainerState::default(),
-            file,
+            file: None,
         }
+    }
+
+    pub fn set_output_path(&mut self, output_path: PathBuf) -> AppResult<()> {
+        let file_name = format!(
+            "{}/{}.txt",
+            output_path.to_string_lossy(),
+            slug::slugify(self.text.clone())
+        );
+        let file_path = Path::new(&file_name);
+        self.file = Some(
+            OpenOptions::new()
+                .append(true)
+                .create(true)
+                .open(file_path)?,
+        );
+
+        Ok(())
     }
 
     fn process_line(&self, line: String) -> Option<Line<'a>> {
@@ -178,7 +180,7 @@ mod tests {
 
     #[test]
     fn test_container_new() {
-        let container = Container::new("key".to_string(), 2, None);
+        let container = Container::new("key".to_string(), 2);
         assert_eq!(container.id, 0);
         assert_eq!(container.text, "key");
         assert_eq!(container.cb.len(), 0);
@@ -187,8 +189,19 @@ mod tests {
     }
 
     #[test]
+    fn test_set_output_path() {
+        let _ = std::fs::remove_dir_all("test-sarasa");
+        let mut container = Container::new("key".to_string(), 2);
+        let path = std::path::PathBuf::from("test-sarasa");
+        let mut dir = std::fs::DirBuilder::new();
+        dir.recursive(true).create("test-sarasa").unwrap();
+        assert!(container.set_output_path(path).is_ok());
+        let _ = std::fs::remove_dir_all("test-sarasa");
+    }
+
+    #[test]
     fn process_line() {
-        let container = Container::new("stringtomatch".to_string(), 2, None);
+        let container = Container::new("stringtomatch".to_string(), 2);
         let span = container.process_line("this line should not be proc".to_string());
         assert_eq!(span, None);
         let span = container.process_line("stringtomatch this line should be proc".to_string());
