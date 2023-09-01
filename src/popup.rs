@@ -64,7 +64,7 @@ mod tests {
 
     #[test]
     fn test_render_popup() {
-        let backend = TestBackend::new(14, 14);
+        let backend = TestBackend::new(14, 15);
         let mut terminal = Terminal::new(backend).unwrap();
         let text = vec![Line::from(Span::styled("text", Style::default()))];
         terminal
@@ -76,13 +76,14 @@ mod tests {
             "              ",
             "              ",
             "              ",
-            "   ┌coso─┐    ",
-            "   │text │    ",
-            "   │     │    ",
-            "   │     │    ",
-            "   │     │    ",
-            "   │     │    ",
-            "   └─────┘    ",
+            "              ",
+            "    ┌coso─┐   ",
+            "    │text │   ",
+            "    │     │   ",
+            "    │     │   ",
+            "    │     │   ",
+            "    │     │   ",
+            "    └─────┘   ",
             "              ",
             "              ",
             "              ",

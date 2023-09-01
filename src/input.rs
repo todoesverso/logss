@@ -71,7 +71,7 @@ mod tests {
         let mut input = Input::new();
         input.push('a');
         input.push('b');
-        let backend = TestBackend::new(20, 38);
+        let backend = TestBackend::new(20, 37);
         let mut terminal = Terminal::new(backend).unwrap();
         terminal.draw(|f| input.render(f)).unwrap();
         let expected = Buffer::with_lines(vec![
@@ -95,7 +95,6 @@ mod tests {
             "      ┌Input─┐      ",
             "      │ab    │      ",
             "      └──────┘      ",
-            "                    ",
             "                    ",
             "                    ",
             "                    ",
