@@ -1,3 +1,7 @@
+use std::fs::{File, OpenOptions};
+use std::io::Write;
+use std::path::{Path, PathBuf};
+
 use ratatui::backend::Backend;
 use ratatui::layout::Rect;
 use ratatui::style::{Color, Modifier, Style};
@@ -5,7 +9,9 @@ use ratatui::terminal::Frame;
 use ratatui::text::{Line, Span};
 use ratatui::widgets::{Block, Borders, Paragraph, Wrap};
 use regex::Regex;
+use slug;
 
+use crate::app::AppResult;
 use crate::cb::CircularBuffer;
 use crate::states::ContainerState;
 
@@ -18,6 +24,7 @@ pub struct Container<'a> {
     pub cb: CircularBuffer<Line<'a>>,
     pub id: u8,
     pub state: ContainerState,
+    pub file: Option<File>,
 }
 
 pub const CONTAINER_BUFFER: usize = 64;
@@ -43,7 +50,25 @@ impl<'a> Container<'a> {
             cb: CircularBuffer::new(buffersize),
             id: 0,
             state: ContainerState::default(),
+            file: None,
         }
+    }
+
+    pub fn set_output_path(&mut self, output_path: PathBuf) -> AppResult<()> {
+        let file_name = format!(
+            "{}/{}.txt",
+            output_path.to_string_lossy(),
+            slug::slugify(self.text.clone())
+        );
+        let file_path = Path::new(&file_name);
+        self.file = Some(
+            OpenOptions::new()
+                .append(true)
+                .create(true)
+                .open(file_path)?,
+        );
+
+        Ok(())
     }
 
     fn process_line(&self, line: String) -> Option<Line<'a>> {
@@ -69,9 +94,14 @@ impl<'a> Container<'a> {
     }
 
     pub fn proc_and_push_line(&mut self, line: String) {
+        let l = line.clone();
         let sp = self.process_line(line);
         if let Some(spans) = sp {
             let _ = &self.push(spans);
+        }
+        if let Some(file) = &mut self.file {
+            file.write_all(l.as_bytes()).expect("Failed to write file");
+            file.flush().expect("Failed to flush");
         }
     }
 
@@ -156,6 +186,17 @@ mod tests {
         assert_eq!(container.cb.len(), 0);
         assert_eq!(container.cb.capacity(), 2);
         assert_eq!(container.state, ContainerState::default());
+    }
+
+    #[test]
+    fn test_set_output_path() {
+        let _ = std::fs::remove_dir_all("test-sarasa");
+        let mut container = Container::new("key".to_string(), 2);
+        let path = std::path::PathBuf::from("test-sarasa");
+        let mut dir = std::fs::DirBuilder::new();
+        dir.recursive(true).create("test-sarasa").unwrap();
+        assert!(container.set_output_path(path).is_ok());
+        let _ = std::fs::remove_dir_all("test-sarasa");
     }
 
     #[test]

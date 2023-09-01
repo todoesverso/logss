@@ -56,6 +56,9 @@ impl<'a> App<'a> {
         // Let 0 for raw_buffer
         for (id, c) in (1_u8..).zip(ret.args.containers.iter()) {
             let mut con = Container::new(c.clone(), CONTAINER_BUFFER);
+            if let Some(output_path) = ret.args.output.clone() {
+                con.set_output_path(output_path).ok();
+            }
             con.state.color = CONTAINER_COLORS[(id - 1) as usize];
             con.id = id;
             ret.containers.push(con);
@@ -164,6 +167,9 @@ impl<'a> App<'a> {
     pub fn add_container(&mut self, text: &str) {
         let first_free_id = self.get_free_ids();
         let mut con = Container::new(text.to_string(), CONTAINER_BUFFER);
+        if let Some(output_path) = self.args.output.clone() {
+            con.set_output_path(output_path).ok();
+        }
         if let Some(inner_id) = first_free_id.first() {
             con.state.color = CONTAINER_COLORS[(inner_id - 1) as usize];
             con.id = *inner_id;

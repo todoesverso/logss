@@ -2,6 +2,7 @@ use pico_args;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
 use serde_yaml;
+use std::fs::{remove_file, OpenOptions};
 
 const HELP: &str = "\
 Simple cli command to show logs in a friendly way
@@ -13,6 +14,7 @@ Options:
   -e               Exit on empty input [default: false]
   -C <COMMAND>     Gets input from this command
   -f <FILE>        Input config file (overrides cli arguments)
+  -o <OUTPUT_PATH> If defined, files with matched patters will be created
   -r <RENDER>      Defines render speed in milliseconds [default: 100]
   -V               Start in vertical view mode
   -h               Print help
@@ -25,6 +27,7 @@ pub struct Args {
     pub vertical: Option<bool>,
     pub render: Option<u64>,
     pub command: Option<Vec<String>>,
+    pub output: Option<std::path::PathBuf>,
     pub config_file: Option<std::path::PathBuf>,
 }
 
@@ -51,6 +54,7 @@ fn parser() -> Result<Args, Box<dyn std::error::Error>> {
         containers: pargs.values_from_str("-c")?,
         command: pargs.opt_value_from_fn("-C", parse_cmd)?,
         config_file: pargs.opt_value_from_os_str("-f", parse_path)?,
+        output: pargs.opt_value_from_os_str("-o", validate_path)?,
         exit: pargs.contains("-e").then_some(true),
         vertical: pargs.contains("-V").then_some(true),
         render: pargs
@@ -106,6 +110,31 @@ fn parse_path(s: &std::ffi::OsStr) -> Result<std::path::PathBuf, &'static str> {
     Ok(s.into())
 }
 
+fn validate_path(s: &std::ffi::OsStr) -> Result<std::path::PathBuf, String> {
+    let p: std::path::PathBuf = s.into();
+    if !p.is_dir() {
+        return Err(format!("{} is not a valid path", p.display()));
+    }
+    /*  TODO: re write once you learn some real rust
+     * Not proud of this but is the simplest way I found to test
+     * write permissions in a directory
+     * */
+    let test_file_name = format!("{}/.logss", p.to_string_lossy());
+
+    let a = OpenOptions::new()
+        .append(true)
+        .create(true)
+        .open(&test_file_name);
+
+    match a {
+        Ok(_) => {
+            remove_file(test_file_name).expect("Failed to delete sentinel file");
+            Ok(p)
+        }
+        Err(e) => Err(e.to_string()),
+    }
+}
+
 fn parse_cmd(s: &str) -> Result<Vec<String>, Box<dyn std::error::Error>> {
     Ok(s.split_whitespace().map(str::to_string).collect())
 }
@@ -125,6 +154,12 @@ fn render_in_range(s: &str) -> Result<Option<u64>, String> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::ffi::OsStr;
+    use std::fs::{remove_dir_all, DirBuilder};
+    #[cfg(not(target_os = "windows"))]
+    use std::os::unix::fs::DirBuilderExt;
+    use std::path::PathBuf;
+
     #[test]
     fn test_render_in_range() {
         assert_eq!(
@@ -141,6 +176,34 @@ mod tests {
 
         let c = vec!["*".to_string()];
         assert!(!validate_regex(&c));
+    }
+
+    #[test]
+    fn test_validate_path_non_valid() {
+        let resp = Err("non_valid_path is not a valid path".to_string());
+        assert_eq!(validate_path(OsStr::new("non_valid_path")), resp);
+    }
+
+    #[test]
+    #[cfg(not(target_os = "windows"))]
+    fn test_validate_path_no_perm() {
+        let _ = remove_dir_all("test-sarasa");
+        let mut dir = DirBuilder::new();
+        dir.mode(0o444);
+        dir.recursive(true).create("test-sarasa").unwrap();
+        let resp = Err("Permission denied (os error 13)".to_string());
+        assert_eq!(validate_path(OsStr::new("test-sarasa")), resp);
+        let _ = remove_dir_all("test-sarasa");
+    }
+
+    #[test]
+    fn test_validate_path() {
+        let _ = remove_dir_all("test-sarasa");
+        let path = PathBuf::from("test-sarasa");
+        let mut dir = DirBuilder::new();
+        dir.recursive(true).create("test-sarasa").unwrap();
+        assert_eq!(validate_path(OsStr::new("test-sarasa")), Ok(path));
+        let _ = remove_dir_all("test-sarasa");
     }
 
     #[test]
