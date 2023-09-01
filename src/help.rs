@@ -31,6 +31,10 @@ pub fn render_help<B: Backend>(frame: &mut Frame<'_, B>) {
             Style::default().bg(Color::Blue),
         )),
         Line::from(Span::styled(
+            "s       - toggles between containers and single input",
+            Style::default().bg(Color::Blue),
+        )),
+        Line::from(Span::styled(
             "1-9     - toggles zoom to specific container",
             Style::default().bg(Color::Blue),
         )),

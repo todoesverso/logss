@@ -43,6 +43,8 @@
 * Support for regexp
 * Support for configuration file
 * Support for explicit command (no need to pipe into it)
+* Send all matched lines to dedicated files
+* Consolidated view with highlighted items
 
 
 ## Usage

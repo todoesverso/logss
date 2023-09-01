@@ -93,16 +93,18 @@ impl<'a> Container<'a> {
         let _ = &self.cb.push(element);
     }
 
-    pub fn proc_and_push_line(&mut self, line: String) {
+    pub fn proc_and_push_line(&mut self, line: String) -> Option<Line<'a>> {
         let l = line.clone();
-        let sp = self.process_line(line);
-        if let Some(spans) = sp {
-            let _ = &self.push(spans);
+        let rt_lines = self.process_line(line);
+        let ret = rt_lines.clone();
+        if let Some(rt_lines_in) = rt_lines {
+            let _ = &self.push(rt_lines_in);
         }
         if let Some(file) = &mut self.file {
             file.write_all(l.as_bytes()).expect("Failed to write file");
             file.flush().expect("Failed to flush");
         }
+        ret
     }
 
     pub fn update_scroll(&mut self, size: usize, up: &mut u16, down: &mut u16) {

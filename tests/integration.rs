@@ -27,6 +27,7 @@ Usage: logss [OPTIONS]
 Options:
   -c <CONTAINERS>  Finds the substring (regexp)
   -e               Exit on empty input [default: false]
+  -s               Starts showing the single view [default: false]
   -C <COMMAND>     Gets input from this command
   -f <FILE>        Input config file (overrides cli arguments)
   -o <OUTPUT_PATH> If defined, files with matched patters will be created

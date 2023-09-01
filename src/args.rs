@@ -12,6 +12,7 @@ Usage: logss [OPTIONS]
 Options:
   -c <CONTAINERS>  Finds the substring (regexp)
   -e               Exit on empty input [default: false]
+  -s               Starts showing the single view [default: false]
   -C <COMMAND>     Gets input from this command
   -f <FILE>        Input config file (overrides cli arguments)
   -o <OUTPUT_PATH> If defined, files with matched patters will be created
@@ -25,6 +26,7 @@ pub struct Args {
     pub containers: Vec<String>,
     pub exit: Option<bool>,
     pub vertical: Option<bool>,
+    pub single: Option<bool>,
     pub render: Option<u64>,
     pub command: Option<Vec<String>>,
     pub output: Option<std::path::PathBuf>,
@@ -56,6 +58,7 @@ fn parser() -> Result<Args, Box<dyn std::error::Error>> {
         config_file: pargs.opt_value_from_os_str("-f", parse_path)?,
         output: pargs.opt_value_from_os_str("-o", validate_path)?,
         exit: pargs.contains("-e").then_some(true),
+        single: pargs.contains("-s").then_some(true),
         vertical: pargs.contains("-V").then_some(true),
         render: pargs
             .opt_value_from_fn("-r", render_in_range)?

@@ -26,6 +26,7 @@ pub struct App<'a> {
     pub input: Input,
     stdin: StdinHandler,
     pub raw_buffer: Container<'a>,
+    pub single_buffer: Container<'a>,
     args: Args,
 }
 
@@ -36,6 +37,7 @@ impl<'a> Default for App<'a> {
             args: parse_args(),
             input: Input::default(),
             raw_buffer: Container::new(".*".to_string(), CONTAINER_BUFFER),
+            single_buffer: Container::new("single".to_string(), CONTAINER_BUFFER),
             containers: Vec::new(),
             state: AppState::default(),
         }
@@ -50,6 +52,9 @@ impl<'a> App<'a> {
             ret.args = args_inner;
             if ret.args.vertical.is_some() {
                 ret.state.direction = Direction::Horizontal;
+            }
+            if ret.args.single.is_some() {
+                ret.state.show = Views::SingleBuffer;
             }
         }
 
@@ -220,6 +225,16 @@ impl<'a> App<'a> {
         }
     }
 
+    pub fn flip_single_view(&mut self) {
+        if !self.containers.is_empty() {
+            if self.state.show == Views::SingleBuffer {
+                self.state.show = Views::Containers;
+            } else {
+                self.state.show = Views::SingleBuffer;
+            }
+        }
+    }
+
     /// Handles the tick event of the terminal.
     pub fn tick(&mut self) {
         self.get_stdin();
@@ -231,10 +246,13 @@ impl<'a> App<'a> {
                 // save all lines to a raw buffer
                 if !self.state.paused {
                     self.raw_buffer.cb.push(Line::from(line.clone()));
-                }
-                for c in self.containers.iter_mut() {
-                    if c.re.is_match(&line) && !self.state.paused {
-                        c.proc_and_push_line(line.clone());
+                    for c in self.containers.iter_mut() {
+                        if c.re.is_match(&line) {
+                            let ret = c.proc_and_push_line(line.clone());
+                            if let Some(l) = ret {
+                                self.single_buffer.cb.push(l.to_owned());
+                            }
+                        }
                     }
                 }
             }
@@ -323,6 +341,10 @@ impl<'a> App<'a> {
         let container = &self.raw_buffer;
         container.render(frame, frame.size());
     }
+    fn render_single<B: Backend>(&mut self, frame: &mut Frame<'_, B>) {
+        let container = &self.single_buffer;
+        container.render(frame, frame.size());
+    }
 
     fn render_id<B: Backend>(&mut self, frame: &mut Frame<'_, B>, id: u8) {
         for container in self.containers.iter() {
@@ -360,6 +382,9 @@ impl<'a> App<'a> {
             }
             Views::RawBuffer => {
                 self.render_raw(frame);
+            }
+            Views::SingleBuffer => {
+                self.render_single(frame);
             }
             Views::Zoom => {
                 if let Some(id) = self.state.zoom_id {
