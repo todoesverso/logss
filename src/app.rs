@@ -656,6 +656,15 @@ mod tests {
     }
 
     #[test]
+    fn flip_single_view() {
+        let mut app = App::new(None);
+        app.add_container("a");
+        assert_eq!(app.state.show, Views::RawBuffer);
+        app.flip_single_view();
+        assert_eq!(app.state.show, Views::SingleBuffer);
+    }
+
+    #[test]
     fn remove_view() {
         let mut app = App::new(None);
         app.add_container("a");

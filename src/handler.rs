@@ -130,6 +130,19 @@ mod tests {
     }
 
     #[test]
+    fn flip_single() {
+        let mut app = App::default();
+        app.add_container("3");
+        assert_eq!(app.containers.len(), 1);
+        assert_eq!(app.state.show, Views::Containers);
+        let key = KeyEvent::new(KeyCode::Char('s'), KeyModifiers::NONE);
+        handle_key_events(key, &mut app).ok();
+        assert_eq!(app.state.show, Views::SingleBuffer);
+        handle_key_events(key, &mut app).ok();
+        assert_eq!(app.state.show, Views::Containers);
+    }
+
+    #[test]
     fn flip_show_input() {
         let mut app = App::default();
         assert!(!app.state.show_input);
