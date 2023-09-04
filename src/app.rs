@@ -341,6 +341,7 @@ impl<'a> App<'a> {
         let container = &self.raw_buffer;
         container.render(frame, frame.size());
     }
+
     fn render_single<B: Backend>(&mut self, frame: &mut Frame<'_, B>) {
         let container = &self.single_buffer;
         container.render(frame, frame.size());
@@ -652,6 +653,55 @@ mod tests {
                 expected.get_mut(x, y).set_bg(Color::Black);
             }
         }
+        terminal.backend().assert_buffer(&expected);
+    }
+
+    #[test]
+    fn render_single_view() {
+        let mut app = App::new(None);
+        app.add_container("a");
+        for c in app.containers.iter_mut() {
+            c.state.color = Color::White;
+        }
+        app.state.show = Views::SingleBuffer;
+        let backend = TestBackend::new(14, 14);
+        let mut terminal = Terminal::new(backend).unwrap();
+        terminal
+            .draw(|f| {
+                app.render(f);
+            })
+            .unwrap();
+        let mut expected = Buffer::with_lines(vec![
+            "┌(0) - single┐",
+            "│            │",
+            "│            │",
+            "│            │",
+            "│            │",
+            "│            │",
+            "│            │",
+            "│            │",
+            "│            │",
+            "│            │",
+            "│            │",
+            "│            │",
+            "│            │",
+            "└────────────┘",
+        ]);
+
+        let bolds = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+        for x in 0..=13 {
+            for y in 0..=13 {
+                if bolds.contains(&x) && (y == 0) {
+                    let st = Style::default().add_modifier(Modifier::BOLD);
+                    expected.get_mut(x, y).set_style(st);
+                    expected.get_mut(x, y).set_fg(Color::Red);
+                } else {
+                    expected.get_mut(x, y).set_fg(Color::White);
+                }
+                expected.get_mut(x, y).set_bg(Color::Black);
+            }
+        }
+        dbg!(&expected);
         terminal.backend().assert_buffer(&expected);
     }
 
