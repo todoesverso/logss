@@ -26,6 +26,7 @@ pub struct App<'a> {
     pub input: Input,
     stdin: StdinHandler,
     pub raw_buffer: Container<'a>,
+    pub single_buffer: Container<'a>,
     args: Args,
 }
 
@@ -36,6 +37,7 @@ impl<'a> Default for App<'a> {
             args: parse_args(),
             input: Input::default(),
             raw_buffer: Container::new(".*".to_string(), CONTAINER_BUFFER),
+            single_buffer: Container::new("single".to_string(), CONTAINER_BUFFER),
             containers: Vec::new(),
             state: AppState::default(),
         }
@@ -50,6 +52,9 @@ impl<'a> App<'a> {
             ret.args = args_inner;
             if ret.args.vertical.is_some() {
                 ret.state.direction = Direction::Horizontal;
+            }
+            if ret.args.single.is_some() {
+                ret.state.show = Views::SingleBuffer;
             }
         }
 
@@ -220,6 +225,16 @@ impl<'a> App<'a> {
         }
     }
 
+    pub fn flip_single_view(&mut self) {
+        if !self.containers.is_empty() {
+            if self.state.show == Views::SingleBuffer {
+                self.state.show = Views::Containers;
+            } else {
+                self.state.show = Views::SingleBuffer;
+            }
+        }
+    }
+
     /// Handles the tick event of the terminal.
     pub fn tick(&mut self) {
         self.get_stdin();
@@ -231,10 +246,13 @@ impl<'a> App<'a> {
                 // save all lines to a raw buffer
                 if !self.state.paused {
                     self.raw_buffer.cb.push(Line::from(line.clone()));
-                }
-                for c in self.containers.iter_mut() {
-                    if c.re.is_match(&line) && !self.state.paused {
-                        c.proc_and_push_line(line.clone());
+                    for c in self.containers.iter_mut() {
+                        if c.re.is_match(&line) {
+                            let ret = c.proc_and_push_line(line.clone());
+                            if let Some(l) = ret {
+                                self.single_buffer.cb.push(l.to_owned());
+                            }
+                        }
                     }
                 }
             }
@@ -324,6 +342,11 @@ impl<'a> App<'a> {
         container.render(frame, frame.size());
     }
 
+    fn render_single<B: Backend>(&mut self, frame: &mut Frame<'_, B>) {
+        let container = &self.single_buffer;
+        container.render(frame, frame.size());
+    }
+
     fn render_id<B: Backend>(&mut self, frame: &mut Frame<'_, B>, id: u8) {
         for container in self.containers.iter() {
             if container.id == id {
@@ -360,6 +383,9 @@ impl<'a> App<'a> {
             }
             Views::RawBuffer => {
                 self.render_raw(frame);
+            }
+            Views::SingleBuffer => {
+                self.render_single(frame);
             }
             Views::Zoom => {
                 if let Some(id) = self.state.zoom_id {
@@ -628,6 +654,64 @@ mod tests {
             }
         }
         terminal.backend().assert_buffer(&expected);
+    }
+
+    #[test]
+    fn render_single_view() {
+        let mut app = App::new(None);
+        app.add_container("a");
+        for c in app.containers.iter_mut() {
+            c.state.color = Color::White;
+        }
+        app.state.show = Views::SingleBuffer;
+        let backend = TestBackend::new(14, 14);
+        let mut terminal = Terminal::new(backend).unwrap();
+        terminal
+            .draw(|f| {
+                app.render(f);
+            })
+            .unwrap();
+        let mut expected = Buffer::with_lines(vec![
+            "┌(0) - single┐",
+            "│            │",
+            "│            │",
+            "│            │",
+            "│            │",
+            "│            │",
+            "│            │",
+            "│            │",
+            "│            │",
+            "│            │",
+            "│            │",
+            "│            │",
+            "│            │",
+            "└────────────┘",
+        ]);
+
+        let bolds = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+        for x in 0..=13 {
+            for y in 0..=13 {
+                if bolds.contains(&x) && (y == 0) {
+                    let st = Style::default().add_modifier(Modifier::BOLD);
+                    expected.get_mut(x, y).set_style(st);
+                    expected.get_mut(x, y).set_fg(Color::Red);
+                } else {
+                    expected.get_mut(x, y).set_fg(Color::White);
+                }
+                expected.get_mut(x, y).set_bg(Color::Black);
+            }
+        }
+        dbg!(&expected);
+        terminal.backend().assert_buffer(&expected);
+    }
+
+    #[test]
+    fn flip_single_view() {
+        let mut app = App::new(None);
+        app.add_container("a");
+        assert_eq!(app.state.show, Views::RawBuffer);
+        app.flip_single_view();
+        assert_eq!(app.state.show, Views::SingleBuffer);
     }
 
     #[test]

@@ -4,6 +4,7 @@ use ratatui::style::{Color, Style};
 #[derive(Debug, Eq, PartialEq)]
 pub enum Views {
     RawBuffer,
+    SingleBuffer,
     Containers,
     Zoom,
     Remove,

@@ -16,6 +16,7 @@ pub fn handle_key_events(key_event: KeyEvent, app: &mut App) -> AppResult<()> {
                 }
             }
             KeyCode::Char('*') => app.flip_raw_view(),
+            KeyCode::Char('s') => app.flip_single_view(),
             KeyCode::Char('i') | KeyCode::Char('/') => app.flip_show_input(),
             KeyCode::Char('h') => app.flip_help(),
             KeyCode::Char('w') => app.flip_wrap(),
@@ -124,6 +125,19 @@ mod tests {
         let key = KeyEvent::new(KeyCode::Char('*'), KeyModifiers::NONE);
         handle_key_events(key, &mut app).ok();
         assert_eq!(app.state.show, Views::RawBuffer);
+        handle_key_events(key, &mut app).ok();
+        assert_eq!(app.state.show, Views::Containers);
+    }
+
+    #[test]
+    fn flip_single() {
+        let mut app = App::default();
+        app.add_container("3");
+        assert_eq!(app.containers.len(), 1);
+        assert_eq!(app.state.show, Views::Containers);
+        let key = KeyEvent::new(KeyCode::Char('s'), KeyModifiers::NONE);
+        handle_key_events(key, &mut app).ok();
+        assert_eq!(app.state.show, Views::SingleBuffer);
         handle_key_events(key, &mut app).ok();
         assert_eq!(app.state.show, Views::Containers);
     }
