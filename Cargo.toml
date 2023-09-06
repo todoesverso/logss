@@ -1,5 +1,6 @@
 [package]
 name = "logss"
+description = "A simple command line tool that helps you visualize an input stream of text."
 version = "1.0.0-beta"
 authors = ["Victor Rosales <todoesverso@gmail.com>"]
 edition = "2021"
