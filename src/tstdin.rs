@@ -32,6 +32,7 @@ impl StdinHandler {
             let child = Command::new(&inner_cmd[0])
                 .args(&inner_cmd[1..])
                 .stdout(Stdio::piped())
+                .stderr(Stdio::null())
                 .spawn()?;
 
             let stdout = child
