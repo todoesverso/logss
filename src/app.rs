@@ -248,7 +248,7 @@ impl<'a> App<'a> {
                     self.raw_buffer.cb.push(Line::from(line.clone()));
                     for c in self.containers.iter_mut() {
                         if c.re.is_match(&line) {
-                            let ret = c.proc_and_push_line(line.clone());
+                            let ret = c.proc_and_push_line(&line);
                             if let Some(l) = ret {
                                 self.single_buffer.cb.push(l.to_owned());
                             }
@@ -286,7 +286,7 @@ impl<'a> App<'a> {
             constr.push(Constraint::Ratio(1, show_cont as u32));
         }
         let ret = Layout::default()
-            .direction(self.state.direction.clone())
+            .direction(self.state.direction)
             .constraints(constr.as_ref())
             .split(size);
 
@@ -357,6 +357,7 @@ impl<'a> App<'a> {
 
     fn remove_id(&mut self, id: u8) {
         if let Some(index) = self.containers.iter().position(|c| c.id == id) {
+            self.containers[index].reset();
             self.containers.swap_remove(index);
         }
         self.containers.sort_by_key(|container| container.id);
@@ -535,7 +536,7 @@ mod tests {
         for c in app.containers.iter_mut() {
             c.state.color = Color::White;
         }
-        let backend = TestBackend::new(14, 14);
+        let backend = TestBackend::new(16, 14);
         let mut terminal = Terminal::new(backend).unwrap();
         terminal
             .draw(|f| {
@@ -543,23 +544,23 @@ mod tests {
             })
             .unwrap();
         let mut expected = Buffer::with_lines(vec![
-            "┌(1) - a─────┐",
-            "│            │",
-            "│            │",
-            "│            │",
-            "│            │",
-            "│            │",
-            "└────────────┘",
-            "┌(2) - b─────┐",
-            "│            │",
-            "│            │",
-            "│            │",
-            "│            │",
-            "│            │",
-            "└────────────┘",
+            "┌(1) - 'a' [0]─┐",
+            "│              │",
+            "│              │",
+            "│              │",
+            "│              │",
+            "│              │",
+            "└──────────────┘",
+            "┌(2) - 'b' [0]─┐",
+            "│              │",
+            "│              │",
+            "│              │",
+            "│              │",
+            "│              │",
+            "└──────────────┘",
         ]);
-        let bolds = [1, 2, 3, 4, 5, 6, 7];
-        for x in 0..=13 {
+        let bolds = 1..=13;
+        for x in 0..=15 {
             for y in 0..=13 {
                 if bolds.contains(&x) && (y == 0 || y == 7) {
                     expected
@@ -582,7 +583,7 @@ mod tests {
             c.state.color = Color::White;
         }
         app.zoom_into(1);
-        let backend = TestBackend::new(14, 14);
+        let backend = TestBackend::new(16, 14);
         let mut terminal = Terminal::new(backend).unwrap();
         terminal
             .draw(|f| {
@@ -590,23 +591,23 @@ mod tests {
             })
             .unwrap();
         let mut expected = Buffer::with_lines(vec![
-            "┌(1) - a─────┐",
-            "│            │",
-            "│            │",
-            "│            │",
-            "│            │",
-            "│            │",
-            "│            │",
-            "│            │",
-            "│            │",
-            "│            │",
-            "│            │",
-            "│            │",
-            "│            │",
-            "└────────────┘",
+            "┌(1) - 'a' [0]─┐",
+            "│              │",
+            "│              │",
+            "│              │",
+            "│              │",
+            "│              │",
+            "│              │",
+            "│              │",
+            "│              │",
+            "│              │",
+            "│              │",
+            "│              │",
+            "│              │",
+            "└──────────────┘",
         ]);
-        let bolds = [1, 2, 3, 4, 5, 6, 7];
-        for x in 0..=13 {
+        let bolds = 1..=13;
+        for x in 0..=15 {
             for y in 0..=13 {
                 if bolds.contains(&x) && (y == 0) {
                     expected
@@ -626,23 +627,23 @@ mod tests {
             })
             .unwrap();
         let mut expected = Buffer::with_lines(vec![
-            "┌(2) - b─────┐",
-            "│            │",
-            "│            │",
-            "│            │",
-            "│            │",
-            "│            │",
-            "│            │",
-            "│            │",
-            "│            │",
-            "│            │",
-            "│            │",
-            "│            │",
-            "│            │",
-            "└────────────┘",
+            "┌(2) - 'b' [0]─┐",
+            "│              │",
+            "│              │",
+            "│              │",
+            "│              │",
+            "│              │",
+            "│              │",
+            "│              │",
+            "│              │",
+            "│              │",
+            "│              │",
+            "│              │",
+            "│              │",
+            "└──────────────┘",
         ]);
-        let bolds = [1, 2, 3, 4, 5, 6, 7];
-        for x in 0..=13 {
+        let bolds = 1..=13;
+        for x in 0..=15 {
             for y in 0..=13 {
                 if bolds.contains(&x) && (y == 0) {
                     expected
@@ -664,7 +665,7 @@ mod tests {
             c.state.color = Color::White;
         }
         app.state.show = Views::SingleBuffer;
-        let backend = TestBackend::new(14, 14);
+        let backend = TestBackend::new(17, 14);
         let mut terminal = Terminal::new(backend).unwrap();
         terminal
             .draw(|f| {
@@ -672,24 +673,24 @@ mod tests {
             })
             .unwrap();
         let mut expected = Buffer::with_lines(vec![
-            "┌(0) - single┐",
-            "│            │",
-            "│            │",
-            "│            │",
-            "│            │",
-            "│            │",
-            "│            │",
-            "│            │",
-            "│            │",
-            "│            │",
-            "│            │",
-            "│            │",
-            "│            │",
-            "└────────────┘",
+            "┌(0) - 'single' ┐",
+            "│               │",
+            "│               │",
+            "│               │",
+            "│               │",
+            "│               │",
+            "│               │",
+            "│               │",
+            "│               │",
+            "│               │",
+            "│               │",
+            "│               │",
+            "│               │",
+            "└───────────────┘",
         ]);
 
-        let bolds = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
-        for x in 0..=13 {
+        let bolds = 1..=15;
+        for x in 0..=16 {
             for y in 0..=13 {
                 if bolds.contains(&x) && (y == 0) {
                     let st = Style::default().add_modifier(Modifier::BOLD);
@@ -724,7 +725,7 @@ mod tests {
         }
         app.flip_raw_view();
         app.remove_view(1);
-        let backend = TestBackend::new(14, 14);
+        let backend = TestBackend::new(16, 14);
         let mut terminal = Terminal::new(backend).unwrap();
         terminal
             .draw(|f| {
@@ -732,23 +733,23 @@ mod tests {
             })
             .unwrap();
         let mut expected = Buffer::with_lines(vec![
-            "┌(2) - b─────┐",
-            "│            │",
-            "│            │",
-            "│            │",
-            "│            │",
-            "│            │",
-            "│            │",
-            "│            │",
-            "│            │",
-            "│            │",
-            "│            │",
-            "│            │",
-            "│            │",
-            "└────────────┘",
+            "┌(2) - 'b' [0]─┐",
+            "│              │",
+            "│              │",
+            "│              │",
+            "│              │",
+            "│              │",
+            "│              │",
+            "│              │",
+            "│              │",
+            "│              │",
+            "│              │",
+            "│              │",
+            "│              │",
+            "└──────────────┘",
         ]);
-        let bolds = [1, 2, 3, 4, 5, 6, 7];
-        for x in 0..=13 {
+        let bolds = 1..=13;
+        for x in 0..=15 {
             for y in 0..=13 {
                 if bolds.contains(&x) && (y == 0) {
                     expected
@@ -772,7 +773,7 @@ mod tests {
         }
         app.flip_raw_view();
         app.hide_view(1);
-        let backend = TestBackend::new(14, 14);
+        let backend = TestBackend::new(16, 14);
         let mut terminal = Terminal::new(backend).unwrap();
         terminal
             .draw(|f| {
@@ -780,23 +781,23 @@ mod tests {
             })
             .unwrap();
         let mut expected = Buffer::with_lines(vec![
-            "┌(2) - b─────┐",
-            "│            │",
-            "│            │",
-            "│            │",
-            "│            │",
-            "│            │",
-            "│            │",
-            "│            │",
-            "│            │",
-            "│            │",
-            "│            │",
-            "│            │",
-            "│            │",
-            "└────────────┘",
+            "┌(2) - 'b' [0]─┐",
+            "│              │",
+            "│              │",
+            "│              │",
+            "│              │",
+            "│              │",
+            "│              │",
+            "│              │",
+            "│              │",
+            "│              │",
+            "│              │",
+            "│              │",
+            "│              │",
+            "└──────────────┘",
         ]);
-        let bolds = [1, 2, 3, 4, 5, 6, 7];
-        for x in 0..=13 {
+        let bolds = 1..=13;
+        for x in 0..=15 {
             for y in 0..=13 {
                 if bolds.contains(&x) && (y == 0) {
                     expected
@@ -816,23 +817,23 @@ mod tests {
             })
             .unwrap();
         let mut expected = Buffer::with_lines(vec![
-            "┌(1) - a─────┐",
-            "│            │",
-            "│            │",
-            "│            │",
-            "│            │",
-            "│            │",
-            "└────────────┘",
-            "┌(2) - b─────┐",
-            "│            │",
-            "│            │",
-            "│            │",
-            "│            │",
-            "│            │",
-            "└────────────┘",
+            "┌(1) - 'a' [0]─┐",
+            "│              │",
+            "│              │",
+            "│              │",
+            "│              │",
+            "│              │",
+            "└──────────────┘",
+            "┌(2) - 'b' [0]─┐",
+            "│              │",
+            "│              │",
+            "│              │",
+            "│              │",
+            "│              │",
+            "└──────────────┘",
         ]);
-        let bolds = [1, 2, 3, 4, 5, 6, 7];
-        for x in 0..=13 {
+        let bolds = 1..=13;
+        for x in 0..=15 {
             for y in 0..=13 {
                 if bolds.contains(&x) && (y == 0 || y == 7) {
                     expected
