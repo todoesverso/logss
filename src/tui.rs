@@ -68,7 +68,7 @@ mod tests {
 
     #[test]
     fn new() {
-        let backend = TestBackend::new(10, 10);
+        let backend = TestBackend::new(13, 10);
         let terminal = Terminal::new(backend).unwrap();
         let events = EventHandler::new(1);
         let mut app = App::new(Some(parse_args()));
@@ -78,19 +78,19 @@ mod tests {
         //tui.init().unwrap(); // This fails in github tests
         tui.draw(&mut app).unwrap();
         let mut expected = Buffer::with_lines(vec![
-            "┌(0) - .*┐",
-            "│        │",
-            "│        │",
-            "│        │",
-            "│        │",
-            "│        │",
-            "│        │",
-            "│        │",
-            "│        │",
-            "└────────┘",
+            "┌(0) - '.*' ┐",
+            "│           │",
+            "│           │",
+            "│           │",
+            "│           │",
+            "│           │",
+            "│           │",
+            "│           │",
+            "│           │",
+            "└───────────┘",
         ]);
-        let bolds = [1, 2, 3, 4, 5, 6, 7, 8];
-        for x in 0..=9 {
+        let bolds = 1..=11;
+        for x in 0..=12 {
             for y in 0..=9 {
                 if bolds.contains(&x) && y == 0 {
                     expected

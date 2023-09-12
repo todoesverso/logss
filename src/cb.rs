@@ -81,6 +81,11 @@ where
 
         cb
     }
+
+    pub fn reset(&mut self) {
+        self.buffer.clear();
+        self.write_index = 0;
+    }
 }
 
 #[cfg(test)]

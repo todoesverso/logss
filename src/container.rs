@@ -25,6 +25,7 @@ pub struct Container<'a> {
     pub id: u8,
     pub state: ContainerState,
     pub file: Option<File>,
+    count: u64,
 }
 
 pub const CONTAINER_BUFFER: usize = 64;
@@ -51,6 +52,7 @@ impl<'a> Container<'a> {
             id: 0,
             state: ContainerState::default(),
             file: None,
+            count: 0,
         }
     }
 
@@ -71,9 +73,9 @@ impl<'a> Container<'a> {
         Ok(())
     }
 
-    fn process_line(&self, line: String) -> Option<Line<'a>> {
+    fn process_line(&self, line: &str) -> Option<Line<'a>> {
         // TODO: maybe add smart time coloration?
-        if let Some(mat) = self.re.find(&line) {
+        if let Some(mat) = self.re.find(line) {
             let start = mat.start();
             let end = mat.end();
 
@@ -90,18 +92,19 @@ impl<'a> Container<'a> {
     }
 
     pub fn push(&mut self, element: Line<'a>) {
+        self.count += 1;
         let _ = &self.cb.push(element);
     }
 
-    pub fn proc_and_push_line(&mut self, line: String) -> Option<Line<'a>> {
-        let l = line.clone();
+    pub fn proc_and_push_line(&mut self, line: &str) -> Option<Line<'a>> {
         let rt_lines = self.process_line(line);
         let ret = rt_lines.clone();
         if let Some(rt_lines_in) = rt_lines {
             let _ = &self.push(rt_lines_in);
         }
         if let Some(file) = &mut self.file {
-            file.write_all(l.as_bytes()).expect("Failed to write file");
+            file.write_all(line.as_bytes())
+                .expect("Failed to write file");
             file.flush().expect("Failed to flush");
         }
         ret
@@ -132,7 +135,7 @@ impl<'a> Container<'a> {
         if self.state.hide {
             return;
         }
-        let title = format!("({}) - {}", self.id, self.text);
+        let title = format!("({}) - '{}' [{}]", self.id, self.text, self.count);
         let mut paragraph = Paragraph::new(self.cb.ordered_clone().buffer.clone())
             .block(create_block(&title, self.state.color, self.state.paused))
             .style(self.state.style)
@@ -142,6 +145,10 @@ impl<'a> Container<'a> {
         }
 
         frame.render_widget(paragraph, area);
+    }
+
+    pub fn reset(&mut self) {
+        self.cb.reset();
     }
 }
 
@@ -204,9 +211,9 @@ mod tests {
     #[test]
     fn process_line() {
         let container = Container::new("stringtomatch".to_string(), 2);
-        let span = container.process_line("this line should not be proc".to_string());
+        let span = container.process_line("this line should not be proc");
         assert_eq!(span, None);
-        let span = container.process_line("stringtomatch this line should be proc".to_string());
+        let span = container.process_line("stringtomatch this line should be proc");
         let expected_span = Some(Line::from(vec![
             Span::from("".to_string()),
             Span::styled("stringtomatch".to_string(), Style::default().fg(Color::Red)),
