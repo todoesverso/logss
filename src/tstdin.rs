@@ -1,5 +1,6 @@
 use std::io::{stdin, Error, ErrorKind};
 use std::sync::mpsc;
+use std::sync::mpsc::Sender;
 use std::thread;
 
 use std::io::{BufRead, BufReader};
@@ -31,45 +32,20 @@ impl StdinHandler {
         if let Some(inner_cmd) = cmd {
             let child = Command::new(&inner_cmd[0])
                 .args(&inner_cmd[1..])
-                .stdout(Stdio::piped())
                 .stderr(Stdio::null())
+                .stdout(Stdio::piped())
                 .spawn()?;
 
             let stdout = child
                 .stdout
                 .ok_or_else(|| Error::new(ErrorKind::Other, "Failed to run command"))?;
-
-            let mut reader = BufReader::new(stdout);
-
-            thread::spawn(move || loop {
-                let mut line = String::new();
-                match reader.read_line(&mut line) {
-                    Ok(len) => {
-                        if len == 0 {
-                            break;
-                        } else {
-                            sender.send(line).ok();
-                        }
-                    }
-                    Err(_) => panic!("BUG!, please report it"),
-                }
-            });
+            let reader = BufReader::new(stdout);
+            read_lines_and_send(reader, sender);
         } else {
-            let reader = stdin();
+            let stdin = stdin();
+            let reader = BufReader::new(stdin);
 
-            thread::spawn(move || loop {
-                let mut line = String::new();
-                match reader.read_line(&mut line) {
-                    Ok(len) => {
-                        if len == 0 {
-                            break;
-                        } else {
-                            sender.send(line).ok();
-                        }
-                    }
-                    Err(_) => panic!("BUG!, please report it"),
-                }
-            });
+            read_lines_and_send(reader, sender);
         }
 
         Ok(())
@@ -82,4 +58,24 @@ impl StdinHandler {
     pub fn try_recv(&self) -> Result<String, mpsc::TryRecvError> {
         self.receiver.try_recv()
     }
+}
+
+fn read_lines_and_send<R>(mut reader: R, sender: Sender<String>)
+where
+    R: BufRead + Send + 'static,
+{
+    let mut line = String::new();
+    thread::spawn(move || loop {
+        match reader.read_line(&mut line) {
+            Ok(len) => {
+                if len == 0 {
+                    break;
+                } else {
+                    sender.send(line.clone()).ok();
+                }
+            }
+            Err(_) => panic!("BUG!, please report it"),
+        }
+        line.clear();
+    });
 }

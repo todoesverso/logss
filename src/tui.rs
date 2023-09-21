@@ -78,7 +78,7 @@ mod tests {
         //tui.init().unwrap(); // This fails in github tests
         tui.draw(&mut app).unwrap();
         let mut expected = Buffer::with_lines(vec![
-            "┌(0) - '.*' ┐",
+            "┌[0]'.*' (0)┐",
             "│           │",
             "│           │",
             "│           │",

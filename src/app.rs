@@ -544,14 +544,14 @@ mod tests {
             })
             .unwrap();
         let mut expected = Buffer::with_lines(vec![
-            "┌(1) - 'a' [0]─┐",
+            "┌[1]'a' (0)────┐",
             "│              │",
             "│              │",
             "│              │",
             "│              │",
             "│              │",
             "└──────────────┘",
-            "┌(2) - 'b' [0]─┐",
+            "┌[2]'b' (0)────┐",
             "│              │",
             "│              │",
             "│              │",
@@ -559,7 +559,7 @@ mod tests {
             "│              │",
             "└──────────────┘",
         ]);
-        let bolds = 1..=13;
+        let bolds = 1..=10;
         for x in 0..=15 {
             for y in 0..=13 {
                 if bolds.contains(&x) && (y == 0 || y == 7) {
@@ -591,7 +591,7 @@ mod tests {
             })
             .unwrap();
         let mut expected = Buffer::with_lines(vec![
-            "┌(1) - 'a' [0]─┐",
+            "┌[1]'a' (0)────┐",
             "│              │",
             "│              │",
             "│              │",
@@ -606,7 +606,7 @@ mod tests {
             "│              │",
             "└──────────────┘",
         ]);
-        let bolds = 1..=13;
+        let bolds = 1..=10;
         for x in 0..=15 {
             for y in 0..=13 {
                 if bolds.contains(&x) && (y == 0) {
@@ -627,7 +627,7 @@ mod tests {
             })
             .unwrap();
         let mut expected = Buffer::with_lines(vec![
-            "┌(2) - 'b' [0]─┐",
+            "┌[2]'b' (0)────┐",
             "│              │",
             "│              │",
             "│              │",
@@ -642,7 +642,7 @@ mod tests {
             "│              │",
             "└──────────────┘",
         ]);
-        let bolds = 1..=13;
+        let bolds = 1..=10;
         for x in 0..=15 {
             for y in 0..=13 {
                 if bolds.contains(&x) && (y == 0) {
@@ -673,7 +673,7 @@ mod tests {
             })
             .unwrap();
         let mut expected = Buffer::with_lines(vec![
-            "┌(0) - 'single' ┐",
+            "┌[0]'single' (0)┐",
             "│               │",
             "│               │",
             "│               │",
@@ -733,7 +733,7 @@ mod tests {
             })
             .unwrap();
         let mut expected = Buffer::with_lines(vec![
-            "┌(2) - 'b' [0]─┐",
+            "┌[2]'b' (0)────┐",
             "│              │",
             "│              │",
             "│              │",
@@ -748,7 +748,7 @@ mod tests {
             "│              │",
             "└──────────────┘",
         ]);
-        let bolds = 1..=13;
+        let bolds = 1..=10;
         for x in 0..=15 {
             for y in 0..=13 {
                 if bolds.contains(&x) && (y == 0) {
@@ -781,7 +781,7 @@ mod tests {
             })
             .unwrap();
         let mut expected = Buffer::with_lines(vec![
-            "┌(2) - 'b' [0]─┐",
+            "┌[2]'b' (0)────┐",
             "│              │",
             "│              │",
             "│              │",
@@ -796,7 +796,7 @@ mod tests {
             "│              │",
             "└──────────────┘",
         ]);
-        let bolds = 1..=13;
+        let bolds = 1..=10;
         for x in 0..=15 {
             for y in 0..=13 {
                 if bolds.contains(&x) && (y == 0) {
@@ -817,14 +817,14 @@ mod tests {
             })
             .unwrap();
         let mut expected = Buffer::with_lines(vec![
-            "┌(1) - 'a' [0]─┐",
+            "┌[1]'a' (0)────┐",
             "│              │",
             "│              │",
             "│              │",
             "│              │",
             "│              │",
             "└──────────────┘",
-            "┌(2) - 'b' [0]─┐",
+            "┌[2]'b' (0)────┐",
             "│              │",
             "│              │",
             "│              │",
@@ -832,7 +832,7 @@ mod tests {
             "│              │",
             "└──────────────┘",
         ]);
-        let bolds = 1..=13;
+        let bolds = 1..=10;
         for x in 0..=15 {
             for y in 0..=13 {
                 if bolds.contains(&x) && (y == 0 || y == 7) {
@@ -876,13 +876,13 @@ mod tests {
         for c in app.containers.iter() {
             assert_eq!(c.state.paused, app.state.paused);
             assert_eq!(c.state.wrap, app.state.wrap);
-            assert_eq!(c.state.scroll, 49);
+            assert_eq!(c.state.scroll, 114);
         }
         app.state.scroll_up = 5;
         app.update_containers(rect);
 
         for c in app.containers.iter() {
-            assert_eq!(c.state.scroll, 54);
+            assert_eq!(c.state.scroll, 119);
         }
     }
 }
