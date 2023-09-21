@@ -28,7 +28,7 @@ pub struct Container<'a> {
     count: u64,
 }
 
-pub const CONTAINER_BUFFER: usize = 64;
+pub const CONTAINER_BUFFER: usize = 1024;
 pub const CONTAINERS_MAX: u8 = 10;
 pub const CONTAINER_COLORS: [ratatui::style::Color; 10] = [
     Color::Red,
@@ -135,7 +135,7 @@ impl<'a> Container<'a> {
         if self.state.hide {
             return;
         }
-        let title = format!("({}) - '{}' [{}]", self.id, self.text, self.count);
+        let title = format!("[{}]'{}' ({})", self.id, self.text, self.count);
         let mut paragraph = Paragraph::new(self.cb.ordered_clone().buffer.clone())
             .block(create_block(&title, self.state.color, self.state.paused))
             .style(self.state.style)
@@ -154,7 +154,7 @@ impl<'a> Container<'a> {
 
 fn create_block(title: &str, color: Color, paused: bool) -> Block {
     let modifier = if paused {
-        Modifier::BOLD | Modifier::SLOW_BLINK
+        Modifier::BOLD | Modifier::SLOW_BLINK | Modifier::UNDERLINED
     } else {
         Modifier::BOLD
     };
@@ -181,7 +181,7 @@ mod tests {
         let expected = Block::default().borders(Borders::ALL).title(Span::styled(
             "coso",
             Style::default()
-                .add_modifier(Modifier::BOLD | Modifier::SLOW_BLINK)
+                .add_modifier(Modifier::BOLD | Modifier::SLOW_BLINK | Modifier::UNDERLINED)
                 .fg(Color::Blue),
         ));
         assert_eq!(block, expected);
