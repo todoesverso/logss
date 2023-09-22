@@ -18,14 +18,13 @@ use crate::states::ContainerState;
 #[derive(Debug)]
 pub struct Container<'a> {
     /// matching text
-    text: String,
+    pub text: String,
     pub re: Regex,
     /// circular buffer with matching lines
     pub cb: CircularBuffer<Line<'a>>,
     pub id: u8,
     pub state: ContainerState,
     pub file: Option<File>,
-    count: u64,
 }
 
 pub const CONTAINER_BUFFER: usize = 1024;
@@ -52,7 +51,6 @@ impl<'a> Container<'a> {
             id: 0,
             state: ContainerState::default(),
             file: None,
-            count: 0,
         }
     }
 
@@ -92,7 +90,7 @@ impl<'a> Container<'a> {
     }
 
     pub fn push(&mut self, element: Line<'a>) {
-        self.count += 1;
+        self.state.count += 1;
         let _ = &self.cb.push(element);
     }
 
@@ -135,7 +133,7 @@ impl<'a> Container<'a> {
         if self.state.hide {
             return;
         }
-        let title = format!("[{}]'{}' ({})", self.id, self.text, self.count);
+        let title = format!("[{}]'{}' ({})", self.id, self.text, self.state.count);
         let mut paragraph = Paragraph::new(self.cb.ordered_clone().buffer.clone())
             .block(create_block(&title, self.state.color, self.state.paused))
             .style(self.state.style)
@@ -145,6 +143,10 @@ impl<'a> Container<'a> {
         }
 
         frame.render_widget(paragraph, area);
+    }
+
+    pub fn get_count(&self) -> u64 {
+        self.state.count
     }
 
     pub fn reset(&mut self) {

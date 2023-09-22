@@ -7,6 +7,7 @@ use std::error;
 use std::sync::mpsc::TryRecvError;
 
 use crate::args::{parse_args, Args};
+use crate::bars::render_bar_chart;
 use crate::container::{Container, CONTAINERS_MAX, CONTAINER_BUFFER, CONTAINER_COLORS};
 use crate::help::render_help;
 use crate::input::Input;
@@ -114,6 +115,10 @@ impl<'a> App<'a> {
 
     pub fn flip_help(&mut self) {
         self.state.help = !self.state.help;
+    }
+
+    pub fn flip_barchart(&mut self) {
+        self.state.barchart = !self.state.barchart;
     }
 
     pub fn flip_show_input(&mut self) {
@@ -369,6 +374,12 @@ impl<'a> App<'a> {
         }
     }
 
+    fn render_bar_chart<B: Backend>(&self, frame: &mut Frame<'_, B>) {
+        if self.state.barchart {
+            render_bar_chart(frame, self);
+        }
+    }
+
     fn render_input<B: Backend>(&self, frame: &mut Frame<'_, B>) {
         if self.state.show_input {
             self.input.render(frame);
@@ -409,6 +420,7 @@ impl<'a> App<'a> {
         }
         // Popups need to go at the bottom
         self.render_help(frame);
+        self.render_bar_chart(frame);
         self.render_input(frame);
     }
 }
