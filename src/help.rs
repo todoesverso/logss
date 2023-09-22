@@ -11,6 +11,10 @@ pub fn render_help<B: Backend>(frame: &mut Frame<'_, B>) {
             Style::default().bg(Color::Blue),
         )),
         Line::from(Span::styled(
+            "b       - toggles BarChart popup",
+            Style::default().bg(Color::Blue),
+        )),
+        Line::from(Span::styled(
             "w       - toggles text wrapping",
             Style::default().bg(Color::Blue),
         )),

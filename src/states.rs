@@ -17,6 +17,7 @@ pub struct AppState {
     pub show: Views,
     pub wrap: bool,
     pub help: bool,
+    pub barchart: bool,
     pub show_input: bool,
     pub zoom_id: Option<u8>,
     pub scroll_up: u16,
@@ -33,6 +34,7 @@ impl Default for AppState {
             show: Views::Containers,
             direction: Direction::Vertical,
             help: false,
+            barchart: false,
             show_input: false,
             zoom_id: None,
             scroll_up: 0,
@@ -47,6 +49,7 @@ pub struct ContainerState {
     pub hide: bool,
     pub wrap: bool,
     pub scroll: u16,
+    pub count: u64,
     pub color: Color,
     pub style: Style,
 }
@@ -58,6 +61,7 @@ impl Default for ContainerState {
             hide: false,
             wrap: false,
             scroll: 0,
+            count: 0,
             color: Color::Red,
             style: Style::default().fg(Color::White).bg(Color::Black),
         }

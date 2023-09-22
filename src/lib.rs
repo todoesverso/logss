@@ -25,6 +25,9 @@ pub mod container;
 /// Help menu
 pub mod help;
 
+/// BarChart
+pub mod bars;
+
 /// State of app and containers
 pub mod states;
 
