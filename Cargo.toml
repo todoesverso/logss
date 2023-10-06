@@ -30,7 +30,7 @@ ratatui = "0.23.0"
 regex = "1.9.5"
 serde_yaml = "0.9.22"
 serde = {version = "1.0.171", features = ["derive"]}
-proc-macro2 = "1.0.67"
+proc-macro2 = "1.0.68"
 slug = "0.1.4"
 
 [profile.release]
