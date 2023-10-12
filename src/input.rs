@@ -2,6 +2,7 @@ use ratatui::backend::Backend;
 use ratatui::style::Style;
 use ratatui::terminal::Frame;
 use ratatui::text::{Line, Span};
+use regex::Regex;
 use unicode_width::UnicodeWidthStr;
 
 use crate::popup::{centered_rect, render_popup};
@@ -25,8 +26,13 @@ impl Input {
             Style::default(),
         ))];
 
+        let title = if self.is_valid() {
+            "Input"
+        } else {
+            "Input (non valid regexp)"
+        };
         frame.set_cursor(area.x + self.input.width() as u16 + 1, area.y + 1);
-        render_popup(frame, "Input", &text, (pos.0, pos.1));
+        render_popup(frame, title, &text, (pos.0, pos.1));
     }
 
     pub fn reset(&mut self) {
@@ -43,6 +49,10 @@ impl Input {
 
     pub fn inner_clone(&self) -> String {
         self.input.clone()
+    }
+
+    pub fn is_valid(&self) -> bool {
+        Regex::new(&self.input).is_ok()
     }
 }
 

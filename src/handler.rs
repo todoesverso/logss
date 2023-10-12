@@ -42,21 +42,17 @@ pub fn handle_key_events(key_event: KeyEvent, app: &mut App) -> AppResult<()> {
             KeyCode::Char('9') => view_helper(app, 9, key_event),
             KeyCode::F(9) => app.hide_view(9),
             KeyCode::Up => {
-                app.pause();
                 if key_event.kind == KeyEventKind::Press {
                     app.scroll_up();
                 }
             }
             KeyCode::Down => {
-                app.pause();
                 if key_event.kind == KeyEventKind::Press {
                     app.scroll_down();
                 }
             }
             KeyCode::Char('c') => {
                 app.unpause();
-                app.reset_scroll_down();
-                app.reset_scroll_up();
                 if key_event.modifiers == KeyModifiers::CONTROL {
                     app.stop();
                 }
@@ -206,31 +202,21 @@ mod tests {
     #[test]
     fn scroll_up_down_continue() {
         let mut app = App::default();
-        assert_eq!(app.state.scroll_up, 0);
-        assert_eq!(app.state.scroll_down, 0);
         assert!(!app.state.paused);
         let mut key = KeyEvent::new(KeyCode::Up, KeyModifiers::NONE);
         key.kind = KeyEventKind::Press;
         handle_key_events(key, &mut app).ok();
-        assert_eq!(app.state.scroll_up, 1);
-        assert_eq!(app.state.scroll_down, 0);
         assert!(app.state.paused);
         let mut key = KeyEvent::new(KeyCode::Up, KeyModifiers::NONE);
         key.kind = KeyEventKind::Press;
         handle_key_events(key, &mut app).ok();
-        assert_eq!(app.state.scroll_up, 2);
-        assert_eq!(app.state.scroll_down, 0);
         assert!(app.state.paused);
         let mut key = KeyEvent::new(KeyCode::Down, KeyModifiers::NONE);
         key.kind = KeyEventKind::Press;
         handle_key_events(key, &mut app).ok();
-        assert_eq!(app.state.scroll_up, 2);
-        assert_eq!(app.state.scroll_down, 1);
         assert!(app.state.paused);
         let key = KeyEvent::new(KeyCode::Char('c'), KeyModifiers::NONE);
         handle_key_events(key, &mut app).ok();
-        assert_eq!(app.state.scroll_up, 0);
-        assert_eq!(app.state.scroll_down, 0);
         assert!(!app.state.paused);
     }
 

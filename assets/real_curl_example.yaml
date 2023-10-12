@@ -2,7 +2,7 @@ command:
   - curl 
   - -s 
   - https://raw.githubusercontent.com/linuxacademy/content-elastic-log-samples/master/access.log 
-render: 35
+render: 55
 # output: output_path/
 # single: true
 containers:

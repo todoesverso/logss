@@ -11,7 +11,7 @@ use crate::bars::render_bar_chart;
 use crate::container::{Container, CONTAINERS_MAX, CONTAINER_BUFFER, CONTAINER_COLORS};
 use crate::help::render_help;
 use crate::input::Input;
-use crate::states::{AppState, Views};
+use crate::states::{AppState, ScrollDirection, Views};
 use crate::tstdin::StdinHandler;
 
 /// Application result type.
@@ -126,19 +126,13 @@ impl<'a> App<'a> {
     }
 
     pub fn scroll_up(&mut self) {
-        self.state.scroll_up += 1;
+        self.pause();
+        self.state.scroll_direction = ScrollDirection::UP;
     }
 
     pub fn scroll_down(&mut self) {
-        self.state.scroll_down += 1;
-    }
-
-    pub fn reset_scroll_up(&mut self) {
-        self.state.scroll_up = 0;
-    }
-
-    pub fn reset_scroll_down(&mut self) {
-        self.state.scroll_down = 0;
+        self.pause();
+        self.state.scroll_direction = ScrollDirection::DOWN;
     }
 
     pub fn flip_direction(&mut self) {
@@ -152,9 +146,10 @@ impl<'a> App<'a> {
     pub fn update_input(&mut self, key_code: KeyCode) {
         match key_code {
             KeyCode::Enter => {
-                self.add_input_as_container();
-                self.hide_show_input();
-                self.state.show = Views::Containers;
+                if self.add_input_as_container() {
+                    self.hide_show_input();
+                    self.state.show = Views::Containers;
+                }
             }
             KeyCode::Char(c) => {
                 self.input.push(c);
@@ -169,9 +164,13 @@ impl<'a> App<'a> {
         }
     }
 
-    pub fn add_input_as_container(&mut self) {
-        self.add_container(&self.input.inner_clone());
-        self.input.reset();
+    pub fn add_input_as_container(&mut self) -> bool {
+        let is_valid = self.input.is_valid();
+        if is_valid {
+            self.add_container(&self.input.inner_clone());
+            self.input.reset();
+        }
+        is_valid
     }
 
     pub fn add_container(&mut self, text: &str) {
@@ -261,9 +260,7 @@ impl<'a> App<'a> {
                     }
                 }
             }
-            Err(TryRecvError::Disconnected) => {
-                self.stop();
-            }
+            Err(TryRecvError::Disconnected) => self.stop(),
             Err(TryRecvError::Empty) if self.args.exit.unwrap_or_default() => {
                 self.stop();
             }
@@ -307,6 +304,23 @@ impl<'a> App<'a> {
     }
 
     fn update_containers(&mut self, frame_rect: Rect) {
+        match self.state.show {
+            Views::RawBuffer => {
+                // Raw buffer
+                let container = &mut self.raw_buffer;
+                container.state.paused = self.state.paused;
+                container.state.wrap = self.state.wrap;
+                container.update_scroll(frame_rect.height as usize, &self.state.scroll_direction);
+            }
+            Views::SingleBuffer => {
+                // Single buffer
+                let container = &mut self.single_buffer;
+                container.state.paused = self.state.paused;
+                container.state.wrap = self.state.wrap;
+                container.update_scroll(frame_rect.height as usize, &self.state.scroll_direction);
+            }
+            _ => (),
+        }
         let blocks = self.get_layout_blocks(frame_rect);
         let mut area;
 
@@ -317,7 +331,6 @@ impl<'a> App<'a> {
             .filter(|c| !c.state.hide)
             .enumerate()
         {
-            container.state.wrap = self.state.wrap;
             if self.state.show == Views::Zoom {
                 area = frame_rect.height;
             } else {
@@ -325,21 +338,11 @@ impl<'a> App<'a> {
             }
             container.state.paused = self.state.paused;
             container.state.wrap = self.state.wrap;
-            container.update_scroll(
-                area as usize,
-                &mut self.state.scroll_up,
-                &mut self.state.scroll_down,
-            );
+            container.update_scroll(area as usize, &self.state.scroll_direction);
         }
-        // Raw buffer
-        let container = &mut self.raw_buffer;
-        container.state.paused = self.state.paused;
 
-        container.update_scroll(
-            frame_rect.height as usize,
-            &mut self.state.scroll_up,
-            &mut self.state.scroll_down,
-        );
+        // Reset scroll direction so that scroll is done on each key press
+        self.state.scroll_direction = ScrollDirection::NONE;
     }
 
     fn render_raw<B: Backend>(&mut self, frame: &mut Frame<'_, B>) {
@@ -390,15 +393,9 @@ impl<'a> App<'a> {
     pub fn render<B: Backend>(&mut self, frame: &mut Frame<'_, B>) {
         self.update_containers(frame.size());
         match self.state.show {
-            Views::Containers => {
-                self.render_containers(frame);
-            }
-            Views::RawBuffer => {
-                self.render_raw(frame);
-            }
-            Views::SingleBuffer => {
-                self.render_single(frame);
-            }
+            Views::Containers => self.render_containers(frame),
+            Views::RawBuffer => self.render_raw(frame),
+            Views::SingleBuffer => self.render_single(frame),
             Views::Zoom => {
                 if let Some(id) = self.state.zoom_id {
                     self.render_id(frame, id);
@@ -881,20 +878,12 @@ mod tests {
         // Change the app state
         app.state.paused = true;
         app.state.wrap = true;
-        app.state.scroll_up = 0;
-        app.state.scroll_down = 10;
         app.update_containers(rect);
 
         for c in app.containers.iter() {
             assert_eq!(c.state.paused, app.state.paused);
             assert_eq!(c.state.wrap, app.state.wrap);
-            assert_eq!(c.state.scroll, 114);
         }
-        app.state.scroll_up = 5;
         app.update_containers(rect);
-
-        for c in app.containers.iter() {
-            assert_eq!(c.state.scroll, 119);
-        }
     }
 }
