@@ -32,6 +32,7 @@ serde_yaml = "0.9.22"
 serde = {version = "1.0.171", features = ["derive"]}
 proc-macro2 = "1.0.67"
 slug = "0.1.4"
+anyhow = "1.0.75"
 
 [profile.release]
 codegen-units = 1

@@ -1,8 +1,9 @@
 use std::io;
 
+use anyhow::Result;
 use is_terminal::IsTerminal;
 use logss::{
-    app::{App, AppResult},
+    app::App,
     args::parse_args,
     event::{Event, EventHandler},
     handler::handle_key_events,
@@ -10,7 +11,7 @@ use logss::{
 };
 use ratatui::{backend::CrosstermBackend, Terminal};
 
-fn main() -> AppResult<()> {
+fn main() -> Result<()> {
     let args = parse_args();
     let render_speed = args.render.unwrap_or(100);
 

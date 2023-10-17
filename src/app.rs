@@ -1,5 +1,6 @@
-use std::{error, sync::mpsc::TryRecvError};
+use std::sync::mpsc::TryRecvError;
 
+use anyhow::Result;
 use crossterm::event::KeyCode;
 use ratatui::{
     backend::Backend,
@@ -17,8 +18,6 @@ use crate::{
     states::{AppState, ScrollDirection, Views},
     tstdin::StdinHandler,
 };
-/// Application result type.
-pub type AppResult<T> = std::result::Result<T, Box<dyn error::Error>>;
 
 /// Application.
 ///
@@ -78,7 +77,7 @@ impl<'a> App<'a> {
         ret
     }
 
-    pub fn init(&mut self) -> AppResult<()> {
+    pub fn init(&mut self) -> Result<()> {
         self.state.running = true;
         self.stdin.init(self.args.command.clone())?;
         Ok(())

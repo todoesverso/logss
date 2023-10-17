@@ -5,7 +5,7 @@ use std::{
     thread,
 };
 
-use crate::app::AppResult;
+use anyhow::Result;
 
 #[derive(Debug)]
 pub struct StdinHandler {
@@ -25,7 +25,7 @@ impl StdinHandler {
         Self { receiver, sender }
     }
 
-    pub fn init(&self, cmd: Option<Vec<String>>) -> AppResult<()> {
+    pub fn init(&self, cmd: Option<Vec<String>>) -> Result<()> {
         let sender = self.sender.clone();
         match cmd {
             Some(inner_cmd) => {
