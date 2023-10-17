@@ -47,8 +47,6 @@ toolchain = "nightly"
 command = "cargo"
 args = [
   "rustdoc",
-  "--no-default-features",
-  "${ALL_FEATURES_FLAG}",
   "--",
   "-Zunstable-options",
   "--check",
@@ -61,8 +59,6 @@ command = "cargo"
 args = [
   "check",
   "--all-targets",
-  "--no-default-features",
-  "${ALL_FEATURES_FLAG}",
 ]
 
 [tasks.build]
@@ -71,8 +67,6 @@ command = "cargo"
 args = [
   "build",
   "--all-targets",
-  "--no-default-features",
-  "${ALL_FEATURES_FLAG}",
 ]
 
 [tasks.clippy]
@@ -83,8 +77,6 @@ args = [
   "--all-targets",
   "--tests",
   "--benches",
-  "--no-default-features",
-  "${ALL_FEATURES_FLAG}",
   "--",
   "-D",
   "warnings",
@@ -97,14 +89,12 @@ command = "cargo"
 args = [
   "test",
   "--all-targets",
-  "--no-default-features",
-  "${ALL_FEATURES_FLAG}",
 ]
 
 [tasks.test-doc]
 description = "Run documentation tests"
 command = "cargo"
-args = ["test", "--doc", "--no-default-features", "${ALL_FEATURES_FLAG}"]
+args = ["test", "--doc", "--no-default-features"]
 
 [tasks.coverage]
 description = "Generate code coverage report"
