@@ -1,9 +1,10 @@
-use ratatui::backend::Backend;
-use ratatui::layout::{Constraint, Direction, Layout, Rect};
-use ratatui::terminal::Frame;
-use ratatui::text::Line;
-use ratatui::widgets::Clear;
-use ratatui::widgets::{BarChart, Block, Borders, Paragraph};
+use ratatui::{
+    backend::Backend,
+    layout::{Constraint, Direction, Layout, Rect},
+    terminal::Frame,
+    text::Line,
+    widgets::{BarChart, Block, Borders, Clear, Paragraph},
+};
 
 pub fn render_popup<B: Backend>(
     frame: &mut Frame<'_, B>,
@@ -61,11 +62,11 @@ pub fn centered_rect(percent_x: u16, percent_y: u16, r: Rect) -> Rect {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use ratatui::{
         backend::TestBackend, buffer::Buffer, layout::Rect, style::Style, text::Span, Terminal,
     };
 
+    use super::*;
     #[test]
     fn test_centered_rect() {
         let rect = Rect::new(0, 0, 100, 100);

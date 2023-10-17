@@ -1,8 +1,9 @@
+use std::fs::{remove_file, OpenOptions};
+
 use pico_args;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
 use serde_yaml;
-use std::fs::{remove_file, OpenOptions};
 
 const HELP: &str = "\
 Simple CLI command to display logs in a user-friendly way
@@ -116,7 +117,7 @@ fn validate_path(s: &std::ffi::OsStr) -> Result<std::path::PathBuf, String> {
     /*  TODO: re write once you learn some real rust
      * Not proud of this but is the simplest way I found to test
      * write permissions in a directory
-     * */
+     */
     let test_file_name = format!("{}/.logss", path.to_string_lossy());
 
     let a = OpenOptions::new()
@@ -147,13 +148,15 @@ fn render_in_range(s: &str) -> Result<Option<u64>, String> {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-    use std::ffi::OsStr;
-    use std::fs::{remove_dir_all, DirBuilder};
     #[cfg(not(target_os = "windows"))]
     use std::os::unix::fs::DirBuilderExt;
-    use std::path::PathBuf;
+    use std::{
+        ffi::OsStr,
+        fs::{remove_dir_all, DirBuilder},
+        path::PathBuf,
+    };
 
+    use super::*;
     #[test]
     fn test_render_in_range() {
         assert_eq!(render_in_range("30"), Ok(Some(30)));

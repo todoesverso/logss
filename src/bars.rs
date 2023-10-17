@@ -1,11 +1,16 @@
-use crate::app::App;
-use crate::container::Container;
-use crate::popup::{centered_rect, render_bar_chart_popup};
-use ratatui::backend::Backend;
-use ratatui::style::{Color, Style};
-use ratatui::terminal::Frame;
-use ratatui::text::Line;
-use ratatui::widgets::{Bar, BarChart, BarGroup, Block, Borders};
+use ratatui::{
+    backend::Backend,
+    style::{Color, Style},
+    terminal::Frame,
+    text::Line,
+    widgets::{Bar, BarChart, BarGroup, Block, Borders},
+};
+
+use crate::{
+    app::App,
+    container::Container,
+    popup::{centered_rect, render_bar_chart_popup},
+};
 
 pub fn render_bar_chart<B: Backend>(frame: &mut Frame<'_, B>, app: &App) {
     let bargroup = create_groups(app);

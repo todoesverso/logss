@@ -1,8 +1,12 @@
-use crate::app::AppResult;
+use std::{
+    sync::mpsc,
+    thread,
+    time::{Duration, Instant},
+};
+
 use crossterm::event::{self, Event as CrosstermEvent, KeyEvent, MouseEvent};
-use std::sync::mpsc;
-use std::thread;
-use std::time::{Duration, Instant};
+
+use crate::app::AppResult;
 
 /// Terminal events.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -77,8 +81,9 @@ impl EventHandler {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
+
+    use super::*;
     #[test]
     fn new() {
         let event = EventHandler::new(1);

@@ -1,5 +1,6 @@
-use crate::app::{App, AppResult};
 use crossterm::event::{KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
+
+use crate::app::{App, AppResult};
 
 /// Handles the key events and updates the state of [`App`].
 pub fn handle_key_events(key_event: KeyEvent, app: &mut App) -> AppResult<()> {
@@ -73,10 +74,12 @@ fn view_helper(app: &mut App, id: u8, key_event: KeyEvent) {
 
 #[cfg(test)]
 mod tests {
+    use std::char::from_digit;
+
+    use ratatui::layout::Direction;
+
     use super::*;
     use crate::states::Views;
-    use ratatui::layout::Direction;
-    use std::char::from_digit;
 
     #[test]
     fn stop() {
@@ -85,7 +88,7 @@ mod tests {
         app.add_container("2");
         assert_eq!(app.containers.len(), 2);
 
-        // Test stoping
+        // Test stopping
         app.state.running = true;
         assert!(app.is_running());
         let key = KeyEvent::new(KeyCode::Esc, KeyModifiers::NONE);

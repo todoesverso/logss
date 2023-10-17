@@ -1,5 +1,7 @@
-use ratatui::layout::Direction;
-use ratatui::style::{Color, Style};
+use ratatui::{
+    layout::Direction,
+    style::{Color, Style},
+};
 
 #[derive(Debug, Eq, PartialEq)]
 pub enum Views {

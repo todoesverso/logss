@@ -1,7 +1,9 @@
-use ratatui::backend::Backend;
-use ratatui::style::Style;
-use ratatui::terminal::Frame;
-use ratatui::text::{Line, Span};
+use ratatui::{
+    backend::Backend,
+    style::Style,
+    terminal::Frame,
+    text::{Line, Span},
+};
 use regex::Regex;
 use unicode_width::UnicodeWidthStr;
 
@@ -58,8 +60,9 @@ impl Input {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use ratatui::{backend::TestBackend, buffer::Buffer, Terminal};
+
+    use super::*;
 
     #[test]
     fn simple_full_test() {

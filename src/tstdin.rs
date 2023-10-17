@@ -1,10 +1,9 @@
-use std::io::{stdin, Error, ErrorKind};
-use std::sync::mpsc;
-use std::sync::mpsc::Sender;
-use std::thread;
-
-use std::io::{BufRead, BufReader};
-use std::process::{Command, Stdio};
+use std::{
+    io::{stdin, BufRead, BufReader, Error, ErrorKind},
+    process::{Command, Stdio},
+    sync::{mpsc, mpsc::Sender},
+    thread,
+};
 
 use crate::app::AppResult;
 

@@ -1,17 +1,25 @@
-use crate::app::AppResult;
-use crate::cb::CircularBuffer;
-use crate::states::{ContainerState, ScrollDirection};
-use ratatui::backend::Backend;
-use ratatui::layout::Rect;
-use ratatui::style::{Color, Modifier, Style};
-use ratatui::terminal::Frame;
-use ratatui::text::{Line, Span};
-use ratatui::widgets::{Block, Borders, Paragraph, Wrap};
+use std::{
+    fs::{File, OpenOptions},
+    io::Write,
+    path::{Path, PathBuf},
+};
+
+use ratatui::{
+    backend::Backend,
+    layout::Rect,
+    style::{Color, Modifier, Style},
+    terminal::Frame,
+    text::{Line, Span},
+    widgets::{Block, Borders, Paragraph, Wrap},
+};
 use regex::Regex;
 use slug;
-use std::fs::{File, OpenOptions};
-use std::io::Write;
-use std::path::{Path, PathBuf};
+
+use crate::{
+    app::AppResult,
+    cb::CircularBuffer,
+    states::{ContainerState, ScrollDirection},
+};
 
 pub const CONTAINER_BUFFER: usize = 1024;
 pub const CONTAINERS_MAX: u8 = 10;

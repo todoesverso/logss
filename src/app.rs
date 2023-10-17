@@ -1,19 +1,22 @@
+use std::{error, sync::mpsc::TryRecvError};
+
 use crossterm::event::KeyCode;
-use ratatui::backend::Backend;
-use ratatui::layout::{Constraint, Direction, Layout, Rect};
-use ratatui::terminal::Frame;
-use ratatui::text::Line;
-use std::error;
-use std::sync::mpsc::TryRecvError;
+use ratatui::{
+    backend::Backend,
+    layout::{Constraint, Direction, Layout, Rect},
+    terminal::Frame,
+    text::Line,
+};
 
-use crate::args::{parse_args, Args};
-use crate::bars::render_bar_chart;
-use crate::container::{Container, CONTAINERS_MAX, CONTAINER_BUFFER, CONTAINER_COLORS};
-use crate::help::render_help;
-use crate::input::Input;
-use crate::states::{AppState, ScrollDirection, Views};
-use crate::tstdin::StdinHandler;
-
+use crate::{
+    args::{parse_args, Args},
+    bars::render_bar_chart,
+    container::{Container, CONTAINERS_MAX, CONTAINER_BUFFER, CONTAINER_COLORS},
+    help::render_help,
+    input::Input,
+    states::{AppState, ScrollDirection, Views},
+    tstdin::StdinHandler,
+};
 /// Application result type.
 pub type AppResult<T> = std::result::Result<T, Box<dyn error::Error>>;
 
@@ -424,10 +427,14 @@ impl<'a> App<'a> {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use ratatui::{
-        backend::TestBackend, buffer::Buffer, style::Color, style::Modifier, style::Style, Terminal,
+        backend::TestBackend,
+        buffer::Buffer,
+        style::{Color, Modifier, Style},
+        Terminal,
     };
+
+    use super::*;
 
     #[test]
     fn test_new() {
