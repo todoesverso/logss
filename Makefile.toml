@@ -89,6 +89,8 @@ command = "cargo"
 args = [
   "test",
   "--all-targets",
+  "--locked", 
+  "--all-features"
 ]
 
 [tasks.test-doc]
