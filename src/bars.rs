@@ -48,3 +48,28 @@ fn create_bar<'a>(c: &'a Container) -> Bar<'a> {
         .value_style(Style::default().fg(c.state.color))
         .label(Line::from(c.text.clone()))
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_create_block() {
+        let block = create_block("block");
+        let block_base = Block::default().title("block").borders(Borders::ALL);
+        assert_eq!(block_base, block);
+    }
+
+    #[test]
+    fn test_create_bar() {
+        let container = Container::new("test".to_string(), 1);
+        let bar = create_bar(&container);
+        let base_bar = Bar::default()
+            .value(0)
+            .style(Style::default().fg(Color::Red))
+            .value_style(Style::default().fg(Color::Red))
+            .label(Line::from("test"));
+
+        assert_eq!(base_bar, bar);
+    }
+}
