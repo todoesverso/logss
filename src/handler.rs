@@ -1,5 +1,6 @@
-use crate::app::{App, AppResult};
 use crossterm::event::{KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
+
+use crate::app::{App, AppResult};
 
 /// Handles the key events and updates the state of [`App`].
 pub fn handle_key_events(key_event: KeyEvent, app: &mut App) -> AppResult<()> {
@@ -42,21 +43,17 @@ pub fn handle_key_events(key_event: KeyEvent, app: &mut App) -> AppResult<()> {
             KeyCode::Char('9') => view_helper(app, 9, key_event),
             KeyCode::F(9) => app.hide_view(9),
             KeyCode::Up => {
-                app.pause();
                 if key_event.kind == KeyEventKind::Press {
                     app.scroll_up();
                 }
             }
             KeyCode::Down => {
-                app.pause();
                 if key_event.kind == KeyEventKind::Press {
                     app.scroll_down();
                 }
             }
             KeyCode::Char('c') => {
                 app.unpause();
-                app.reset_scroll_down();
-                app.reset_scroll_up();
                 if key_event.modifiers == KeyModifiers::CONTROL {
                     app.stop();
                 }
@@ -77,10 +74,12 @@ fn view_helper(app: &mut App, id: u8, key_event: KeyEvent) {
 
 #[cfg(test)]
 mod tests {
+    use std::char::from_digit;
+
+    use ratatui::layout::Direction;
+
     use super::*;
     use crate::states::Views;
-    use ratatui::layout::Direction;
-    use std::char::from_digit;
 
     #[test]
     fn stop() {
@@ -89,7 +88,7 @@ mod tests {
         app.add_container("2");
         assert_eq!(app.containers.len(), 2);
 
-        // Test stoping
+        // Test stopping
         app.state.running = true;
         assert!(app.is_running());
         let key = KeyEvent::new(KeyCode::Esc, KeyModifiers::NONE);
@@ -206,31 +205,21 @@ mod tests {
     #[test]
     fn scroll_up_down_continue() {
         let mut app = App::default();
-        assert_eq!(app.state.scroll_up, 0);
-        assert_eq!(app.state.scroll_down, 0);
         assert!(!app.state.paused);
         let mut key = KeyEvent::new(KeyCode::Up, KeyModifiers::NONE);
         key.kind = KeyEventKind::Press;
         handle_key_events(key, &mut app).ok();
-        assert_eq!(app.state.scroll_up, 1);
-        assert_eq!(app.state.scroll_down, 0);
         assert!(app.state.paused);
         let mut key = KeyEvent::new(KeyCode::Up, KeyModifiers::NONE);
         key.kind = KeyEventKind::Press;
         handle_key_events(key, &mut app).ok();
-        assert_eq!(app.state.scroll_up, 2);
-        assert_eq!(app.state.scroll_down, 0);
         assert!(app.state.paused);
         let mut key = KeyEvent::new(KeyCode::Down, KeyModifiers::NONE);
         key.kind = KeyEventKind::Press;
         handle_key_events(key, &mut app).ok();
-        assert_eq!(app.state.scroll_up, 2);
-        assert_eq!(app.state.scroll_down, 1);
         assert!(app.state.paused);
         let key = KeyEvent::new(KeyCode::Char('c'), KeyModifiers::NONE);
         handle_key_events(key, &mut app).ok();
-        assert_eq!(app.state.scroll_up, 0);
-        assert_eq!(app.state.scroll_down, 0);
         assert!(!app.state.paused);
     }
 

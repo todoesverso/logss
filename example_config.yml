@@ -1,6 +1,6 @@
 command: 
   - cat 
-  - shakespeare.txt
+  - assets/shakespeare.txt
 vertical: true
 render: 26
 containers: 
@@ -9,3 +9,4 @@ containers:
 - or
 - not 
 - to.*be
+output: output_path

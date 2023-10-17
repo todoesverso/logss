@@ -1,22 +1,23 @@
+use std::fs::{remove_file, OpenOptions};
+
 use pico_args;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
 use serde_yaml;
-use std::fs::{remove_file, OpenOptions};
 
 const HELP: &str = "\
-Simple cli command to show logs in a friendly way
+Simple CLI command to display logs in a user-friendly way
 
 Usage: logss [OPTIONS]
 
 Options:
-  -c <CONTAINERS>  Finds the substring (regexp)
+  -c <CONTAINERS>  Specify substrings (regex patterns)
   -e               Exit on empty input [default: false]
-  -s               Starts showing the single view [default: false]
-  -C <COMMAND>     Gets input from this command
-  -f <FILE>        Input config file (overrides cli arguments)
-  -o <OUTPUT_PATH> If defined, files with matched patters will be created
-  -r <RENDER>      Defines render speed in milliseconds [default: 100]
+  -s               Start in single view mode [default: false]
+  -C <COMMAND>     Get input from a command
+  -f <FILE>        Input configuration file (overrides CLI arguments)
+  -o <OUTPUT_PATH> Specify the output path for matched patterns
+  -r <RENDER>      Define render speed in milliseconds [default: 100]
   -V               Start in vertical view mode
   -h               Print help
 ";
@@ -91,11 +92,6 @@ fn parser() -> Result<Args, Box<dyn std::error::Error>> {
 fn parse_yaml(config_file: std::path::PathBuf) -> Result<Args, Box<dyn std::error::Error>> {
     let f = std::fs::File::open(config_file)?;
     let scrape_config: Args = serde_yaml::from_reader(f)?;
-    if let Some(render) = scrape_config.render {
-        if render < 25 {
-            return Err("Values lower than 25 make the application unresponsive.".into());
-        }
-    }
     Ok(scrape_config)
 }
 
@@ -114,15 +110,15 @@ fn parse_path(s: &std::ffi::OsStr) -> Result<std::path::PathBuf, &'static str> {
 }
 
 fn validate_path(s: &std::ffi::OsStr) -> Result<std::path::PathBuf, String> {
-    let p: std::path::PathBuf = s.into();
-    if !p.is_dir() {
-        return Err(format!("{} is not a valid path", p.display()));
+    let path: std::path::PathBuf = s.into();
+    if !path.is_dir() {
+        return Err(format!("{} is not a valid path", path.display()));
     }
     /*  TODO: re write once you learn some real rust
      * Not proud of this but is the simplest way I found to test
      * write permissions in a directory
-     * */
-    let test_file_name = format!("{}/.logss", p.to_string_lossy());
+     */
+    let test_file_name = format!("{}/.logss", path.to_string_lossy());
 
     let a = OpenOptions::new()
         .append(true)
@@ -132,9 +128,9 @@ fn validate_path(s: &std::ffi::OsStr) -> Result<std::path::PathBuf, String> {
     match a {
         Ok(_) => {
             remove_file(test_file_name).expect("Failed to delete sentinel file");
-            Ok(p)
+            Ok(path)
         }
-        Err(e) => Err(e.to_string()),
+        Err(error) => Err(error.to_string()),
     }
 }
 
@@ -147,28 +143,22 @@ fn render_in_range(s: &str) -> Result<Option<u64>, String> {
         .parse()
         .map_err(|_| format!("`{s}` isn't a valid number"))?;
 
-    if render < 25 {
-        Err("Values lower than 25 make the application unresponsive.".to_string())
-    } else {
-        Ok(Some(render))
-    }
+    Ok(Some(render))
 }
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-    use std::ffi::OsStr;
-    use std::fs::{remove_dir_all, DirBuilder};
     #[cfg(not(target_os = "windows"))]
     use std::os::unix::fs::DirBuilderExt;
-    use std::path::PathBuf;
+    use std::{
+        ffi::OsStr,
+        fs::{remove_dir_all, DirBuilder},
+        path::PathBuf,
+    };
 
+    use super::*;
     #[test]
     fn test_render_in_range() {
-        assert_eq!(
-            render_in_range("12"),
-            Err("Values lower than 25 make the application unresponsive.".to_string())
-        );
         assert_eq!(render_in_range("30"), Ok(Some(30)));
     }
 

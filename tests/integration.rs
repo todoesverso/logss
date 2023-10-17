@@ -1,6 +1,7 @@
+use std::path::Path;
+
 use assert_cmd::Command;
 use predicates::prelude::*;
-use std::path::Path;
 
 #[test]
 fn non_valid_arg() {
@@ -20,18 +21,18 @@ fn show_help() {
     cmd.assert()
         .success()
         .stdout(predicate::str::contains(
-            "Simple cli command to show logs in a friendly way
+            "Simple CLI command to display logs in a user-friendly way
 
 Usage: logss [OPTIONS]
 
 Options:
-  -c <CONTAINERS>  Finds the substring (regexp)
+  -c <CONTAINERS>  Specify substrings (regex patterns)
   -e               Exit on empty input [default: false]
-  -s               Starts showing the single view [default: false]
-  -C <COMMAND>     Gets input from this command
-  -f <FILE>        Input config file (overrides cli arguments)
-  -o <OUTPUT_PATH> If defined, files with matched patters will be created
-  -r <RENDER>      Defines render speed in milliseconds [default: 100]
+  -s               Start in single view mode [default: false]
+  -C <COMMAND>     Get input from a command
+  -f <FILE>        Input configuration file (overrides CLI arguments)
+  -o <OUTPUT_PATH> Specify the output path for matched patterns
+  -r <RENDER>      Define render speed in milliseconds [default: 100]
   -V               Start in vertical view mode
   -h               Print help
 ",

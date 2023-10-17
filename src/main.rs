@@ -1,12 +1,14 @@
-use is_terminal::IsTerminal;
-use logss::app::{App, AppResult};
-use logss::args::parse_args;
-use logss::event::{Event, EventHandler};
-use logss::handler::handle_key_events;
-use logss::tui::Tui;
-use ratatui::backend::CrosstermBackend;
-use ratatui::Terminal;
 use std::io;
+
+use is_terminal::IsTerminal;
+use logss::{
+    app::{App, AppResult},
+    args::parse_args,
+    event::{Event, EventHandler},
+    handler::handle_key_events,
+    tui::Tui,
+};
+use ratatui::{backend::CrosstermBackend, Terminal};
 
 fn main() -> AppResult<()> {
     let args = parse_args();

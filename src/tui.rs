@@ -1,9 +1,12 @@
-use crate::app::{App, AppResult};
-use crate::event::EventHandler;
-use crossterm::terminal::{self, EnterAlternateScreen, LeaveAlternateScreen};
-use ratatui::backend::Backend;
-use ratatui::Terminal;
 use std::io;
+
+use crossterm::terminal::{self, EnterAlternateScreen, LeaveAlternateScreen};
+use ratatui::{backend::Backend, Terminal};
+
+use crate::{
+    app::{App, AppResult},
+    event::EventHandler,
+};
 
 /// Representation of a terminal user interface.
 ///
@@ -57,14 +60,15 @@ impl<B: Backend> Tui<B> {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-    use crate::args::parse_args;
     use ratatui::{
         backend::TestBackend,
         buffer::Buffer,
         style::{Color, Modifier, Style},
         Terminal,
     };
+
+    use super::*;
+    use crate::args::parse_args;
 
     #[test]
     fn new() {

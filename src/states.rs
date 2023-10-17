@@ -1,5 +1,7 @@
-use ratatui::layout::Direction;
-use ratatui::style::{Color, Style};
+use ratatui::{
+    layout::Direction,
+    style::{Color, Style},
+};
 
 #[derive(Debug, Eq, PartialEq)]
 pub enum Views {
@@ -8,6 +10,13 @@ pub enum Views {
     Containers,
     Zoom,
     Remove,
+}
+
+#[derive(Debug, Eq, PartialEq)]
+pub enum ScrollDirection {
+    UP,
+    DOWN,
+    NONE,
 }
 
 #[derive(Debug, Eq, PartialEq)]
@@ -20,8 +29,7 @@ pub struct AppState {
     pub barchart: bool,
     pub show_input: bool,
     pub zoom_id: Option<u8>,
-    pub scroll_up: u16,
-    pub scroll_down: u16,
+    pub scroll_direction: ScrollDirection,
     pub direction: Direction,
 }
 
@@ -37,8 +45,7 @@ impl Default for AppState {
             barchart: false,
             show_input: false,
             zoom_id: None,
-            scroll_up: 0,
-            scroll_down: 0,
+            scroll_direction: ScrollDirection::NONE,
         }
     }
 }
@@ -93,7 +100,5 @@ mod tests {
         assert!(!appstate.help);
         assert!(!appstate.show_input);
         assert_eq!(appstate.zoom_id, None);
-        assert_eq!(appstate.scroll_up, 0);
-        assert_eq!(appstate.scroll_down, 0);
     }
 }

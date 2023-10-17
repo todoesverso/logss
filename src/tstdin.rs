@@ -1,10 +1,9 @@
-use std::io::{stdin, Error, ErrorKind};
-use std::sync::mpsc;
-use std::sync::mpsc::Sender;
-use std::thread;
-
-use std::io::{BufRead, BufReader};
-use std::process::{Command, Stdio};
+use std::{
+    io::{stdin, BufRead, BufReader, Error, ErrorKind},
+    process::{Command, Stdio},
+    sync::{mpsc, mpsc::Sender},
+    thread,
+};
 
 use crate::app::AppResult;
 
@@ -27,25 +26,28 @@ impl StdinHandler {
     }
 
     pub fn init(&self, cmd: Option<Vec<String>>) -> AppResult<()> {
-        // TODO: refactor to avoid duplicate code
         let sender = self.sender.clone();
-        if let Some(inner_cmd) = cmd {
-            let child = Command::new(&inner_cmd[0])
-                .args(&inner_cmd[1..])
-                .stderr(Stdio::null())
-                .stdout(Stdio::piped())
-                .spawn()?;
+        match cmd {
+            Some(inner_cmd) => {
+                let child = Command::new(&inner_cmd[0])
+                    .args(&inner_cmd[1..])
+                    .stderr(Stdio::null())
+                    .stdout(Stdio::piped())
+                    .spawn()?;
 
-            let stdout = child
-                .stdout
-                .ok_or_else(|| Error::new(ErrorKind::Other, "Failed to run command"))?;
-            let reader = BufReader::new(stdout);
-            read_lines_and_send(reader, sender);
-        } else {
-            let stdin = stdin();
-            let reader = BufReader::new(stdin);
+                let stdout = child
+                    .stdout
+                    .ok_or_else(|| Error::new(ErrorKind::Other, "Failed to run command"))?;
+                let reader = BufReader::new(stdout);
+                read_lines_and_send(reader, sender);
+            }
+            // If no command set then we are being pipped
+            None => {
+                let stdin = stdin();
+                let reader = BufReader::new(stdin);
 
-            read_lines_and_send(reader, sender);
+                read_lines_and_send(reader, sender);
+            }
         }
 
         Ok(())
@@ -74,7 +76,10 @@ where
                     sender.send(line.clone()).ok();
                 }
             }
-            Err(_) => panic!("BUG!, please report it"),
+            Err(e) => {
+                sender.send(e.to_string()).ok();
+                break;
+            }
         }
         line.clear();
     });

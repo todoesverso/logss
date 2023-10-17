@@ -1,31 +1,25 @@
-use std::fs::{File, OpenOptions};
-use std::io::Write;
-use std::path::{Path, PathBuf};
+use std::{
+    fs::{File, OpenOptions},
+    io::Write,
+    path::{Path, PathBuf},
+};
 
-use ratatui::backend::Backend;
-use ratatui::layout::Rect;
-use ratatui::style::{Color, Modifier, Style};
-use ratatui::terminal::Frame;
-use ratatui::text::{Line, Span};
-use ratatui::widgets::{Block, Borders, Paragraph, Wrap};
+use ratatui::{
+    backend::Backend,
+    layout::Rect,
+    style::{Color, Modifier, Style},
+    terminal::Frame,
+    text::{Line, Span},
+    widgets::{Block, Borders, Paragraph, Wrap},
+};
 use regex::Regex;
 use slug;
 
-use crate::app::AppResult;
-use crate::cb::CircularBuffer;
-use crate::states::ContainerState;
-
-#[derive(Debug)]
-pub struct Container<'a> {
-    /// matching text
-    pub text: String,
-    pub re: Regex,
-    /// circular buffer with matching lines
-    pub cb: CircularBuffer<Line<'a>>,
-    pub id: u8,
-    pub state: ContainerState,
-    pub file: Option<File>,
-}
+use crate::{
+    app::AppResult,
+    cb::CircularBuffer,
+    states::{ContainerState, ScrollDirection},
+};
 
 pub const CONTAINER_BUFFER: usize = 1024;
 pub const CONTAINERS_MAX: u8 = 10;
@@ -42,11 +36,24 @@ pub const CONTAINER_COLORS: [ratatui::style::Color; 10] = [
     Color::DarkGray,
 ];
 
+#[derive(Debug)]
+pub struct Container<'a> {
+    /// matching text
+    pub text: String,
+    pub re: Regex,
+    /// circular buffer with matching lines
+    pub cb: CircularBuffer<Line<'a>>,
+    pub id: u8,
+    pub state: ContainerState,
+    pub file: Option<File>,
+}
+
 impl<'a> Container<'a> {
     pub fn new(text: String, buffersize: usize) -> Self {
+        let re = Regex::new(&text).unwrap();
         Self {
             text: text.clone(),
-            re: Regex::new(&text).unwrap(),
+            re,
             cb: CircularBuffer::new(buffersize),
             id: 0,
             state: ContainerState::default(),
@@ -95,36 +102,44 @@ impl<'a> Container<'a> {
     }
 
     pub fn proc_and_push_line(&mut self, line: &str) -> Option<Line<'a>> {
-        let rt_lines = self.process_line(line);
-        let ret = rt_lines.clone();
-        if let Some(rt_lines_in) = rt_lines {
-            let _ = &self.push(rt_lines_in);
+        let processed_line = self.process_line(line);
+        if let Some(processed_line_clone) = processed_line.clone() {
+            self.push(processed_line_clone);
         }
         if let Some(file) = &mut self.file {
             file.write_all(line.as_bytes())
                 .expect("Failed to write file");
             file.flush().expect("Failed to flush");
         }
-        ret
+        processed_line
     }
 
-    pub fn update_scroll(&mut self, size: usize, up: &mut u16, down: &mut u16) {
-        // TODO: rewrite this mess
-        let bufflen = self.cb.len();
+    pub fn update_scroll(&mut self, visible_lines: usize, scroll: &ScrollDirection) {
+        let total_lines = self.cb.len();
 
-        if bufflen < size {
+        // If we have less lines in the buffer than visible lines then do nothing
+        if total_lines < visible_lines {
+            return;
+        }
+
+        let max_scroll = (total_lines - visible_lines) as u16;
+
+        if !self.state.paused {
+            // This ensures automatic scrolling
+            self.state.scroll = max_scroll;
         } else {
-            self.state.scroll = (bufflen - size) as u16;
-            if self.state.scroll - *down > 0 {
-                self.state.scroll -= *down;
-            } else if *down > 1 {
-                *down -= 1;
-            }
-
-            if self.state.scroll + *up <= (bufflen - size) as u16 {
-                self.state.scroll += *up;
-            } else if *up > 1 {
-                *up -= 1;
+            match scroll {
+                ScrollDirection::NONE => (),
+                ScrollDirection::UP => {
+                    if self.state.scroll <= max_scroll {
+                        self.state.scroll += 1;
+                    }
+                }
+                ScrollDirection::DOWN => {
+                    if self.state.scroll - 1 > 0 {
+                        self.state.scroll -= 1;
+                    }
+                }
             }
         }
     }
@@ -134,8 +149,9 @@ impl<'a> Container<'a> {
             return;
         }
         let title = format!("[{}]'{}' ({})", self.id, self.text, self.state.count);
+        let block = create_block(&title, self.state.color, self.state.paused);
         let mut paragraph = Paragraph::new(self.cb.ordered_clone().buffer.clone())
-            .block(create_block(&title, self.state.color, self.state.paused))
+            .block(block)
             .style(self.state.style)
             .scroll((self.state.scroll, 0));
         if self.state.wrap {

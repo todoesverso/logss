@@ -1,8 +1,11 @@
+use ratatui::{
+    backend::Backend,
+    style::{Color, Style},
+    terminal::Frame,
+    text::{Line, Span},
+};
+
 use crate::popup::render_popup;
-use ratatui::backend::Backend;
-use ratatui::style::{Color, Style};
-use ratatui::terminal::Frame;
-use ratatui::text::{Line, Span};
 
 pub fn render_help<B: Backend>(frame: &mut Frame<'_, B>) {
     let help_text = vec![
@@ -68,8 +71,9 @@ pub fn render_help<B: Backend>(frame: &mut Frame<'_, B>) {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use ratatui::{backend::TestBackend, Terminal};
+
+    use super::*;
 
     #[test]
     fn test_render_help() {
