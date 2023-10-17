@@ -285,14 +285,14 @@ impl<'a> App<'a> {
     }
 
     fn get_layout_blocks(&self, size: Rect) -> Vec<Rect> {
-        let mut constr = vec![];
+        let mut constr: Vec<Constraint> = vec![];
         let show_cont = self.containers.iter().filter(|c| !c.state.hide).count();
         for _ in 0..show_cont {
             constr.push(Constraint::Ratio(1, show_cont as u32));
         }
         let ret = Layout::default()
             .direction(self.state.direction)
-            .constraints(constr.as_ref())
+            .constraints(constr)
             .split(size);
 
         ret.to_vec()
