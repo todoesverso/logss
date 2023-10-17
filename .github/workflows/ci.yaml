@@ -136,11 +136,6 @@ jobs:
       matrix:
         os: [ ubuntu-latest, windows-latest, macos-latest ]
         toolchain: [ "1.67.0", "stable" ]
-          #backend: [ crossterm, termion, termwiz ]
-        exclude:
-          # termion is not supported on windows
-          - os: windows-latest
-            backend: termion
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout
@@ -152,6 +147,6 @@ jobs:
       - name: Install cargo-make
         uses: taiki-e/install-action@cargo-make
       - name: Test
-        run: cargo test --locked --all-features --all-targets
+        run: cargo make test 
         env:
           RUST_BACKTRACE: full

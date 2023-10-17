@@ -128,4 +128,53 @@ mod tests {
         ]);
         terminal.backend().assert_buffer(&expected);
     }
+
+    #[test]
+    fn test_render_non_valid_input() {
+        let mut input = Input::new();
+        input.push('[');
+        let backend = TestBackend::new(65, 37);
+        let mut terminal = Terminal::new(backend).unwrap();
+        terminal.draw(|f| input.render(f)).unwrap();
+        let expected = Buffer::with_lines(vec![
+            "                                                                 ",
+            "                                                                 ",
+            "                                                                 ",
+            "                                                                 ",
+            "                                                                 ",
+            "                                                                 ",
+            "                                                                 ",
+            "                                                                 ",
+            "                                                                 ",
+            "                                                                 ",
+            "                                                                 ",
+            "                                                                 ",
+            "                                                                 ",
+            "                                                                 ",
+            "                                                                 ",
+            "                                                                 ",
+            "                                                                 ",
+            "                    ┌Input (non valid regexp)┐                   ",
+            "                    │[                       │                   ",
+            "                    └────────────────────────┘                   ",
+            "                                                                 ",
+            "                                                                 ",
+            "                                                                 ",
+            "                                                                 ",
+            "                                                                 ",
+            "                                                                 ",
+            "                                                                 ",
+            "                                                                 ",
+            "                                                                 ",
+            "                                                                 ",
+            "                                                                 ",
+            "                                                                 ",
+            "                                                                 ",
+            "                                                                 ",
+            "                                                                 ",
+            "                                                                 ",
+            "                                                                 ",
+        ]);
+        terminal.backend().assert_buffer(&expected);
+    }
 }
