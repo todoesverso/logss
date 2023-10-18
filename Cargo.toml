@@ -41,4 +41,4 @@ strip = true
 
 [dev-dependencies]
 assert_cmd = "2.0.10"
-predicates = "3.0.3"
+predicates = "3.0.4"
