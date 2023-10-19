@@ -1,4 +1,7 @@
-use std::sync::mpsc::TryRecvError;
+use std::{
+    ops::{Deref, DerefMut},
+    sync::mpsc::TryRecvError,
+};
 
 use anyhow::Result;
 use crossterm::event::KeyCode;
@@ -31,6 +34,20 @@ pub struct App<'a> {
     pub raw_buffer: Container<'a>,
     pub single_buffer: Container<'a>,
     args: Args,
+}
+
+impl<'a> Deref for App<'a> {
+    type Target = AppState;
+
+    fn deref(&self) -> &AppState {
+        &self.state
+    }
+}
+
+impl<'a> DerefMut for App<'a> {
+    fn deref_mut(&mut self) -> &mut AppState {
+        &mut self.state
+    }
 }
 
 impl<'a> Default for App<'a> {
@@ -81,68 +98,6 @@ impl<'a> App<'a> {
         self.state.running = true;
         self.stdin.init(self.args.command.clone())?;
         Ok(())
-    }
-
-    pub const fn is_running(&self) -> bool {
-        self.state.running
-    }
-
-    pub const fn show_input(&self) -> bool {
-        self.state.show_input
-    }
-
-    pub fn hide_show_input(&mut self) {
-        self.state.show_input = false;
-    }
-
-    pub fn stop(&mut self) {
-        self.state.running = false;
-    }
-
-    pub fn pause(&mut self) {
-        self.state.paused = true;
-    }
-
-    pub fn unpause(&mut self) {
-        self.state.paused = false;
-    }
-
-    pub fn flip_pause(&mut self) {
-        self.state.paused = !self.state.paused;
-    }
-
-    pub fn flip_wrap(&mut self) {
-        self.state.wrap = !self.state.wrap;
-    }
-
-    pub fn flip_help(&mut self) {
-        self.state.help = !self.state.help;
-    }
-
-    pub fn flip_barchart(&mut self) {
-        self.state.barchart = !self.state.barchart;
-    }
-
-    pub fn flip_show_input(&mut self) {
-        self.state.show_input = !self.state.show_input;
-    }
-
-    pub fn scroll_up(&mut self) {
-        self.pause();
-        self.state.scroll_direction = ScrollDirection::UP;
-    }
-
-    pub fn scroll_down(&mut self) {
-        self.pause();
-        self.state.scroll_direction = ScrollDirection::DOWN;
-    }
-
-    pub fn flip_direction(&mut self) {
-        if self.state.direction == Direction::Vertical {
-            self.state.direction = Direction::Horizontal;
-        } else {
-            self.state.direction = Direction::Vertical;
-        }
     }
 
     pub fn update_input(&mut self, key_code: KeyCode) {
