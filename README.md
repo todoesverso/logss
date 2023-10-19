@@ -90,7 +90,7 @@ So far only available in crates.io.
 cargo install logss
 ```
 
-If cargo is not a possibility then download pre compiled binaries from the #download section.
+If cargo is not a possibility then download pre compiled binaries from the [download](#download) section.
 
 ## Download
 
