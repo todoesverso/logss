@@ -8,10 +8,10 @@
 <h5 align="center">logs splitter</h5>
 <h4 align="center">A simple command line tool that helps you visualize an input stream of text.</h4>
 
-![screenshot](./assets/screenshot.png)
+![screenshot](./assets/gifs/complete.gif)
 
 <p align="center">
-  <img src="https://github.com/todoesverso/logss/actions/workflows/test.yml/badge.svg">
+  <img src="https://github.com/todoesverso/logss/actions/workflows/ci.yaml/badge.svg">
   <img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square">
   <a href="https://codecov.io/gh/todoesverso/logss" >
     <img src="https://codecov.io/gh/todoesverso/logss/branch/main/graph/badge.svg?token=G6JEXYQQO0"/>
@@ -21,7 +21,6 @@
 <p align="center">
   <a href="#key-features">Key Features</a> •
   <a href="#usage">Usage</a> •
-  <a href="#screenshots">Screenshots</a> •
   <a href="#download">Download</a> •
   <a href="#roadmap">Roadmap</a> •
   <a href="#license">License</a>
@@ -45,21 +44,25 @@
 * Support for explicit command (no need to pipe into it)
 * Send all matched lines to dedicated files
 * Consolidated view with highlighted items
+* Simple BrChart popup with counts
 
 
 ## Usage
 
   ```sh
   $ logss -h
-  Simple cli command to show logs in a friendly way
+  Simple CLI command to display logs in a user-friendly way
 
   Usage: logss [OPTIONS]
 
   Options:
-    -c <CONTAINERS>  Finds the substring (regexp)
-    -C <COMMAND>     Gets input from this command
-    -r <RENDER>      Defines render speed in milliseconds [default: 100]
-    -f <FILE>        Input config file (overrides cli arguments)
+    -c <CONTAINERS>  Specify substrings (regex patterns)
+    -e               Exit on empty input [default: false]
+    -s               Start in single view mode [default: false]
+    -C <COMMAND>     Get input from a command
+    -f <FILE>        Input configuration file (overrides CLI arguments)
+    -o <OUTPUT_PATH> Specify the output path for matched patterns
+    -r <RENDER>      Define render speed in milliseconds [default: 100]
     -V               Start in vertical view mode
     -h               Print help
 
@@ -77,57 +80,6 @@
       - ".*ERROR|error.*"
   $ logss -f real_curl_example.yaml 
   ```
-
-## Screenshots
-<details>
-  <summary>File Configuration</summary>
-
-  [![asciicast](https://asciinema.org/a/581505.svg)](https://asciinema.org/a/581505)
-
-</details>
-<details>
-  <summary>Zooms</summary>
-
-  ![](./assets/zooms.gif)
-
-</details>
-<details>
-  <summary>Pause</summary>
-
-  ![](./assets/pause.gif)
-
-</details>
-<details>
-  <summary>Vertical toggle</summary>
-
-  ![](./assets/vertical.gif)
-
-</details>
-<details>
-  <summary>Dynamic input and removal</summary>
-
-  ![](./assets/input_and_delete.gif)
-
-</details>
-
-<details>
-  <summary>Configuration file</summary>
-
-  ```sh
-  $ cat shakespeare.txt | logss -f example_config.yml
-  ```
-
-</details>
-
-<details>
-  <summary>Command</summary>
-
-  ```sh
-  $ logss -C cat shakespeare.txt
-  ```
-
-</details>
-
 
 ## Download
 

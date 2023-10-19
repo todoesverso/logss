@@ -20,6 +20,7 @@ exclude = [
 ]
 readme = "README.md"
 
+[badges]
 
 [dependencies]
 crossterm = "0.26.1"

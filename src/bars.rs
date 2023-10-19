@@ -22,13 +22,15 @@ pub fn render_bar_chart<B: Backend>(frame: &mut Frame<'_, B>, app: &App) {
     } else {
         bar_width
     };
+    let style = Style::default().fg(Color::White).bg(Color::Black);
     let title = "Counts";
     let barchart = BarChart::default()
         .block(create_block(title))
         .data(bargroup)
         .bar_gap(1)
         .bar_width(corrected_bw)
-        .value_style(Style::default().fg(Color::Black));
+        .value_style(Style::default().fg(Color::Black))
+        .style(style);
     render_bar_chart_popup(frame, barchart, (50, 50));
 }
 
