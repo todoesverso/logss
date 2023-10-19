@@ -21,6 +21,7 @@
 <p align="center">
   <a href="#key-features">Key Features</a> •
   <a href="#usage">Usage</a> •
+  <a href="#installation">Installation</a> •
   <a href="#download">Download</a> •
   <a href="#roadmap">Roadmap</a> •
   <a href="#license">License</a>
@@ -80,6 +81,16 @@
       - ".*ERROR|error.*"
   $ logss -f real_curl_example.yaml 
   ```
+
+## Installation
+
+So far only available in crates.io.
+
+```shell
+cargo install logss
+```
+
+If cargo is not a possibility then download pre compiled binaries from the [download](#download) section.
 
 ## Download
 
