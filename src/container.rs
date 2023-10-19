@@ -4,6 +4,7 @@ use std::{
     path::{Path, PathBuf},
 };
 
+use anyhow::Result;
 use ratatui::{
     backend::Backend,
     layout::Rect,
@@ -16,7 +17,6 @@ use regex::Regex;
 use slug;
 
 use crate::{
-    app::AppResult,
     cb::CircularBuffer,
     states::{ContainerState, ScrollDirection},
 };
@@ -61,7 +61,7 @@ impl<'a> Container<'a> {
         }
     }
 
-    pub fn set_output_path(&mut self, output_path: PathBuf) -> AppResult<()> {
+    pub fn set_output_path(&mut self, output_path: PathBuf) -> Result<()> {
         let file_name = format!(
             "{}/{}.txt",
             output_path.to_string_lossy(),

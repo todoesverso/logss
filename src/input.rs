@@ -60,7 +60,7 @@ impl Input {
 
 #[cfg(test)]
 mod tests {
-    use ratatui::{backend::TestBackend, buffer::Buffer, Terminal};
+    use ratatui::{backend::TestBackend, buffer::Buffer, prelude::Color, Terminal};
 
     use super::*;
 
@@ -87,7 +87,7 @@ mod tests {
         let backend = TestBackend::new(20, 37);
         let mut terminal = Terminal::new(backend).unwrap();
         terminal.draw(|f| input.render(f)).unwrap();
-        let expected = Buffer::with_lines(vec![
+        let mut expected = Buffer::with_lines(vec![
             "                    ",
             "                    ",
             "                    ",
@@ -126,6 +126,14 @@ mod tests {
             "                    ",
             "                    ",
         ]);
+
+        for x in 6..=13 {
+            for y in 17..=19 {
+                expected.get_mut(x, y).set_fg(Color::White);
+                expected.get_mut(x, y).set_bg(Color::Black);
+            }
+        }
+
         terminal.backend().assert_buffer(&expected);
     }
 
@@ -136,7 +144,7 @@ mod tests {
         let backend = TestBackend::new(65, 37);
         let mut terminal = Terminal::new(backend).unwrap();
         terminal.draw(|f| input.render(f)).unwrap();
-        let expected = Buffer::with_lines(vec![
+        let mut expected = Buffer::with_lines(vec![
             "                                                                 ",
             "                                                                 ",
             "                                                                 ",
@@ -175,6 +183,13 @@ mod tests {
             "                                                                 ",
             "                                                                 ",
         ]);
+        for x in 20..=45 {
+            for y in 17..=19 {
+                expected.get_mut(x, y).set_fg(Color::White);
+                expected.get_mut(x, y).set_bg(Color::Black);
+            }
+        }
+
         terminal.backend().assert_buffer(&expected);
     }
 }

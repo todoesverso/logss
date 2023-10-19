@@ -1,6 +1,7 @@
 use ratatui::{
     backend::Backend,
     layout::{Constraint, Direction, Layout, Rect},
+    prelude::style::{Color, Style},
     terminal::Frame,
     text::Line,
     widgets::{BarChart, Block, Borders, Clear, Paragraph},
@@ -14,7 +15,8 @@ pub fn render_popup<B: Backend>(
 ) {
     let size = frame.size();
     let block = Block::default().title(title).borders(Borders::ALL);
-    let paragraph = Paragraph::new(text.to_owned()).block(block);
+    let style = Style::default().fg(Color::White).bg(Color::Black);
+    let paragraph = Paragraph::new(text.to_owned()).block(block).style(style);
     let area = centered_rect(percent_area.0, percent_area.1, size);
 
     frame.render_widget(Clear, area); // this clears out the background
@@ -85,7 +87,7 @@ mod tests {
                 render_popup(f, "coso", &text, (50, 50));
             })
             .unwrap();
-        let expected = Buffer::with_lines(vec![
+        let mut expected = Buffer::with_lines(vec![
             "              ",
             "              ",
             "              ",
@@ -102,6 +104,13 @@ mod tests {
             "              ",
             "              ",
         ]);
+        for x in 4..=10 {
+            for y in 4..=10 {
+                expected.get_mut(x, y).set_fg(Color::White);
+                expected.get_mut(x, y).set_bg(Color::Black);
+            }
+        }
+
         terminal.backend().assert_buffer(&expected);
     }
 }

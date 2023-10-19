@@ -1,9 +1,10 @@
+use anyhow::Result;
 use crossterm::event::{KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
 
-use crate::app::{App, AppResult};
+use crate::app::App;
 
 /// Handles the key events and updates the state of [`App`].
-pub fn handle_key_events(key_event: KeyEvent, app: &mut App) -> AppResult<()> {
+pub fn handle_key_events(key_event: KeyEvent, app: &mut App) -> Result<()> {
     if app.show_input() {
         app.update_input(key_event.code);
     } else {

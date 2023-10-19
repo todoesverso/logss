@@ -2,10 +2,10 @@ command:
   - curl 
   - -s 
   - https://raw.githubusercontent.com/linuxacademy/content-elastic-log-samples/master/access.log 
-render: 55
+render: 95
 # output: output_path/
 # single: true
 containers:
   - GET
-  - "404"
-  - ".*ERROR|error.*"
+  - \.css
+  - GET.*iPhone

@@ -1,12 +1,10 @@
 use std::io;
 
+use anyhow::Result;
 use crossterm::terminal::{self, EnterAlternateScreen, LeaveAlternateScreen};
 use ratatui::{backend::Backend, Terminal};
 
-use crate::{
-    app::{App, AppResult},
-    event::EventHandler,
-};
+use crate::{app::App, event::EventHandler};
 
 /// Representation of a terminal user interface.
 ///
@@ -29,7 +27,7 @@ impl<B: Backend> Tui<B> {
     /// Initializes the terminal interface.
     ///
     /// It enables the raw mode and sets terminal properties.
-    pub fn init(&mut self) -> AppResult<()> {
+    pub fn init(&mut self) -> Result<()> {
         terminal::enable_raw_mode()?;
         crossterm::execute!(io::stderr(), EnterAlternateScreen)?;
         self.terminal.hide_cursor()?;
@@ -42,7 +40,7 @@ impl<B: Backend> Tui<B> {
     ///
     /// [`Draw`]: ratatui::Terminal::draw
     /// [`rendering`]: crate::app::App::render
-    pub fn draw(&mut self, app: &mut App) -> AppResult<()> {
+    pub fn draw(&mut self, app: &mut App) -> Result<()> {
         self.terminal.draw(|frame| app.render(frame))?;
         Ok(())
     }
@@ -50,7 +48,7 @@ impl<B: Backend> Tui<B> {
     /// Exits the terminal interface.
     ///
     /// It disables the raw mode and reverts back the terminal properties.
-    pub fn exit(&mut self) -> AppResult<()> {
+    pub fn exit(&mut self) -> Result<()> {
         terminal::disable_raw_mode()?;
         crossterm::execute!(io::stderr(), LeaveAlternateScreen)?;
         self.terminal.show_cursor()?;
