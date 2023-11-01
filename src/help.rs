@@ -1,5 +1,4 @@
 use ratatui::{
-    backend::Backend,
     style::{Color, Style},
     terminal::Frame,
     text::{Line, Span},
@@ -7,7 +6,7 @@ use ratatui::{
 
 use crate::popup::render_popup;
 
-pub fn render_help<B: Backend>(frame: &mut Frame<'_, B>) {
+pub fn render_help(frame: &mut Frame) {
     let help_text = vec![
         Line::from(Span::styled(
             "h       - toggles help popup",

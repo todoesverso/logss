@@ -1,5 +1,4 @@
 use ratatui::{
-    backend::Backend,
     layout::{Constraint, Direction, Layout, Rect},
     prelude::style::{Color, Style},
     terminal::Frame,
@@ -7,12 +6,7 @@ use ratatui::{
     widgets::{BarChart, Block, Borders, Clear, Paragraph},
 };
 
-pub fn render_popup<B: Backend>(
-    frame: &mut Frame<'_, B>,
-    title: &str,
-    text: &[Line],
-    percent_area: (u16, u16),
-) {
+pub fn render_popup(frame: &mut Frame<'_>, title: &str, text: &[Line], percent_area: (u16, u16)) {
     let size = frame.size();
     let block = Block::default().title(title).borders(Borders::ALL);
     let style = Style::default().fg(Color::White).bg(Color::Black);
@@ -23,11 +17,7 @@ pub fn render_popup<B: Backend>(
     frame.render_widget(paragraph, area);
 }
 
-pub fn render_bar_chart_popup<B: Backend>(
-    frame: &mut Frame<'_, B>,
-    barchart: BarChart,
-    percent_area: (u16, u16),
-) {
+pub fn render_bar_chart_popup(frame: &mut Frame<'_>, barchart: BarChart, percent_area: (u16, u16)) {
     let size = frame.size();
     let area = centered_rect(percent_area.0, percent_area.1, size);
 

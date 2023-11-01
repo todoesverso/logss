@@ -6,7 +6,6 @@ use std::{
 
 use anyhow::Result;
 use ratatui::{
-    backend::Backend,
     layout::Rect,
     style::{Color, Modifier, Style},
     terminal::Frame,
@@ -144,7 +143,7 @@ impl<'a> Container<'a> {
         }
     }
 
-    pub fn render<B: Backend>(&self, frame: &mut Frame<'_, B>, area: Rect) {
+    pub fn render(&self, frame: &mut Frame, area: Rect) {
         if self.state.hide {
             return;
         }

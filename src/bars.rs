@@ -1,5 +1,4 @@
 use ratatui::{
-    backend::Backend,
     style::{Color, Style},
     terminal::Frame,
     text::Line,
@@ -12,7 +11,7 @@ use crate::{
     popup::{centered_rect, render_bar_chart_popup},
 };
 
-pub fn render_bar_chart<B: Backend>(frame: &mut Frame<'_, B>, app: &App) {
+pub fn render_bar_chart(frame: &mut Frame, app: &App) {
     let bargroup = create_groups(app);
     let rect = centered_rect(50, 50, frame.size());
     let containers_count = app.containers.len() as u16;
