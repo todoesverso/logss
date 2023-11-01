@@ -6,7 +6,6 @@ use std::{
 use anyhow::Result;
 use crossterm::event::KeyCode;
 use ratatui::{
-    backend::Backend,
     layout::{Constraint, Direction, Layout, Rect},
     terminal::Frame,
     text::Line,
@@ -252,7 +251,7 @@ impl<'a> App<'a> {
         ret.to_vec()
     }
 
-    fn render_containers<B: Backend>(&mut self, frame: &mut Frame<'_, B>) {
+    fn render_containers(&mut self, frame: &mut Frame) {
         let blocks = self.get_layout_blocks(frame.size());
 
         for (i, container) in self.containers.iter().filter(|c| !c.state.hide).enumerate() {
@@ -302,17 +301,17 @@ impl<'a> App<'a> {
         self.state.scroll_direction = ScrollDirection::NONE;
     }
 
-    fn render_raw<B: Backend>(&mut self, frame: &mut Frame<'_, B>) {
+    fn render_raw(&mut self, frame: &mut Frame) {
         let container = &self.raw_buffer;
         container.render(frame, frame.size());
     }
 
-    fn render_single<B: Backend>(&mut self, frame: &mut Frame<'_, B>) {
+    fn render_single(&mut self, frame: &mut Frame) {
         let container = &self.single_buffer;
         container.render(frame, frame.size());
     }
 
-    fn render_id<B: Backend>(&mut self, frame: &mut Frame<'_, B>, id: u8) {
+    fn render_id(&mut self, frame: &mut Frame, id: u8) {
         for container in self.containers.iter() {
             if container.id == id {
                 container.render(frame, frame.size());
@@ -328,26 +327,26 @@ impl<'a> App<'a> {
         self.containers.sort_by_key(|container| container.id);
     }
 
-    fn render_help<B: Backend>(&self, frame: &mut Frame<'_, B>) {
+    fn render_help(&self, frame: &mut Frame) {
         if self.state.help {
             render_help(frame);
         }
     }
 
-    fn render_bar_chart<B: Backend>(&self, frame: &mut Frame<'_, B>) {
+    fn render_bar_chart(&self, frame: &mut Frame) {
         if self.state.barchart {
             render_bar_chart(frame, self);
         }
     }
 
-    fn render_input<B: Backend>(&self, frame: &mut Frame<'_, B>) {
+    fn render_input(&self, frame: &mut Frame) {
         if self.state.show_input {
             self.input.render(frame);
         }
     }
 
     /// Renders the user interface widgets.
-    pub fn render<B: Backend>(&mut self, frame: &mut Frame<'_, B>) {
+    pub fn render(&mut self, frame: &mut Frame) {
         self.update_containers(frame.size());
         match self.state.show {
             Views::Containers => self.render_containers(frame),

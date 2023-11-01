@@ -1,5 +1,4 @@
 use ratatui::{
-    backend::Backend,
     style::Style,
     terminal::Frame,
     text::{Line, Span},
@@ -20,7 +19,7 @@ impl Input {
         Self::default()
     }
 
-    pub fn render<B: Backend>(&self, frame: &mut Frame<'_, B>) {
+    pub fn render(&self, frame: &mut Frame) {
         let pos = (40, 8);
         let area = centered_rect(pos.0, pos.1, frame.size());
         let text = vec![Line::from(Span::styled(
