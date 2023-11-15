@@ -467,7 +467,7 @@ mod tests {
     fn get_stdin() {
         let mut app = App::new(None);
         app.add_container("a");
-        let c = app.containers.get(0).unwrap();
+        let c = app.containers.first().unwrap();
         assert!(c.cb.is_empty());
         assert!(app.raw_buffer.cb.is_empty());
         assert_eq!(app.raw_buffer.cb.len(), 0);
@@ -478,7 +478,7 @@ mod tests {
         app.stdin.sender.send("def".to_string()).unwrap();
         app.tick();
 
-        let c = app.containers.get(0).unwrap();
+        let c = app.containers.first().unwrap();
         assert!(!c.cb.is_empty());
         assert_eq!(c.cb.len(), 1);
         assert!(!app.raw_buffer.cb.is_empty());
