@@ -32,7 +32,7 @@ regex = "1.9.5"
 serde_yaml = "0.9.27"
 serde = {version = "1.0.190", features = ["derive"]}
 proc-macro2 = "1.0.67"
-slug = "0.1.4"
+slug = "0.1.5"
 anyhow = "1.0.75"
 
 [profile.release]
