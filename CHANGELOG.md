@@ -381,3 +381,81 @@
   * implement deref for appstate
   
   * Background colors and doc
+# v0.0.1..v0.0.2 (2023-12-29)
+
+- Add installation section (#90)
+- Bump actions/checkout from 3 to 4 (#87)
+- Bump ratatui and others (#95)
+- Bump ratatui from 0.24.0 to 0.25.0 (#100)
+- Bump zerocopy from 0.7.11 to 0.7.31 (#99)
+- Bump proc-macro2 from 1.0.69 to 1.0.70 (#98)
+
+### Notes
+    
+- * Add installation section
+  
+  * Fix link
+
+- Bumps [actions/checkout](https://github.com/actions/checkout) from 3 to 4.
+   [Release notes](https://github.com/actions/checkout/releases)
+   [Changelog](https://github.com/actions/checkout/blob/main/CHANGELOG.md)
+   [Commits](https://github.com/actions/checkout/compare/v3...v4)
+  
+  --
+  updated-dependencies:
+   dependency-name: actions/checkout
+    dependency-type: direct:production
+    update-type: version-update:semver-major
+  ...
+  
+  Signed-off-by: dependabot[bot] <support@github.com>
+  Co-authored-by: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
+
+- * Bump ratatui and others
+  
+  * Revert predicate version bump
+  
+  * Bump minor rust version to match ratatui reqs
+
+- Bumps [ratatui](https://github.com/ratatui-org/ratatui) from 0.24.0 to 0.25.0.
+   [Release notes](https://github.com/ratatui-org/ratatui/releases)
+   [Changelog](https://github.com/ratatui-org/ratatui/blob/main/CHANGELOG.md)
+   [Commits](https://github.com/ratatui-org/ratatui/compare/v0.24.0...v0.25.0)
+  
+  --
+  updated-dependencies:
+   dependency-name: ratatui
+    dependency-type: direct:production
+    update-type: version-update:semver-minor
+  ...
+  
+  Signed-off-by: dependabot[bot] <support@github.com>
+  Co-authored-by: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
+
+- Bumps [zerocopy](https://github.com/google/zerocopy) from 0.7.11 to 0.7.31.
+   [Release notes](https://github.com/google/zerocopy/releases)
+   [Changelog](https://github.com/google/zerocopy/blob/main/CHANGELOG.md)
+   [Commits](https://github.com/google/zerocopy/compare/v0.7.11...v0.7.31)
+  
+  --
+  updated-dependencies:
+   dependency-name: zerocopy
+    dependency-type: indirect
+  ...
+  
+  Signed-off-by: dependabot[bot] <support@github.com>
+  Co-authored-by: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
+
+- Bumps [proc-macro2](https://github.com/dtolnay/proc-macro2) from 1.0.69 to 1.0.70.
+   [Release notes](https://github.com/dtolnay/proc-macro2/releases)
+   [Commits](https://github.com/dtolnay/proc-macro2/compare/1.0.69...1.0.70)
+  
+  --
+  updated-dependencies:
+   dependency-name: proc-macro2
+    dependency-type: direct:production
+    update-type: version-update:semver-patch
+  ...
+  
+  Signed-off-by: dependabot[bot] <support@github.com>
+  Co-authored-by: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
