@@ -4,9 +4,9 @@ command:
 vertical: true
 render: 26
 containers: 
-- to
-- be
-- or
-- not 
-- to.*be
+- re: to
+- re: be
+- re: or
+- re: not 
+- re: to.*be
 output: output_path

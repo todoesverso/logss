@@ -55,8 +55,8 @@ impl<'a> Default for App<'a> {
             stdin: StdinHandler::new(),
             args: parse_args(),
             input: Input::default(),
-            raw_buffer: Container::new(".*".to_string(), CONTAINER_BUFFER),
-            single_buffer: Container::new("single".to_string(), CONTAINER_BUFFER),
+            raw_buffer: Container::new(".*".to_string(), None, CONTAINER_BUFFER),
+            single_buffer: Container::new("single".to_string(), None,  CONTAINER_BUFFER),
             containers: Vec::new(),
             state: AppState::default(),
         }
@@ -79,7 +79,7 @@ impl<'a> App<'a> {
 
         // Let 0 for raw_buffer
         for (id, c) in (1_u8..).zip(ret.args.containers.iter()) {
-            let mut con = Container::new(c.clone(), CONTAINER_BUFFER);
+            let mut con = Container::new(c.re.clone(), c.trigger.clone(), CONTAINER_BUFFER);
             if let Some(output_path) = ret.args.output.clone() {
                 con.set_output_path(output_path).ok();
             }
@@ -131,7 +131,7 @@ impl<'a> App<'a> {
 
     pub fn add_container(&mut self, text: &str) {
         let first_free_id = self.get_free_ids();
-        let mut con = Container::new(text.to_string(), CONTAINER_BUFFER);
+        let mut con = Container::new(text.to_string(), None, CONTAINER_BUFFER);
         if let Some(output_path) = self.args.output.clone() {
             con.set_output_path(output_path).ok();
         }
@@ -388,6 +388,7 @@ mod tests {
     };
 
     use super::*;
+    use crate::args::LocalContainer;
 
     #[test]
     fn test_new() {
@@ -413,7 +414,16 @@ mod tests {
         assert_eq!(app.containers.len(), 2);
 
         let mut args = parse_args();
-        args.containers = vec!["a".to_string(), "b".to_string()];
+        args.containers = vec![
+            LocalContainer {
+                re: "a".to_string(),
+                trigger: None,
+            },
+            LocalContainer {
+                re: "b".to_string(),
+                trigger: None,
+            },
+        ];
         let app = App::new(Some(args));
         assert_eq!(app.containers.len(), 2);
     }

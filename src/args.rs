@@ -5,6 +5,9 @@ use regex::Regex;
 use serde::{Deserialize, Serialize};
 use serde_yaml;
 
+use std::str::FromStr;
+
+
 const HELP: &str = "\
 Simple CLI command to display logs in a user-friendly way
 
@@ -22,9 +25,37 @@ Options:
   -h               Print help
 ";
 
+#[derive(Debug, Serialize, Deserialize, PartialEq)]
+pub struct LocalContainer {
+    pub re: String,
+    pub trigger: Option<String>
+}
+
+impl FromStr for LocalContainer {
+    type Err = &'static str;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let parts: Vec<&str> = s.trim().split(',').collect();
+
+        if parts.len() != 2 {
+            return Err("Expected two comma-separated parts");
+        }
+
+        let re = parts[0].trim().to_string();
+        let trigger = if parts[1].trim().is_empty() {
+            None
+        } else {
+            Some(parts[1].trim().to_string())
+        };
+
+        Ok(LocalContainer { re, trigger })
+    }
+}
+
+
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Args {
-    pub containers: Vec<String>,
+    pub containers: Vec<LocalContainer>,
     pub exit: Option<bool>,
     pub vertical: Option<bool>,
     pub single: Option<bool>,
@@ -95,10 +126,10 @@ fn parse_yaml(config_file: std::path::PathBuf) -> Result<Args, Box<dyn std::erro
     Ok(scrape_config)
 }
 
-fn validate_regex(containers: &Vec<String>) -> bool {
+fn validate_regex(containers: &Vec<LocalContainer>) -> bool {
     for c in containers {
-        if Regex::new(c).is_err() {
-            eprintln!("Error: Failed to parse regexp '{c}'.");
+        if Regex::new(&c.re).is_err() {
+            eprintln!("Error: Failed to parse regexp '{c:?}'.");
             return false;
         }
     }
@@ -164,10 +195,10 @@ mod tests {
 
     #[test]
     fn test_validate_regex() {
-        let c = vec!["a".to_string()];
+        let c = vec![LocalContainer{re: "a".to_string(), trigger: None}];
         assert!(validate_regex(&c));
 
-        let c = vec!["*".to_string()];
+        let c = vec![LocalContainer{re: "*".to_string(), trigger: None}];
         assert!(!validate_regex(&c));
     }
 
@@ -207,11 +238,11 @@ mod tests {
         assert_eq!(
             args.containers,
             vec![
-                "to".to_string(),
-                "be".to_string(),
-                "or".to_string(),
-                "not".to_string(),
-                "to.*be".to_string()
+                LocalContainer{re: "to".to_string(), trigger: None},
+                LocalContainer{re: "be".to_string(), trigger: None},
+                LocalContainer{re: "or".to_string(), trigger: None},
+                LocalContainer{re: "not".to_string(), trigger: None},
+                LocalContainer{re: "to.*be".to_string(), trigger: None},
             ]
         );
     }

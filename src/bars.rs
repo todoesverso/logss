@@ -63,7 +63,7 @@ mod tests {
 
     #[test]
     fn test_create_bar() {
-        let container = Container::new("test".to_string(), 1);
+        let container = Container::new("test".to_string(), None, 1);
         let bar = create_bar(&container);
         let base_bar = Bar::default()
             .value(0)

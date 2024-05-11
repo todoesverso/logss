@@ -45,10 +45,11 @@ pub struct Container<'a> {
     pub id: u8,
     pub state: ContainerState,
     pub file: Option<File>,
+    pub trigger: Option<String>,
 }
 
 impl<'a> Container<'a> {
-    pub fn new(text: String, buffersize: usize) -> Self {
+    pub fn new(text: String, trigger: Option<String>, buffersize: usize) -> Self {
         let re = Regex::new(&text).unwrap();
         Self {
             text: text.clone(),
@@ -57,6 +58,7 @@ impl<'a> Container<'a> {
             id: 0,
             state: ContainerState::default(),
             file: None,
+            trigger,
         }
     }
 
@@ -206,7 +208,7 @@ mod tests {
 
     #[test]
     fn test_container_new() {
-        let container = Container::new("key".to_string(), 2);
+        let container = Container::new("key".to_string(), None, 2);
         assert_eq!(container.id, 0);
         assert_eq!(container.text, "key");
         assert_eq!(container.cb.len(), 0);
@@ -217,7 +219,7 @@ mod tests {
     #[test]
     fn test_set_output_path() {
         let _ = std::fs::remove_dir_all("test-sarasa");
-        let mut container = Container::new("key".to_string(), 2);
+        let mut container = Container::new("key".to_string(), None, 2);
         let path = std::path::PathBuf::from("test-sarasa");
         let mut dir = std::fs::DirBuilder::new();
         dir.recursive(true).create("test-sarasa").unwrap();
@@ -227,7 +229,7 @@ mod tests {
 
     #[test]
     fn process_line() {
-        let container = Container::new("stringtomatch".to_string(), 2);
+        let container = Container::new("stringtomatch".to_string(),None,  2);
         let span = container.process_line("this line should not be proc");
         assert_eq!(span, None);
         let span = container.process_line("stringtomatch this line should be proc");
