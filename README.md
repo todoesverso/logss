@@ -61,7 +61,7 @@
   Usage: logss [OPTIONS]
 
   Options:
-    -c <CONTAINERS>  Specify substrings (regex patterns)
+    -c <CONTAINERS>  Specify substrings (regex patterns) 
     -e               Exit on empty input [default: false]
     -s               Start in single view mode [default: false]
     -C <COMMAND>     Get input from a command
@@ -72,8 +72,8 @@
     -V               Start in vertical view mode
     -h               Print help
 
-  $ cat shakespeare.txt | logss -c to -c be -c or -c 'in.*of'
-  $ # 
+  $ cat shakespeare.txt | logss -c to -c be -c or,'echo or_found >> /tmp/or.log',1 -c 'in.*of'
+  $ #  The containers can be a simple '-c <regex>' or '-c <regex>, <command>, <command timeout>'
   $ cat real_curl_example.yaml
     command:
       - curl
