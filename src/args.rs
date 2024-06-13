@@ -1,12 +1,12 @@
-use std::fs::{remove_file, OpenOptions};
+use std::{
+    fs::{remove_file, OpenOptions},
+    str::FromStr,
+};
 
 use pico_args;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
 use serde_yaml;
-
-use std::str::FromStr;
-
 
 const HELP: &str = "\
 Simple CLI command to display logs in a user-friendly way
@@ -21,6 +21,7 @@ Options:
   -f <FILE>        Input configuration file (overrides CLI arguments)
   -o <OUTPUT_PATH> Specify the output path for matched patterns
   -r <RENDER>      Define render speed in milliseconds [default: 100]
+  -t <THREADS>     Number of threads per container for triggers [default: 1]
   -V               Start in vertical view mode
   -h               Print help
 ";
@@ -28,7 +29,8 @@ Options:
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
 pub struct LocalContainer {
     pub re: String,
-    pub trigger: Option<String>
+    pub trigger: Option<String>,
+    pub timeout: Option<u64>,
 }
 
 impl FromStr for LocalContainer {
@@ -37,7 +39,7 @@ impl FromStr for LocalContainer {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let parts: Vec<&str> = s.trim().split(',').collect();
 
-        if parts.len() != 2 {
+        if parts.len() != 3 {
             return Err("Expected two comma-separated parts");
         }
 
@@ -47,11 +49,20 @@ impl FromStr for LocalContainer {
         } else {
             Some(parts[1].trim().to_string())
         };
+        let timeout = if parts[2].trim().is_empty() {
+            Some(1)
+        } else {
+            let timeout: u64 = parts[2].trim().parse().unwrap_or(1);
+            Some(timeout)
+        };
 
-        Ok(LocalContainer { re, trigger })
+        Ok(LocalContainer {
+            re,
+            trigger,
+            timeout,
+        })
     }
 }
-
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Args {
@@ -60,6 +71,7 @@ pub struct Args {
     pub vertical: Option<bool>,
     pub single: Option<bool>,
     pub render: Option<u64>,
+    pub threads: Option<u64>,
     pub command: Option<Vec<String>>,
     pub output: Option<std::path::PathBuf>,
     pub config_file: Option<std::path::PathBuf>,
@@ -95,6 +107,9 @@ fn parser() -> Result<Args, Box<dyn std::error::Error>> {
         render: pargs
             .opt_value_from_fn("-r", render_in_range)?
             .unwrap_or(Some(100)),
+        threads: pargs
+            .opt_value_from_fn("-t", render_in_range)?
+            .unwrap_or(Some(4)),
     };
 
     let render = args.render;
@@ -195,10 +210,18 @@ mod tests {
 
     #[test]
     fn test_validate_regex() {
-        let c = vec![LocalContainer{re: "a".to_string(), trigger: None}];
+        let c = vec![LocalContainer {
+            re: "a".to_string(),
+            trigger: None,
+            timeout: None,
+        }];
         assert!(validate_regex(&c));
 
-        let c = vec![LocalContainer{re: "*".to_string(), trigger: None}];
+        let c = vec![LocalContainer {
+            re: "*".to_string(),
+            trigger: None,
+            timeout: None,
+        }];
         assert!(!validate_regex(&c));
     }
 
@@ -238,11 +261,31 @@ mod tests {
         assert_eq!(
             args.containers,
             vec![
-                LocalContainer{re: "to".to_string(), trigger: None},
-                LocalContainer{re: "be".to_string(), trigger: None},
-                LocalContainer{re: "or".to_string(), trigger: None},
-                LocalContainer{re: "not".to_string(), trigger: None},
-                LocalContainer{re: "to.*be".to_string(), trigger: None},
+                LocalContainer {
+                    re: "to".to_string(),
+                    trigger: Some("echo $(date) >> /tmp/dates.txt".to_string()),
+                    timeout: Some(1),
+                },
+                LocalContainer {
+                    re: "be".to_string(),
+                    trigger: Some("echo __line__ >> /tmp/match_lines.txt".to_string()),
+                    timeout: Some(1),
+                },
+                LocalContainer {
+                    re: "or".to_string(),
+                    trigger: None,
+                    timeout: Some(1),
+                },
+                LocalContainer {
+                    re: "not".to_string(),
+                    trigger: None,
+                    timeout: Some(1),
+                },
+                LocalContainer {
+                    re: "to.*be".to_string(),
+                    trigger: None,
+                    timeout: Some(1),
+                },
             ]
         );
     }

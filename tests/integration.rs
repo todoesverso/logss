@@ -33,6 +33,7 @@ Options:
   -f <FILE>        Input configuration file (overrides CLI arguments)
   -o <OUTPUT_PATH> Specify the output path for matched patterns
   -r <RENDER>      Define render speed in milliseconds [default: 100]
+  -t <THREADS>     Number of threads per container for triggers [default: 1]
   -V               Start in vertical view mode
   -h               Print help
 ",

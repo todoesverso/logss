@@ -1,11 +1,16 @@
-command:  
-  - curl 
-  - -s 
-  - https://raw.githubusercontent.com/linuxacademy/content-elastic-log-samples/master/access.log 
+command:
+  - curl
+  - -s
+  - https://raw.githubusercontent.com/linuxacademy/content-elastic-log-samples/master/access.log
 render: 95
 # output: output_path/
 # single: true
+threads: 1
 containers:
-  - GET
-  - \.css
-  - GET.*iPhone
+  - re: GET
+    trigger: echo $(date) >> /tmp/get.log
+    timeout: 4
+  - re: \.css
+    trigger: echo '__line__' >> /tmp/css.log
+    timeout: 4
+  - re: GET.*iPhone

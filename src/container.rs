@@ -2,6 +2,8 @@ use std::{
     fs::{File, OpenOptions},
     io::Write,
     path::{Path, PathBuf},
+    process::Command,
+    time::Duration,
 };
 
 use anyhow::Result;
@@ -14,6 +16,8 @@ use ratatui::{
 };
 use regex::Regex;
 use slug;
+use threadpool::ThreadPool;
+use wait_timeout::ChildExt;
 
 use crate::{
     cb::CircularBuffer,
@@ -46,11 +50,24 @@ pub struct Container<'a> {
     pub state: ContainerState,
     pub file: Option<File>,
     pub trigger: Option<String>,
+    pub timeout: u64,
+    pub thread_pool: Option<ThreadPool>,
 }
 
 impl<'a> Container<'a> {
-    pub fn new(text: String, trigger: Option<String>, buffersize: usize) -> Self {
+    pub fn new(
+        text: String,
+        trigger: Option<String>,
+        timeout: u64,
+        threads: u64,
+        buffersize: usize,
+    ) -> Self {
         let re = Regex::new(&text).unwrap();
+        let thread_pool = if threads > 0 {
+            Some(ThreadPool::new(threads as usize))
+        } else {
+            None
+        };
         Self {
             text: text.clone(),
             re,
@@ -59,6 +76,23 @@ impl<'a> Container<'a> {
             state: ContainerState::default(),
             file: None,
             trigger,
+            timeout,
+            thread_pool,
+        }
+    }
+
+    pub fn new_clean(text: &str) -> Self {
+        let re = Regex::new(text).unwrap();
+        Self {
+            text: text.to_string(),
+            re,
+            cb: CircularBuffer::new(CONTAINER_BUFFER),
+            id: 0,
+            state: ContainerState::default(),
+            file: None,
+            trigger: None,
+            timeout: 1,
+            thread_pool: None,
         }
     }
 
@@ -112,6 +146,22 @@ impl<'a> Container<'a> {
                 .expect("Failed to write file");
             file.flush().expect("Failed to flush");
         }
+        if self.trigger.is_some() && self.thread_pool.is_some() {
+            let cmd = self.trigger.clone().unwrap().replace("__line__", line);
+            let mut child = Command::new("sh").arg("-c").arg(cmd).spawn().unwrap();
+            let timeout = Duration::from_secs(self.timeout);
+            self.thread_pool.as_ref().unwrap().execute(move || {
+                let _status_code = match child.wait_timeout(timeout).unwrap() {
+                    Some(status) => status.code(),
+                    None => {
+                        // child hasn't exited yet
+                        child.kill().unwrap();
+                        child.wait().unwrap().code()
+                    }
+                };
+            });
+        }
+
         processed_line
     }
 
@@ -208,7 +258,7 @@ mod tests {
 
     #[test]
     fn test_container_new() {
-        let container = Container::new("key".to_string(), None, 2);
+        let container = Container::new("key".to_string(), None, 1, 0, 2);
         assert_eq!(container.id, 0);
         assert_eq!(container.text, "key");
         assert_eq!(container.cb.len(), 0);
@@ -219,7 +269,7 @@ mod tests {
     #[test]
     fn test_set_output_path() {
         let _ = std::fs::remove_dir_all("test-sarasa");
-        let mut container = Container::new("key".to_string(), None, 2);
+        let mut container = Container::new("key".to_string(), None, 1, 0, 2);
         let path = std::path::PathBuf::from("test-sarasa");
         let mut dir = std::fs::DirBuilder::new();
         dir.recursive(true).create("test-sarasa").unwrap();
@@ -229,7 +279,7 @@ mod tests {
 
     #[test]
     fn process_line() {
-        let container = Container::new("stringtomatch".to_string(),None,  2);
+        let container = Container::new("stringtomatch".to_string(), None, 1, 0, 2);
         let span = container.process_line("this line should not be proc");
         assert_eq!(span, None);
         let span = container.process_line("stringtomatch this line should be proc");

@@ -10,6 +10,7 @@ use ratatui::{
     terminal::Frame,
     text::Line,
 };
+use threadpool::ThreadPool;
 
 use crate::{
     args::{parse_args, Args},
@@ -32,6 +33,7 @@ pub struct App<'a> {
     stdin: StdinHandler,
     pub raw_buffer: Container<'a>,
     pub single_buffer: Container<'a>,
+    thread_pool: ThreadPool,
     args: Args,
 }
 
@@ -55,10 +57,11 @@ impl<'a> Default for App<'a> {
             stdin: StdinHandler::new(),
             args: parse_args(),
             input: Input::default(),
-            raw_buffer: Container::new(".*".to_string(), None, CONTAINER_BUFFER),
-            single_buffer: Container::new("single".to_string(), None,  CONTAINER_BUFFER),
+            raw_buffer: Container::new_clean(".*"),
+            single_buffer: Container::new_clean("single"),
             containers: Vec::new(),
             state: AppState::default(),
+            thread_pool: ThreadPool::new(4),
         }
     }
 }
@@ -67,6 +70,7 @@ impl<'a> App<'a> {
     /// Constructs a new instance of [`App`].
     pub fn new(args: Option<Args>) -> Self {
         let mut ret = Self::default();
+        let mut threads: u64 = 1;
         if let Some(args_inner) = args {
             ret.args = args_inner;
             if ret.args.vertical.is_some() {
@@ -75,11 +79,20 @@ impl<'a> App<'a> {
             if ret.args.single.is_some() {
                 ret.state.show = Views::SingleBuffer;
             }
+
+            threads = ret.args.threads.unwrap_or(1);
+            ret.thread_pool = ThreadPool::new(threads as usize);
         }
 
         // Let 0 for raw_buffer
         for (id, c) in (1_u8..).zip(ret.args.containers.iter()) {
-            let mut con = Container::new(c.re.clone(), c.trigger.clone(), CONTAINER_BUFFER);
+            let mut con = Container::new(
+                c.re.clone(),
+                c.trigger.clone(),
+                c.timeout.unwrap_or(1),
+                threads,
+                CONTAINER_BUFFER,
+            );
             if let Some(output_path) = ret.args.output.clone() {
                 con.set_output_path(output_path).ok();
             }
@@ -131,7 +144,7 @@ impl<'a> App<'a> {
 
     pub fn add_container(&mut self, text: &str) {
         let first_free_id = self.get_free_ids();
-        let mut con = Container::new(text.to_string(), None, CONTAINER_BUFFER);
+        let mut con = Container::new(text.to_string(), None, 1, 1, CONTAINER_BUFFER);
         if let Some(output_path) = self.args.output.clone() {
             con.set_output_path(output_path).ok();
         }
@@ -200,20 +213,24 @@ impl<'a> App<'a> {
         self.get_stdin();
     }
 
+    fn handle_containers_with_line(&mut self, line: &str) {
+        for c in self.containers.iter_mut() {
+            if c.re.is_match(line) {
+                let ret = c.proc_and_push_line(line);
+                if let Some(l) = ret {
+                    self.single_buffer.cb.push(l.to_owned());
+                }
+            }
+        }
+    }
+
     fn get_stdin(&mut self) {
         match self.stdin.try_recv() {
             Ok(line) => {
                 // save all lines to a raw buffer
                 if !self.state.paused {
                     self.raw_buffer.cb.push(Line::from(line.clone()));
-                    for c in self.containers.iter_mut() {
-                        if c.re.is_match(&line) {
-                            let ret = c.proc_and_push_line(&line);
-                            if let Some(l) = ret {
-                                self.single_buffer.cb.push(l.to_owned());
-                            }
-                        }
-                    }
+                    self.handle_containers_with_line(&line);
                 }
             }
             Err(TryRecvError::Disconnected) => self.stop(),
@@ -418,10 +435,12 @@ mod tests {
             LocalContainer {
                 re: "a".to_string(),
                 trigger: None,
+                timeout: None,
             },
             LocalContainer {
                 re: "b".to_string(),
                 trigger: None,
+                timeout: None,
             },
         ];
         let app = App::new(Some(args));

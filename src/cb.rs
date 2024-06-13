@@ -72,7 +72,7 @@ where
         let mut cb = Self::new(capacity);
 
         if len < capacity {
-            cb.buffer = self.buffer.clone();
+            cb.buffer.clone_from(&self.buffer);
         } else {
             let index_position = self.write_index % capacity;
             cb.buffer.extend_from_slice(&self.buffer[index_position..]);
