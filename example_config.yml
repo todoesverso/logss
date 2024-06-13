@@ -1,12 +1,19 @@
-command: 
-  - cat 
+command:
+  - cat
   - assets/shakespeare.txt
 vertical: true
 render: 26
-containers: 
-- to
-- be
-- or
-- not 
-- to.*be
+containers:
+  - re: to
+    trigger: echo $(date) >> /tmp/dates.txt
+    timeout: 1
+  - re: be
+    trigger: echo __line__ >> /tmp/match_lines.txt
+    timeout: 1
+  - re: or
+    timeout: 1
+  - re: not
+    timeout: 1
+  - re: to.*be
+    timeout: 1
 output: output_path

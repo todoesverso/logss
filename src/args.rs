@@ -1,4 +1,7 @@
-use std::fs::{remove_file, OpenOptions};
+use std::{
+    fs::{remove_file, OpenOptions},
+    str::FromStr,
+};
 
 use pico_args;
 use regex::Regex;
@@ -18,17 +21,57 @@ Options:
   -f <FILE>        Input configuration file (overrides CLI arguments)
   -o <OUTPUT_PATH> Specify the output path for matched patterns
   -r <RENDER>      Define render speed in milliseconds [default: 100]
+  -t <THREADS>     Number of threads per container for triggers [default: 1]
   -V               Start in vertical view mode
   -h               Print help
 ";
 
+#[derive(Debug, Serialize, Deserialize, PartialEq)]
+pub struct LocalContainer {
+    pub re: String,
+    pub trigger: Option<String>,
+    pub timeout: Option<u64>,
+}
+
+impl FromStr for LocalContainer {
+    type Err = &'static str;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let parts: Vec<&str> = s.trim().split(',').collect();
+
+        if parts.len() != 3 {
+            return Err("Expected two comma-separated parts");
+        }
+
+        let re = parts[0].trim().to_string();
+        let trigger = if parts[1].trim().is_empty() {
+            None
+        } else {
+            Some(parts[1].trim().to_string())
+        };
+        let timeout = if parts[2].trim().is_empty() {
+            Some(1)
+        } else {
+            let timeout: u64 = parts[2].trim().parse().unwrap_or(1);
+            Some(timeout)
+        };
+
+        Ok(LocalContainer {
+            re,
+            trigger,
+            timeout,
+        })
+    }
+}
+
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Args {
-    pub containers: Vec<String>,
+    pub containers: Vec<LocalContainer>,
     pub exit: Option<bool>,
     pub vertical: Option<bool>,
     pub single: Option<bool>,
     pub render: Option<u64>,
+    pub threads: Option<u64>,
     pub command: Option<Vec<String>>,
     pub output: Option<std::path::PathBuf>,
     pub config_file: Option<std::path::PathBuf>,
@@ -64,6 +107,9 @@ fn parser() -> Result<Args, Box<dyn std::error::Error>> {
         render: pargs
             .opt_value_from_fn("-r", render_in_range)?
             .unwrap_or(Some(100)),
+        threads: pargs
+            .opt_value_from_fn("-t", render_in_range)?
+            .unwrap_or(Some(4)),
     };
 
     let render = args.render;
@@ -95,10 +141,10 @@ fn parse_yaml(config_file: std::path::PathBuf) -> Result<Args, Box<dyn std::erro
     Ok(scrape_config)
 }
 
-fn validate_regex(containers: &Vec<String>) -> bool {
+fn validate_regex(containers: &Vec<LocalContainer>) -> bool {
     for c in containers {
-        if Regex::new(c).is_err() {
-            eprintln!("Error: Failed to parse regexp '{c}'.");
+        if Regex::new(&c.re).is_err() {
+            eprintln!("Error: Failed to parse regexp '{c:?}'.");
             return false;
         }
     }
@@ -164,10 +210,18 @@ mod tests {
 
     #[test]
     fn test_validate_regex() {
-        let c = vec!["a".to_string()];
+        let c = vec![LocalContainer {
+            re: "a".to_string(),
+            trigger: None,
+            timeout: None,
+        }];
         assert!(validate_regex(&c));
 
-        let c = vec!["*".to_string()];
+        let c = vec![LocalContainer {
+            re: "*".to_string(),
+            trigger: None,
+            timeout: None,
+        }];
         assert!(!validate_regex(&c));
     }
 
@@ -207,11 +261,31 @@ mod tests {
         assert_eq!(
             args.containers,
             vec![
-                "to".to_string(),
-                "be".to_string(),
-                "or".to_string(),
-                "not".to_string(),
-                "to.*be".to_string()
+                LocalContainer {
+                    re: "to".to_string(),
+                    trigger: Some("echo $(date) >> /tmp/dates.txt".to_string()),
+                    timeout: Some(1),
+                },
+                LocalContainer {
+                    re: "be".to_string(),
+                    trigger: Some("echo __line__ >> /tmp/match_lines.txt".to_string()),
+                    timeout: Some(1),
+                },
+                LocalContainer {
+                    re: "or".to_string(),
+                    trigger: None,
+                    timeout: Some(1),
+                },
+                LocalContainer {
+                    re: "not".to_string(),
+                    trigger: None,
+                    timeout: Some(1),
+                },
+                LocalContainer {
+                    re: "to.*be".to_string(),
+                    trigger: None,
+                    timeout: Some(1),
+                },
             ]
         );
     }

@@ -45,7 +45,11 @@
 * Support for explicit command (no need to pipe into it)
 * Send all matched lines to dedicated files
 * Consolidated view with highlighted items
-* Simple BrChart popup with counts
+* Simple BarChart popup with counts
+* Support to trigger shell commands (thru 'bin/sh') fir each match
+  * The line matched can be replaced in the command to execute (__line__)
+  * Timeout for each trigger
+  * Configurable number of threads for each container
 
 
 ## Usage
@@ -57,18 +61,19 @@
   Usage: logss [OPTIONS]
 
   Options:
-    -c <CONTAINERS>  Specify substrings (regex patterns)
+    -c <CONTAINERS>  Specify substrings (regex patterns) 
     -e               Exit on empty input [default: false]
     -s               Start in single view mode [default: false]
     -C <COMMAND>     Get input from a command
     -f <FILE>        Input configuration file (overrides CLI arguments)
     -o <OUTPUT_PATH> Specify the output path for matched patterns
     -r <RENDER>      Define render speed in milliseconds [default: 100]
+    -t <THREADS>     Number of threads per container for triggers [default: 1]
     -V               Start in vertical view mode
     -h               Print help
 
-  $ cat shakespeare.txt | logss -c to -c be -c or -c 'in.*of'
-  $ # 
+  $ cat shakespeare.txt | logss -c to -c be -c or,'echo or_found >> /tmp/or.log',1 -c 'in.*of'
+  $ #  The containers can be a simple '-c <regex>' or '-c <regex>, <command>, <command timeout>'
   $ cat real_curl_example.yaml
     command:
       - curl
@@ -76,8 +81,12 @@
       - https://raw.githubusercontent.com/linuxacademy/content-elastic-log-samples/master/access.log
     render: 75
     containers:
-      - GET
-      - "404"
+      - re: GET
+        trigger: echo $(date) >> /tmp/get.log
+        timeout: 4
+      - re: "404"
+        trigger: echo __line__ >> /tmp/404.log
+        timeout: 4
       - ".*ERROR|error.*"
   $ logss -f real_curl_example.yaml 
   ```
@@ -107,7 +116,6 @@ Pre compiled binaries for several platforms can be downloaded from the [release]
 ## Roadmap
 
 This is just a personal project intended to learn Rust, so things move slowly. 
-Currently it is an Alpha release because there are several things missing but it works and can be useful for someone.
 
 This is a list of things I plan to do:
 
