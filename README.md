@@ -101,6 +101,14 @@ cargo install logss
 
 If cargo is not a possibility then download pre compiled binaries from the [download](#download) section.
 
+### Arch Linux (AUR)
+
+You can install `logss` from the [AUR](https://aur.archlinux.org/packages/logss) with using an [AUR helper](https://wiki.archlinux.org/title/AUR_helpers).
+
+```shell
+paru -S logss
+```
+
 ## Download
 
 Pre compiled binaries for several platforms can be downloaded from the [release](https://github.com/todoesverso/logss/releases) section.
