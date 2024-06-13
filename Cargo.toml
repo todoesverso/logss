@@ -9,7 +9,7 @@ repository = "https://github.com/todoesverso/logss"
 keywords = ["terminal", "logs", "cli", "split"]
 categories = ["visualization", "command-line-utilities", "parsing"]
 license = "MIT"
-rust-version = "1.70.0"
+rust-version = "1.73.0"
 exclude = [
   "assets/*",
   ".github",
