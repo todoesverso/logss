@@ -10,55 +10,49 @@ pub fn render_help(frame: &mut Frame) {
     let help_text = vec![
         Line::from(Span::styled(
             "h       - toggles help popup",
-            Style::default().bg(Color::Blue),
+            Style::default(),
         )),
         Line::from(Span::styled(
             "b       - toggles BarChart popup",
-            Style::default().bg(Color::Blue),
+            Style::default(),
         )),
         Line::from(Span::styled(
             "w       - toggles text wrapping",
-            Style::default().bg(Color::Blue),
+            Style::default(),
         )),
         Line::from(Span::styled(
             "i|/     - input new container (Enter/Esc)",
-            Style::default().bg(Color::Blue),
+            Style::default(),
         )),
         Line::from(Span::styled(
             "p|Space - toggles scrolling",
-            Style::default().bg(Color::Blue),
+            Style::default(),
         )),
-        Line::from(Span::styled(
-            "v       - toggles vertical",
-            Style::default().bg(Color::Blue),
-        )),
+        Line::from(Span::styled("v       - toggles vertical", Style::default())),
         Line::from(Span::styled(
             "*       - toggles between containers and raw input",
-            Style::default().bg(Color::Blue),
+            Style::default(),
         )),
         Line::from(Span::styled(
             "s       - toggles between containers and single input",
-            Style::default().bg(Color::Blue),
+            Style::default(),
         )),
         Line::from(Span::styled(
             "1-9     - toggles zoom to specific container",
-            Style::default().bg(Color::Blue),
+            Style::default(),
         )),
         Line::from(Span::styled(
             "Alt+1-9 - removes specific container",
-            Style::default().bg(Color::Blue),
+            Style::default(),
         )),
         Line::from(Span::styled(
             "F1/9    - toggles hide/show for container",
-            Style::default().bg(Color::Blue),
+            Style::default(),
         )),
-        Line::from(Span::styled(
-            "Up/Down - Scrolls lines",
-            Style::default().bg(Color::Blue),
-        )),
+        Line::from(Span::styled("Up/Down - Scrolls lines", Style::default())),
         Line::from(Span::styled(
             "c       - continues autoscroll",
-            Style::default().bg(Color::Blue),
+            Style::default(),
         )),
         Line::from(Span::styled(
             "Esc     - exits the program",

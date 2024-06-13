@@ -39,17 +39,17 @@ impl FromStr for LocalContainer {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let parts: Vec<&str> = s.trim().split(',').collect();
 
-        if parts.len() != 3 {
-            return Err("Expected two comma-separated parts");
+        if parts.len() > 3 {
+            return Err("Expected not more than 2 comma-separated parts");
         }
 
         let re = parts[0].trim().to_string();
-        let trigger = if parts[1].trim().is_empty() {
+        let trigger = if parts.len() < 2 || parts[1].trim().is_empty() {
             None
         } else {
             Some(parts[1].trim().to_string())
         };
-        let timeout = if parts[2].trim().is_empty() {
+        let timeout = if parts.len() < 3 || parts[2].trim().is_empty() {
             Some(1)
         } else {
             let timeout: u64 = parts[2].trim().parse().unwrap_or(1);
