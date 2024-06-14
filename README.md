@@ -109,6 +109,13 @@ You can install `logss` from the [AUR](https://aur.archlinux.org/packages/logss)
 paru -S logss
 ```
 
+### eget
+You can install the pre build binaries using [eget](https://github.com/zyedidia/eget)
+
+```shell
+eget todoesverso/logss
+```
+
 ## Download
 
 Pre compiled binaries for several platforms can be downloaded from the [release](https://github.com/todoesverso/logss/releases) section.
