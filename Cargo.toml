@@ -30,7 +30,7 @@ pico-args = "0.5.0"
 ratatui = "0.26.1"
 regex = "1.9.5"
 serde_yaml = "0.9.27"
-serde = {version = "1.0.190", features = ["derive"]}
+serde = {version = "1.0.209", features = ["derive"]}
 proc-macro2 = "1.0.70"
 slug = "0.1.5"
 anyhow = "1.0.75"
