@@ -35,7 +35,7 @@ proc-macro2 = "1.0.70"
 slug = "0.1.5"
 anyhow = "1.0.75"
 threadpool = "1.8.1"
-wait-timeout = "0.2.0"
+wait-timeout = "0.2.1"
 
 [profile.release]
 codegen-units = 1
