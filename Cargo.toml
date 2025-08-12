@@ -33,7 +33,7 @@ serde_yaml = "0.9.27"
 serde = {version = "1.0.190", features = ["derive"]}
 proc-macro2 = "1.0.70"
 slug = "0.1.5"
-anyhow = "1.0.75"
+anyhow = "1.0.99"
 threadpool = "1.8.1"
 wait-timeout = "0.2.0"
 
