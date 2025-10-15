@@ -269,7 +269,7 @@ impl<'a> App<'a> {
     }
 
     fn render_containers(&mut self, frame: &mut Frame) {
-        let blocks = self.get_layout_blocks(frame.size());
+        let blocks = self.get_layout_blocks(frame.area());
 
         for (i, container) in self.containers.iter().filter(|c| !c.state.hide).enumerate() {
             container.render(frame, blocks[i]);
@@ -320,18 +320,18 @@ impl<'a> App<'a> {
 
     fn render_raw(&mut self, frame: &mut Frame) {
         let container = &self.raw_buffer;
-        container.render(frame, frame.size());
+        container.render(frame, frame.area());
     }
 
     fn render_single(&mut self, frame: &mut Frame) {
         let container = &self.single_buffer;
-        container.render(frame, frame.size());
+        container.render(frame, frame.area());
     }
 
     fn render_id(&mut self, frame: &mut Frame, id: u8) {
         for container in self.containers.iter() {
             if container.id == id {
-                container.render(frame, frame.size());
+                container.render(frame, frame.area());
             }
         }
     }
@@ -364,7 +364,7 @@ impl<'a> App<'a> {
 
     /// Renders the user interface widgets.
     pub fn render(&mut self, frame: &mut Frame) {
-        self.update_containers(frame.size());
+        self.update_containers(frame.area());
         match self.state.show {
             Views::Containers => self.render_containers(frame),
             Views::RawBuffer => self.render_raw(frame),

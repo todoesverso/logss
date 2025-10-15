@@ -13,7 +13,7 @@ use crate::{
 
 pub fn render_bar_chart(frame: &mut Frame, app: &App) {
     let bargroup = create_groups(app);
-    let rect = centered_rect(50, 50, frame.size());
+    let rect = centered_rect(50, 50, frame.area());
     let containers_count = app.containers.len() as u16;
     let bar_width = (rect.width - (containers_count)) / containers_count;
     let corrected_bw = if bar_width * containers_count + containers_count == rect.width {
