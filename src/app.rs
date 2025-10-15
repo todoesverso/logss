@@ -7,8 +7,8 @@ use anyhow::Result;
 use crossterm::event::KeyCode;
 use ratatui::{
     layout::{Constraint, Direction, Layout, Rect},
-    terminal::Frame,
     text::Line,
+    Frame,
 };
 use threadpool::ThreadPool;
 
@@ -37,7 +37,7 @@ pub struct App<'a> {
     args: Args,
 }
 
-impl<'a> Deref for App<'a> {
+impl Deref for App<'_> {
     type Target = AppState;
 
     fn deref(&self) -> &AppState {
@@ -45,13 +45,13 @@ impl<'a> Deref for App<'a> {
     }
 }
 
-impl<'a> DerefMut for App<'a> {
+impl DerefMut for App<'_> {
     fn deref_mut(&mut self) -> &mut AppState {
         &mut self.state
     }
 }
 
-impl<'a> Default for App<'a> {
+impl Default for App<'_> {
     fn default() -> Self {
         Self {
             stdin: StdinHandler::new(),
@@ -66,7 +66,7 @@ impl<'a> Default for App<'a> {
     }
 }
 
-impl<'a> App<'a> {
+impl App<'_> {
     /// Constructs a new instance of [`App`].
     pub fn new(args: Option<Args>) -> Self {
         let mut ret = Self::default();
@@ -269,7 +269,7 @@ impl<'a> App<'a> {
     }
 
     fn render_containers(&mut self, frame: &mut Frame) {
-        let blocks = self.get_layout_blocks(frame.size());
+        let blocks = self.get_layout_blocks(frame.area());
 
         for (i, container) in self.containers.iter().filter(|c| !c.state.hide).enumerate() {
             container.render(frame, blocks[i]);
@@ -320,18 +320,18 @@ impl<'a> App<'a> {
 
     fn render_raw(&mut self, frame: &mut Frame) {
         let container = &self.raw_buffer;
-        container.render(frame, frame.size());
+        container.render(frame, frame.area());
     }
 
     fn render_single(&mut self, frame: &mut Frame) {
         let container = &self.single_buffer;
-        container.render(frame, frame.size());
+        container.render(frame, frame.area());
     }
 
     fn render_id(&mut self, frame: &mut Frame, id: u8) {
         for container in self.containers.iter() {
             if container.id == id {
-                container.render(frame, frame.size());
+                container.render(frame, frame.area());
             }
         }
     }
@@ -364,7 +364,7 @@ impl<'a> App<'a> {
 
     /// Renders the user interface widgets.
     pub fn render(&mut self, frame: &mut Frame) {
-        self.update_containers(frame.size());
+        self.update_containers(frame.area());
         match self.state.show {
             Views::Containers => self.render_containers(frame),
             Views::RawBuffer => self.render_raw(frame),
@@ -561,12 +561,10 @@ mod tests {
         for x in 0..=15 {
             for y in 0..=13 {
                 if bolds.contains(&x) && (y == 0 || y == 7) {
-                    expected
-                        .get_mut(x, y)
-                        .set_style(Style::default().add_modifier(Modifier::BOLD));
+                    expected[(x, y)].set_style(Style::default().add_modifier(Modifier::BOLD));
                 }
-                expected.get_mut(x, y).set_fg(Color::White);
-                expected.get_mut(x, y).set_bg(Color::Black);
+                expected[(x, y)].set_fg(Color::White);
+                expected[(x, y)].set_bg(Color::Black);
             }
         }
         terminal.backend().assert_buffer(&expected);
@@ -608,12 +606,10 @@ mod tests {
         for x in 0..=15 {
             for y in 0..=13 {
                 if bolds.contains(&x) && (y == 0) {
-                    expected
-                        .get_mut(x, y)
-                        .set_style(Style::default().add_modifier(Modifier::BOLD));
+                    expected[(x, y)].set_style(Style::default().add_modifier(Modifier::BOLD));
                 }
-                expected.get_mut(x, y).set_fg(Color::White);
-                expected.get_mut(x, y).set_bg(Color::Black);
+                expected[(x, y)].set_fg(Color::White);
+                expected[(x, y)].set_bg(Color::Black);
             }
         }
         terminal.backend().assert_buffer(&expected);
@@ -644,12 +640,10 @@ mod tests {
         for x in 0..=15 {
             for y in 0..=13 {
                 if bolds.contains(&x) && (y == 0) {
-                    expected
-                        .get_mut(x, y)
-                        .set_style(Style::default().add_modifier(Modifier::BOLD));
+                    expected[(x, y)].set_style(Style::default().add_modifier(Modifier::BOLD));
                 }
-                expected.get_mut(x, y).set_fg(Color::White);
-                expected.get_mut(x, y).set_bg(Color::Black);
+                expected[(x, y)].set_fg(Color::White);
+                expected[(x, y)].set_bg(Color::Black);
             }
         }
         terminal.backend().assert_buffer(&expected);
@@ -692,12 +686,12 @@ mod tests {
             for y in 0..=13 {
                 if bolds.contains(&x) && (y == 0) {
                     let st = Style::default().add_modifier(Modifier::BOLD);
-                    expected.get_mut(x, y).set_style(st);
-                    expected.get_mut(x, y).set_fg(Color::Red);
+                    expected[(x, y)].set_style(st);
+                    expected[(x, y)].set_fg(Color::Red);
                 } else {
-                    expected.get_mut(x, y).set_fg(Color::White);
+                    expected[(x, y)].set_fg(Color::White);
                 }
-                expected.get_mut(x, y).set_bg(Color::Black);
+                expected[(x, y)].set_bg(Color::Black);
             }
         }
         dbg!(&expected);
@@ -750,12 +744,10 @@ mod tests {
         for x in 0..=15 {
             for y in 0..=13 {
                 if bolds.contains(&x) && (y == 0) {
-                    expected
-                        .get_mut(x, y)
-                        .set_style(Style::default().add_modifier(Modifier::BOLD));
+                    expected[(x, y)].set_style(Style::default().add_modifier(Modifier::BOLD));
                 }
-                expected.get_mut(x, y).set_fg(Color::White);
-                expected.get_mut(x, y).set_bg(Color::Black);
+                expected[(x, y)].set_fg(Color::White);
+                expected[(x, y)].set_bg(Color::Black);
             }
         }
         terminal.backend().assert_buffer(&expected);
@@ -798,12 +790,10 @@ mod tests {
         for x in 0..=15 {
             for y in 0..=13 {
                 if bolds.contains(&x) && (y == 0) {
-                    expected
-                        .get_mut(x, y)
-                        .set_style(Style::default().add_modifier(Modifier::BOLD));
+                    expected[(x, y)].set_style(Style::default().add_modifier(Modifier::BOLD));
                 }
-                expected.get_mut(x, y).set_fg(Color::White);
-                expected.get_mut(x, y).set_bg(Color::Black);
+                expected[(x, y)].set_fg(Color::White);
+                expected[(x, y)].set_bg(Color::Black);
             }
         }
         terminal.backend().assert_buffer(&expected);
@@ -834,12 +824,10 @@ mod tests {
         for x in 0..=15 {
             for y in 0..=13 {
                 if bolds.contains(&x) && (y == 0 || y == 7) {
-                    expected
-                        .get_mut(x, y)
-                        .set_style(Style::default().add_modifier(Modifier::BOLD));
+                    expected[(x, y)].set_style(Style::default().add_modifier(Modifier::BOLD));
                 }
-                expected.get_mut(x, y).set_fg(Color::White);
-                expected.get_mut(x, y).set_bg(Color::Black);
+                expected[(x, y)].set_fg(Color::White);
+                expected[(x, y)].set_bg(Color::Black);
             }
         }
         terminal.backend().assert_buffer(&expected);

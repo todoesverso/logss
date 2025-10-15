@@ -95,8 +95,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ ubuntu-latest, windows-latest, macos-latest ]
-        toolchain: [ "1.74.0", "stable" ]
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        toolchain: ["1.75.0", "stable"]
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout
@@ -116,7 +116,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ ubuntu-latest, windows-latest, macos-latest ]
+        os: [ubuntu-latest, windows-latest, macos-latest]
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout
@@ -134,8 +134,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ ubuntu-latest, windows-latest, macos-latest ]
-        toolchain: [ "1.74.0", "stable" ]
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        toolchain: ["1.75.0", "stable"]
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout
@@ -147,6 +147,6 @@ jobs:
       - name: Install cargo-make
         uses: taiki-e/install-action@cargo-make
       - name: Test
-        run: cargo make test 
+        run: cargo make test
         env:
           RUST_BACKTRACE: full

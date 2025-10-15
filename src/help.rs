@@ -1,7 +1,7 @@
 use ratatui::{
     style::{Color, Style},
-    terminal::Frame,
     text::{Line, Span},
+    Frame,
 };
 
 use crate::popup::render_popup;

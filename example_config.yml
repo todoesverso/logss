@@ -8,7 +8,7 @@ containers:
     trigger: echo $(date) >> /tmp/dates.txt
     timeout: 1
   - re: be
-    trigger: echo __line__ >> /tmp/match_lines.txt
+    trigger: echo '__line__' >> /tmp/match_lines.txt
     timeout: 1
   - re: or
     timeout: 1

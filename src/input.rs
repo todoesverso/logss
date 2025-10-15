@@ -1,7 +1,8 @@
 use ratatui::{
+    layout::Position,
     style::Style,
-    terminal::Frame,
     text::{Line, Span},
+    Frame,
 };
 use regex::Regex;
 use unicode_width::UnicodeWidthStr;
@@ -21,7 +22,7 @@ impl Input {
 
     pub fn render(&self, frame: &mut Frame) {
         let pos = (40, 8);
-        let area = centered_rect(pos.0, pos.1, frame.size());
+        let area = centered_rect(pos.0, pos.1, frame.area());
         let text = vec![Line::from(Span::styled(
             self.input.clone(),
             Style::default(),
@@ -32,7 +33,8 @@ impl Input {
         } else {
             "Input (non valid regexp)"
         };
-        frame.set_cursor(area.x + self.input.width() as u16 + 1, area.y + 1);
+        let position = Position::new(area.x + self.input.width() as u16 + 1, area.y + 1);
+        frame.set_cursor_position(position);
         render_popup(frame, title, &text, (pos.0, pos.1));
     }
 
@@ -128,8 +130,8 @@ mod tests {
 
         for x in 6..=13 {
             for y in 17..=19 {
-                expected.get_mut(x, y).set_fg(Color::White);
-                expected.get_mut(x, y).set_bg(Color::Black);
+                expected[(x, y)].set_fg(Color::White);
+                expected[(x, y)].set_bg(Color::Black);
             }
         }
 
@@ -184,8 +186,8 @@ mod tests {
         ]);
         for x in 20..=45 {
             for y in 17..=19 {
-                expected.get_mut(x, y).set_fg(Color::White);
-                expected.get_mut(x, y).set_bg(Color::Black);
+                expected[(x, y)].set_fg(Color::White);
+                expected[(x, y)].set_bg(Color::Black);
             }
         }
 

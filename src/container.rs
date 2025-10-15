@@ -10,9 +10,9 @@ use anyhow::Result;
 use ratatui::{
     layout::Rect,
     style::{Color, Modifier, Style},
-    terminal::Frame,
     text::{Line, Span},
     widgets::{Block, Borders, Paragraph, Wrap},
+    Frame,
 };
 use regex::Regex;
 use slug;
@@ -221,7 +221,7 @@ impl<'a> Container<'a> {
     }
 }
 
-fn create_block(title: &str, color: Color, paused: bool) -> Block {
+fn create_block(title: &str, color: Color, paused: bool) -> Block<'_> {
     let modifier = if paused {
         Modifier::BOLD | Modifier::SLOW_BLINK | Modifier::UNDERLINED
     } else {

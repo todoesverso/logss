@@ -268,7 +268,7 @@ mod tests {
                 },
                 LocalContainer {
                     re: "be".to_string(),
-                    trigger: Some("echo __line__ >> /tmp/match_lines.txt".to_string()),
+                    trigger: Some("echo '__line__' >> /tmp/match_lines.txt".to_string()),
                     timeout: Some(1),
                 },
                 LocalContainer {
