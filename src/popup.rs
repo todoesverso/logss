@@ -96,8 +96,8 @@ mod tests {
         ]);
         for x in 4..=10 {
             for y in 4..=10 {
-                expected.get_mut(x, y).set_fg(Color::White);
-                expected.get_mut(x, y).set_bg(Color::Black);
+                expected[(x, y)].set_fg(Color::White);
+                expected[(x, y)].set_bg(Color::Black);
             }
         }
 

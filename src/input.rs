@@ -130,8 +130,8 @@ mod tests {
 
         for x in 6..=13 {
             for y in 17..=19 {
-                expected.get_mut(x, y).set_fg(Color::White);
-                expected.get_mut(x, y).set_bg(Color::Black);
+                expected[(x, y)].set_fg(Color::White);
+                expected[(x, y)].set_bg(Color::Black);
             }
         }
 
@@ -186,8 +186,8 @@ mod tests {
         ]);
         for x in 20..=45 {
             for y in 17..=19 {
-                expected.get_mut(x, y).set_fg(Color::White);
-                expected.get_mut(x, y).set_bg(Color::Black);
+                expected[(x, y)].set_fg(Color::White);
+                expected[(x, y)].set_bg(Color::Black);
             }
         }
 

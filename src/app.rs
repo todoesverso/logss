@@ -561,12 +561,10 @@ mod tests {
         for x in 0..=15 {
             for y in 0..=13 {
                 if bolds.contains(&x) && (y == 0 || y == 7) {
-                    expected
-                        .get_mut(x, y)
-                        .set_style(Style::default().add_modifier(Modifier::BOLD));
+                    expected[(x, y)].set_style(Style::default().add_modifier(Modifier::BOLD));
                 }
-                expected.get_mut(x, y).set_fg(Color::White);
-                expected.get_mut(x, y).set_bg(Color::Black);
+                expected[(x, y)].set_fg(Color::White);
+                expected[(x, y)].set_bg(Color::Black);
             }
         }
         terminal.backend().assert_buffer(&expected);
@@ -608,12 +606,10 @@ mod tests {
         for x in 0..=15 {
             for y in 0..=13 {
                 if bolds.contains(&x) && (y == 0) {
-                    expected
-                        .get_mut(x, y)
-                        .set_style(Style::default().add_modifier(Modifier::BOLD));
+                    expected[(x, y)].set_style(Style::default().add_modifier(Modifier::BOLD));
                 }
-                expected.get_mut(x, y).set_fg(Color::White);
-                expected.get_mut(x, y).set_bg(Color::Black);
+                expected[(x, y)].set_fg(Color::White);
+                expected[(x, y)].set_bg(Color::Black);
             }
         }
         terminal.backend().assert_buffer(&expected);
@@ -644,12 +640,10 @@ mod tests {
         for x in 0..=15 {
             for y in 0..=13 {
                 if bolds.contains(&x) && (y == 0) {
-                    expected
-                        .get_mut(x, y)
-                        .set_style(Style::default().add_modifier(Modifier::BOLD));
+                    expected[(x, y)].set_style(Style::default().add_modifier(Modifier::BOLD));
                 }
-                expected.get_mut(x, y).set_fg(Color::White);
-                expected.get_mut(x, y).set_bg(Color::Black);
+                expected[(x, y)].set_fg(Color::White);
+                expected[(x, y)].set_bg(Color::Black);
             }
         }
         terminal.backend().assert_buffer(&expected);
@@ -692,12 +686,12 @@ mod tests {
             for y in 0..=13 {
                 if bolds.contains(&x) && (y == 0) {
                     let st = Style::default().add_modifier(Modifier::BOLD);
-                    expected.get_mut(x, y).set_style(st);
-                    expected.get_mut(x, y).set_fg(Color::Red);
+                    expected[(x, y)].set_style(st);
+                    expected[(x, y)].set_fg(Color::Red);
                 } else {
-                    expected.get_mut(x, y).set_fg(Color::White);
+                    expected[(x, y)].set_fg(Color::White);
                 }
-                expected.get_mut(x, y).set_bg(Color::Black);
+                expected[(x, y)].set_bg(Color::Black);
             }
         }
         dbg!(&expected);
@@ -750,12 +744,10 @@ mod tests {
         for x in 0..=15 {
             for y in 0..=13 {
                 if bolds.contains(&x) && (y == 0) {
-                    expected
-                        .get_mut(x, y)
-                        .set_style(Style::default().add_modifier(Modifier::BOLD));
+                    expected[(x, y)].set_style(Style::default().add_modifier(Modifier::BOLD));
                 }
-                expected.get_mut(x, y).set_fg(Color::White);
-                expected.get_mut(x, y).set_bg(Color::Black);
+                expected[(x, y)].set_fg(Color::White);
+                expected[(x, y)].set_bg(Color::Black);
             }
         }
         terminal.backend().assert_buffer(&expected);
@@ -798,12 +790,10 @@ mod tests {
         for x in 0..=15 {
             for y in 0..=13 {
                 if bolds.contains(&x) && (y == 0) {
-                    expected
-                        .get_mut(x, y)
-                        .set_style(Style::default().add_modifier(Modifier::BOLD));
+                    expected[(x, y)].set_style(Style::default().add_modifier(Modifier::BOLD));
                 }
-                expected.get_mut(x, y).set_fg(Color::White);
-                expected.get_mut(x, y).set_bg(Color::Black);
+                expected[(x, y)].set_fg(Color::White);
+                expected[(x, y)].set_bg(Color::Black);
             }
         }
         terminal.backend().assert_buffer(&expected);
@@ -834,12 +824,10 @@ mod tests {
         for x in 0..=15 {
             for y in 0..=13 {
                 if bolds.contains(&x) && (y == 0 || y == 7) {
-                    expected
-                        .get_mut(x, y)
-                        .set_style(Style::default().add_modifier(Modifier::BOLD));
+                    expected[(x, y)].set_style(Style::default().add_modifier(Modifier::BOLD));
                 }
-                expected.get_mut(x, y).set_fg(Color::White);
-                expected.get_mut(x, y).set_bg(Color::Black);
+                expected[(x, y)].set_fg(Color::White);
+                expected[(x, y)].set_bg(Color::Black);
             }
         }
         terminal.backend().assert_buffer(&expected);

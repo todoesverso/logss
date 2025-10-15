@@ -95,12 +95,10 @@ mod tests {
         for x in 0..=12 {
             for y in 0..=9 {
                 if bolds.contains(&x) && y == 0 {
-                    expected
-                        .get_mut(x, y)
-                        .set_style(Style::default().add_modifier(Modifier::BOLD));
+                    expected[(x, y)].set_style(Style::default().add_modifier(Modifier::BOLD));
                 }
-                expected.get_mut(x, y).set_fg(Color::White);
-                expected.get_mut(x, y).set_bg(Color::Black);
+                expected[(x, y)].set_fg(Color::White);
+                expected[(x, y)].set_bg(Color::Black);
             }
         }
 
