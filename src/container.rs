@@ -10,9 +10,9 @@ use anyhow::Result;
 use ratatui::{
     layout::Rect,
     style::{Color, Modifier, Style},
-    terminal::Frame,
     text::{Line, Span},
     widgets::{Block, Borders, Paragraph, Wrap},
+    Frame,
 };
 use regex::Regex;
 use slug;

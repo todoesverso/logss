@@ -1,8 +1,8 @@
 use ratatui::{
     style::{Color, Style},
-    terminal::Frame,
     text::Line,
     widgets::{Bar, BarChart, BarGroup, Block, Borders},
+    Frame,
 };
 
 use crate::{

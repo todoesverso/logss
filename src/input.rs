@@ -1,7 +1,7 @@
 use ratatui::{
     style::Style,
-    terminal::Frame,
     text::{Line, Span},
+    Frame,
 };
 use regex::Regex;
 use unicode_width::UnicodeWidthStr;

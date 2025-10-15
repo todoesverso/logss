@@ -1,9 +1,9 @@
 use ratatui::{
     layout::{Constraint, Direction, Layout, Rect},
     prelude::style::{Color, Style},
-    terminal::Frame,
     text::Line,
     widgets::{BarChart, Block, Borders, Clear, Paragraph},
+    Frame,
 };
 
 pub fn render_popup(frame: &mut Frame<'_>, title: &str, text: &[Line], percent_area: (u16, u16)) {

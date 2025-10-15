@@ -7,8 +7,8 @@ use anyhow::Result;
 use crossterm::event::KeyCode;
 use ratatui::{
     layout::{Constraint, Direction, Layout, Rect},
-    terminal::Frame,
     text::Line,
+    Frame,
 };
 use threadpool::ThreadPool;
 
