@@ -13,7 +13,7 @@ allow = [
 ]
 
 [advisories]
-unmaintained = "none"
+unmaintained = "warn"
 yanked = "deny"
 
 [bans]
