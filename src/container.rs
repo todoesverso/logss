@@ -221,7 +221,7 @@ impl<'a> Container<'a> {
     }
 }
 
-fn create_block(title: &str, color: Color, paused: bool) -> Block {
+fn create_block(title: &str, color: Color, paused: bool) -> Block<'_> {
     let modifier = if paused {
         Modifier::BOLD | Modifier::SLOW_BLINK | Modifier::UNDERLINED
     } else {

@@ -33,7 +33,7 @@ pub fn render_bar_chart(frame: &mut Frame, app: &App) {
     render_bar_chart_popup(frame, barchart, (50, 50));
 }
 
-fn create_block(title: &str) -> Block {
+fn create_block(title: &str) -> Block<'_> {
     Block::default().title(title).borders(Borders::ALL)
 }
 

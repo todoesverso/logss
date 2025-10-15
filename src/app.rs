@@ -37,7 +37,7 @@ pub struct App<'a> {
     args: Args,
 }
 
-impl<'a> Deref for App<'a> {
+impl Deref for App<'_> {
     type Target = AppState;
 
     fn deref(&self) -> &AppState {
@@ -45,13 +45,13 @@ impl<'a> Deref for App<'a> {
     }
 }
 
-impl<'a> DerefMut for App<'a> {
+impl DerefMut for App<'_> {
     fn deref_mut(&mut self) -> &mut AppState {
         &mut self.state
     }
 }
 
-impl<'a> Default for App<'a> {
+impl Default for App<'_> {
     fn default() -> Self {
         Self {
             stdin: StdinHandler::new(),
@@ -66,7 +66,7 @@ impl<'a> Default for App<'a> {
     }
 }
 
-impl<'a> App<'a> {
+impl App<'_> {
     /// Constructs a new instance of [`App`].
     pub fn new(args: Option<Args>) -> Self {
         let mut ret = Self::default();

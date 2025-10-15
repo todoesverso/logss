@@ -1,5 +1,5 @@
 use std::{
-    io::{stdin, BufRead, BufReader, Error, ErrorKind},
+    io::{stdin, BufRead, BufReader, Error},
     process::{Command, Stdio},
     sync::{mpsc, mpsc::Sender},
     thread,
@@ -37,7 +37,7 @@ impl StdinHandler {
 
                 let stdout = child
                     .stdout
-                    .ok_or_else(|| Error::new(ErrorKind::Other, "Failed to run command"))?;
+                    .ok_or_else(|| Error::other("Failed to run command"))?;
                 let reader = BufReader::new(stdout);
                 read_lines_and_send(reader, sender);
             }
