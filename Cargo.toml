@@ -31,7 +31,7 @@ ratatui = "0.29.0"
 regex = "1.12.2"
 serde_yaml = "0.9.33"
 serde = { version = "1.0.228", features = ["derive"] }
-proc-macro2 = "1.0.101"
+proc-macro2 = "1.0.103"
 slug = "0.1.6"
 anyhow = "1.0.100"
 threadpool = "1.8.1"
