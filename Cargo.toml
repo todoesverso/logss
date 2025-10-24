@@ -24,7 +24,7 @@ readme = "README.md"
 
 [dependencies]
 crossterm = "0.29.0"
-is-terminal = "0.4.16"
+is-terminal = "0.4.17"
 unicode-width = "0.2.0"
 pico-args = "0.5.0"
 ratatui = "0.29.0"
