@@ -27,7 +27,7 @@ crossterm = "0.29.0"
 is-terminal = "0.4.16"
 unicode-width = "0.2.0"
 pico-args = "0.5.0"
-ratatui = "0.29.0"
+ratatui = "0.30.0"
 regex = "1.12.2"
 serde_yaml = "0.9.33"
 serde = { version = "1.0.228", features = ["derive"] }
